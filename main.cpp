@@ -25,6 +25,9 @@ int main(int argc, char* argv[])
   program.add_argument("-l", "--log_short")
       .default_value(false)
       .implicit_value(true);
+  program.add_argument("--threshold")
+      .help("number of goals reached to terminate")
+      .default_value(std::string("1"));
 
   try {
     program.parse_known_args(argc, argv);
@@ -45,20 +48,21 @@ int main(int argc, char* argv[])
   const auto output_name = program.get<std::string>("output");
   const auto log_short = program.get<bool>("log_short");
   const auto N = std::stoi(program.get<std::string>("num"));
+  const auto threshold = std::stoi(program.get<std::string>("threshold"));
   const auto ins = scen_name.size() > 0 ? Instance(scen_name, map_name, N)
                                         : Instance(map_name, &MT, N);
   if (!ins.is_valid(1)) return 1;
 
   // solve
   const auto deadline = Deadline(time_limit_sec * 1000);
-  const auto solution = solve(ins, verbose - 1, &deadline, &MT);
+  const auto solution = solve(ins, verbose - 1, &deadline, &MT, threshold);
   const auto comp_time_ms = deadline.elapsed_ms();
 
   // failure
   if (solution.empty()) info(1, verbose, "failed to solve");
 
   // check feasibility
-  if (!is_feasible_solution(ins, solution, verbose)) {
+  if (!is_feasible_solution(ins, solution, verbose, threshold)) {
     info(0, verbose, "invalid solution");
     return 1;
   }

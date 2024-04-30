@@ -101,11 +101,15 @@ bool is_same_config(const Config& C1, const Config& C2)
   return true;
 }
 
-bool any_goals_reached(const Config& C1, const Config& C2)
+bool enough_goals_reached(const Config& C1, const Config& C2, int threshold)
 {
   const auto N = C1.size();
+  int count = 0;
   for (size_t i = 0; i < N; ++i) {
-    if (C1[i]->id == C2[i]->id) return true;
+    if (C1[i]->id == C2[i]->id) {
+      count++;
+      if (count >= threshold) return true;
+    }
   }
   return false;
 }

@@ -50,6 +50,7 @@ struct Planner {
   const Deadline* deadline;
   std::mt19937* MT;
   const int verbose;
+  const int threshold;
 
   // solver utils
   const int N;  // number of agents
@@ -62,7 +63,7 @@ struct Planner {
   Agents occupied_next;  // for quick collision checking
 
   Planner(const Instance* _ins, const Deadline* _deadline, std::mt19937* _MT,
-          int _verbose = 0);
+          int _verbose = 0, int _threshold = 1);
   Solution solve();
   bool get_new_config(Node* S, Constraint* M);
   bool funcPIBT(Agent* ai);
@@ -70,4 +71,4 @@ struct Planner {
 
 // main function
 Solution solve(const Instance& ins, const int verbose = 0,
-               const Deadline* deadline = nullptr, std::mt19937* MT = nullptr);
+               const Deadline* deadline = nullptr, std::mt19937* MT = nullptr, const int threshold = 1);

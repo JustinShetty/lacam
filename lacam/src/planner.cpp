@@ -53,11 +53,12 @@ Node::~Node()
 }
 
 Planner::Planner(const Instance* _ins, const Deadline* _deadline,
-                 std::mt19937* _MT, int _verbose)
+                 std::mt19937* _MT, int _verbose, int _threshold)
     : ins(_ins),
       deadline(_deadline),
       MT(_MT),
       verbose(_verbose),
+      threshold(_threshold),
       N(ins->N),
       V_size(ins->G.size()),
       D(DistTable(ins)),
@@ -97,7 +98,7 @@ Solution Planner::solve()
     S = OPEN.top();
 
     // check goal condition
-    if (any_goals_reached(S->C, ins->goals)) {
+    if (enough_goals_reached(S->C, ins->goals, threshold)) {
       // backtrack
       while (S != nullptr) {
         solution.push_back(S->C);
@@ -254,9 +255,9 @@ bool Planner::funcPIBT(Agent* ai)
 }
 
 Solution solve(const Instance& ins, const int verbose, const Deadline* deadline,
-               std::mt19937* MT)
+               std::mt19937* MT, const int threshold)
 {
   info(1, verbose, "elapsed:", elapsed_ms(deadline), "ms\tpre-processing");
-  auto planner = Planner(&ins, deadline, MT, verbose);
+  auto planner = Planner(&ins, deadline, MT, verbose, threshold);
   return planner.solve();
 }

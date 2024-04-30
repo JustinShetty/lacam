@@ -3,7 +3,7 @@
 #include "../include/dist_table.hpp"
 
 bool is_feasible_solution(const Instance& ins, const Solution& solution,
-                          const int verbose)
+                          const int verbose, const int threshold)
 {
   if (solution.empty()) return true;
 
@@ -14,7 +14,7 @@ bool is_feasible_solution(const Instance& ins, const Solution& solution,
   }
 
   // check goal locations
-  if (!any_goals_reached(solution.back(), ins.goals)) {
+  if (!enough_goals_reached(solution.back(), ins.goals, threshold)) {
     info(1, verbose, "invalid goals");
     return false;
   }
