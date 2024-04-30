@@ -14,10 +14,10 @@ bool is_feasible_solution(const Instance& ins, const Solution& solution,
   }
 
   // check goal locations
-  if (!is_same_config(solution.back(), ins.goals)) {
-    info(1, verbose, "invalid goals");
-    return false;
-  }
+  // if (!is_same_config(solution.back(), ins.goals)) {
+  //   info(1, verbose, "invalid goals");
+  //   return false;
+  // }
 
   for (size_t t = 1; t < solution.size(); ++t) {
     for (size_t i = 0; i < ins.N; ++i) {

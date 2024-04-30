@@ -97,7 +97,7 @@ Solution Planner::solve()
     S = OPEN.top();
 
     // check goal condition
-    if (is_same_config(S->C, ins->goals)) {
+    if (any_goals_reached(S->C, ins->goals)) {
       // backtrack
       while (S != nullptr) {
         solution.push_back(S->C);
