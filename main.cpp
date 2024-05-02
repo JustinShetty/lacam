@@ -25,8 +25,8 @@ int main(int argc, char* argv[])
   program.add_argument("-l", "--log_short")
       .default_value(false)
       .implicit_value(true);
-  program.add_argument("--threshold")
-      .help("number of goals reached to terminate")
+  program.add_argument("-T", "--threshold")
+      .help("number of reached goals necessary to terminate")
       .default_value(std::string("1"));
 
   try {
