@@ -25,6 +25,6 @@ cmake -B build && make -C build
 
 This fork introduces an additional command-line argument
 ```
--T, --threshold       number of reached goals necessary to terminate [default: "1"]
+-T, --threshold       number of reached goals necessary to terminate. If -1, all agents must reach their goals. [default: "-1"]
 ```
 which determines the exit condition for the algorithm.

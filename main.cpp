@@ -4,7 +4,7 @@
 int main(int argc, char* argv[])
 {
   // arguments parser
-  argparse::ArgumentParser program("lacam", "0.1.0");
+  argparse::ArgumentParser program("early-exit-lacam", "0.1.0");
   program.add_argument("-m", "--map").help("map file").required();
   program.add_argument("-i", "--scen")
       .help("scenario file")
@@ -26,8 +26,8 @@ int main(int argc, char* argv[])
       .default_value(false)
       .implicit_value(true);
   program.add_argument("-T", "--threshold")
-      .help("number of reached goals necessary to terminate")
-      .default_value(std::string("1"));
+      .help("number of reached goals necessary to terminate. If -1, all agents must reach their goals.")
+      .default_value(std::string("-1"));
 
   try {
     program.parse_known_args(argc, argv);
@@ -48,7 +48,13 @@ int main(int argc, char* argv[])
   const auto output_name = program.get<std::string>("output");
   const auto log_short = program.get<bool>("log_short");
   const auto N = std::stoi(program.get<std::string>("num"));
-  const auto threshold = std::stoi(program.get<std::string>("threshold"));
+  auto user_threshold = std::stoi(program.get<std::string>("threshold"));
+  if (user_threshold < 0) user_threshold = N;
+  else if (user_threshold == 0 || user_threshold > N) {
+    info(0, verbose, "invalid threshold");
+    return 1;
+  }
+  const auto threshold = user_threshold;
   const auto ins = scen_name.size() > 0 ? Instance(scen_name, map_name, N)
                                         : Instance(map_name, &MT, N);
   if (!ins.is_valid(1)) return 1;
