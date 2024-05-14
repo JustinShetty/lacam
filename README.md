@@ -13,7 +13,7 @@ First, clone this repo with submodules.
 
 ```sh
 git clone --recursive https://github.com/justinshetty/early-exit-lacam.git
-cd lacam
+cd early-exit-lacam
 ```
 Then, build the project.
 
