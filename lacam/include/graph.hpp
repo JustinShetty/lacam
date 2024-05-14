@@ -4,12 +4,18 @@
 #pragma once
 #include "utils.hpp"
 
+enum Direction { NON_ADJACENT, SELF, UP, DOWN, LEFT, RIGHT };
+
 struct Vertex {
   const int id;     // index for V in Graph
   const int index;  // index for U (width * y + x) in Graph
+  const int x;
+  const int y;
   std::vector<Vertex*> neighbor;
 
-  Vertex(int _id, int _index);
+  Vertex(int _id, int _index, int _x, int _y);
+
+  Direction DirectionTo(const Vertex& other);
 };
 using Vertices = std::vector<Vertex*>;
 using Config = std::vector<Vertex*>;  // locations for all agents

@@ -184,6 +184,17 @@ bool Planner::get_new_config(Node* S, Constraint* M)
     // check vertex collision
     if (occupied_next[l] != nullptr) return false;
 
+    // check following conflict
+    // if (occupied_now[l] != nullptr && occupied_now[l] != A[i]) return false;
+    if (occupied_now[l] != nullptr) {
+      if (occupied_now[l]->id != i) return false;
+      if (occupied_now[l]->v_next != nullptr &&
+          S->C[i]->DirectionTo(*M->where[k]) !=
+              M->where[k]->DirectionTo(*occupied_now[l]->v_next)) {
+        return false;
+      }
+    }
+
     // check cycle conflict
     if (is_cycle(A[i], M->where[k])) return false;
 
@@ -228,6 +239,13 @@ bool Planner::funcPIBT(Agent* ai)
     if (occupied_next[u->id] != nullptr) continue;
 
     auto& ak = occupied_now[u->id];
+
+    // avoid following conflicts
+    // if (ak != nullptr && ak != ai) continue;
+    if (ak != nullptr && ak != ai) {
+      if (ak->v_next == nullptr) continue;
+      if (ai->v_now->DirectionTo(*u) != u->DirectionTo(*ak->v_next)) continue;
+    }
 
     // avoid cycle conflicts
     if (is_cycle(ai, u)) continue;
