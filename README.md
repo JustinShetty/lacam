@@ -23,8 +23,10 @@ cmake -B build && make -C build
 
 ## Usage
 
-This fork introduces an additional command-line argument
+This fork introduces two additional command-line arguments:
 ```
 -T, --threshold       number of reached goals necessary to terminate. If -1, all agents must reach their goals. [default: "-1"]
 ```
-which determines the exit condition for the algorithm.
+```
+--skip_post_processing        Skip potentially time-consuming post processing such as calculating sum of costs.
+```

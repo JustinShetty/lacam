@@ -28,6 +28,10 @@ int main(int argc, char* argv[])
   program.add_argument("-T", "--threshold")
       .help("number of reached goals necessary to terminate. If -1, all agents must reach their goals.")
       .default_value(std::string("-1"));
+  program.add_argument("--skip_post_processing")
+      .help("Skip potentially time-consuming post processing such as calculating sum of costs.")
+      .default_value(false)
+      .implicit_value(true);
 
   try {
     program.parse_known_args(argc, argv);
@@ -55,6 +59,7 @@ int main(int argc, char* argv[])
     return 1;
   }
   const auto threshold = user_threshold;
+  const auto skip_post_processing = program.get<bool>("skip_post_processing");
   const auto ins = scen_name.size() > 0 ? Instance(scen_name, map_name, N)
                                         : Instance(map_name, &MT, N);
   if (!ins.is_valid(1)) return 1;
@@ -74,7 +79,8 @@ int main(int argc, char* argv[])
   }
 
   // post processing
-  // print_stats(verbose, ins, solution, comp_time_ms);
-  make_log(ins, solution, output_name, comp_time_ms, map_name, seed, log_short);
+  if (!skip_post_processing) print_stats(verbose, ins, solution, comp_time_ms);
+  make_log(ins, solution, output_name, comp_time_ms, map_name, seed, log_short,
+    skip_post_processing);
   return 0;
 }
