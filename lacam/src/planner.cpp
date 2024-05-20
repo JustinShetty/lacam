@@ -185,15 +185,7 @@ bool Planner::get_new_config(Node* S, Constraint* M)
     if (occupied_next[l] != nullptr) return false;
 
     // check following conflict
-    // if (occupied_now[l] != nullptr && occupied_now[l] != A[i]) return false;
-    if (occupied_now[l] != nullptr) {
-      if (occupied_now[l]->id != i) return false;
-      if (occupied_now[l]->v_next != nullptr &&
-          S->C[i]->DirectionTo(*M->where[k]) !=
-              M->where[k]->DirectionTo(*occupied_now[l]->v_next)) {
-        return false;
-      }
-    }
+    if (occupied_now[l] != nullptr && occupied_now[l] != A[i]) return false;
 
     // set occupied_next
     A[i]->v_next = M->where[k];
@@ -208,7 +200,7 @@ bool Planner::get_new_config(Node* S, Constraint* M)
   return true;
 }
 
-bool Planner::funcPIBT(Agent* ai)
+bool Planner::funcPIBT(Agent* ai, Agent* aj)
 {
   const auto i = ai->id;
   const auto K = ai->v_now->neighbor.size();
@@ -220,41 +212,46 @@ bool Planner::funcPIBT(Agent* ai)
     if (MT != nullptr)
       tie_breakers[u->id] = get_random_float(MT);  // set tie-breaker
   }
-  C_next[i][K] = ai->v_now;
+  size_t num_candidates = K;
+  if (aj == nullptr) {
+    C_next[i][K] = ai->v_now;
+    num_candidates++;
+  }
 
-  // sort, note: K + 1 is sufficient
-  std::sort(C_next[i].begin(), C_next[i].begin() + K + 1,
+  // sort
+  std::sort(C_next[i].begin(), C_next[i].begin() + num_candidates,
             [&](Vertex* const v, Vertex* const u) {
               return D.get(i, v) + tie_breakers[v->id] <
                      D.get(i, u) + tie_breakers[u->id];
             });
 
-  for (size_t k = 0; k < K + 1; ++k) {
+  for (size_t k = 0; k < num_candidates; ++k) {
     auto u = C_next[i][k];
 
     // avoid vertex conflicts
     if (occupied_next[u->id] != nullptr) continue;
 
-    auto& ak = occupied_now[u->id];
 
     // avoid following conflicts
-    // if (ak != nullptr && ak != ai) continue;
+    auto& ak = occupied_now[u->id];
     if (ak != nullptr && ak != ai) {
-      if (ak->v_next == nullptr) continue;
-      if (ai->v_now->DirectionTo(*u) != u->DirectionTo(*ak->v_next)) continue;
+      if (ak->v_next == nullptr && ak != aj) {
+        // preemptively reserve current location
+        occupied_next[ai->v_now->id] = ai;
+        ai->v_next = ai->v_now;
+
+        if (funcPIBT(ak, ai)) return true;
+
+        // revert if priority inheritance failed
+        occupied_next[ai->v_now->id] = nullptr;
+        ai->v_next = nullptr;
+      }
+      continue;
     }
 
-    // reserve next location
+    // success
     occupied_next[u->id] = ai;
     ai->v_next = u;
-
-    // empty or stay
-    if (ak == nullptr || u == ai->v_now) return true;
-
-    // priority inheritance
-    if (ak->v_next == nullptr && !funcPIBT(ak)) continue;
-
-    // success to plan next one step
     return true;
   }
 
