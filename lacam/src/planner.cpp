@@ -235,7 +235,7 @@ bool Planner::funcPIBT(Agent* ai, Agent* aj)
     // avoid following conflicts
     auto& ak = occupied_now[u->id];
     if (ak != nullptr && ak != ai) {
-      if (ak->v_next == nullptr && ak != aj) {
+      if (ak->v_next == nullptr) {
         // preemptively reserve current location
         occupied_next[ai->v_now->id] = ai;
         ai->v_next = ai->v_now;
