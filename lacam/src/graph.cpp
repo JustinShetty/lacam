@@ -1,18 +1,8 @@
 #include "../include/graph.hpp"
 
-Vertex::Vertex(int _id, int _index, int _x, int _y)
-    : id(_id), index(_index), x(_x), y(_y), neighbor(Vertices())
+Vertex::Vertex(int _id, int _index)
+    : id(_id), index(_index), neighbor(Vertices())
 {
-}
-
-Direction Vertex::DirectionTo(const Vertex& other)
-{
-  if (abs(x - other.x) + abs(y - other.y) != 1) return Direction::NON_ADJACENT;  // not adjacent
-  if (x < other.x) return Direction::RIGHT;
-  if (x > other.x) return Direction::LEFT;
-  if (y < other.y) return Direction::UP;
-  if (y > other.y) return Direction::DOWN;
-  return Direction::SELF;
 }
 
 Graph::Graph() : V(Vertices()), width(0), height(0) {}
@@ -63,7 +53,7 @@ Graph::Graph(const std::string& filename) : V(Vertices()), width(0), height(0)
       char s = line[x];
       if (s == 'T' or s == '@') continue;  // object
       auto index = width * y + x;
-      auto v = new Vertex(V.size(), index, x, y);
+      auto v = new Vertex(V.size(), index);
       V.push_back(v);
       U[index] = v;
     }
