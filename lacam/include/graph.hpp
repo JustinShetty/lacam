@@ -4,8 +4,6 @@
 #pragma once
 #include "utils.hpp"
 
-enum Direction { NON_ADJACENT, SELF, UP, DOWN, LEFT, RIGHT };
-
 struct Vertex {
   const int id;     // index for V in Graph
   const int index;  // index for U (width * y + x) in Graph
