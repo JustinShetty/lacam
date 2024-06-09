@@ -183,11 +183,6 @@ bool Planner::get_new_config(Node* S, Constraint* M)
 
     // check vertex collision
     if (occupied_next[l] != nullptr) return false;
-
-    // check cycle conflict
-    if (is_cycle(A[i], M->where[k]))
-      return false;
-
     // check swap collision
     auto l_pre = S->C[i]->id;
     if (occupied_next[l_pre] != nullptr && occupied_now[l] != nullptr &&
@@ -236,9 +231,6 @@ bool Planner::funcPIBT(Agent* ai)
 
     auto& ak = occupied_now[u->id];
 
-    // avoid cycle conflicts
-    if (is_cycle(ai, u)) continue;
-
     // avoid swap conflicts with constraints
     if (ak != nullptr && ak->v_next == ai->v_now) continue;
 
@@ -260,21 +252,6 @@ bool Planner::funcPIBT(Agent* ai)
   occupied_next[ai->v_now->id] = ai;
   ai->v_next = ai->v_now;
   return false;
-}
-
-// from https://github.com/comp-lot/no_cycle_lacam
-bool Planner::is_cycle(Agent* ai, Vertex* u)
-{
-  Agent* ak = occupied_now[u->id];
-  if (ak == ai)
-    return false;
-
-  while (ak != nullptr && ak != ai) {
-    if (ak->v_next == nullptr)
-      return false;
-    ak = occupied_now[ak->v_next->id];
-  }
-  return ak == ai;
 }
 
 Solution solve(const Instance& ins, const int verbose, const Deadline* deadline,
