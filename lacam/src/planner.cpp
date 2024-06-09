@@ -53,12 +53,13 @@ Node::~Node()
 }
 
 Planner::Planner(const Instance* _ins, const Deadline* _deadline,
-                 std::mt19937* _MT, int _verbose, int _threshold)
+                 std::mt19937* _MT, int _verbose, int _threshold, bool _allow_following)
     : ins(_ins),
       deadline(_deadline),
       MT(_MT),
       verbose(_verbose),
       threshold(_threshold),
+      allow_following(_allow_following),
       N(ins->N),
       V_size(ins->G.size()),
       D(DistTable(ins)),
@@ -183,11 +184,18 @@ bool Planner::get_new_config(Node* S, Constraint* M)
 
     // check vertex collision
     if (occupied_next[l] != nullptr) return false;
-    // check swap collision
-    auto l_pre = S->C[i]->id;
-    if (occupied_next[l_pre] != nullptr && occupied_now[l] != nullptr &&
-        occupied_next[l_pre]->id == occupied_now[l]->id)
-      return false;
+
+    if (allow_following) {
+      // check swap collision
+      auto l_pre = S->C[i]->id;
+      if (occupied_next[l_pre] != nullptr && occupied_now[l] != nullptr &&
+          occupied_next[l_pre]->id == occupied_now[l]->id) {
+        return false;
+      }
+    } else {
+      // check following conflict
+      if (occupied_now[l] != nullptr && occupied_now[l] != A[i]) return false;
+    }
 
     // set occupied_next
     A[i]->v_next = M->where[k];
@@ -203,6 +211,12 @@ bool Planner::get_new_config(Node* S, Constraint* M)
 }
 
 bool Planner::funcPIBT(Agent* ai)
+{
+  if (allow_following) return funcPIBT_following(ai);
+  return funcPIBT_no_following(ai, nullptr);
+}
+
+bool Planner::funcPIBT_following(Agent* ai)
 {
   const auto i = ai->id;
   const auto K = ai->v_now->neighbor.size();
@@ -242,7 +256,7 @@ bool Planner::funcPIBT(Agent* ai)
     if (ak == nullptr || u == ai->v_now) return true;
 
     // priority inheritance
-    if (ak->v_next == nullptr && !funcPIBT(ak)) continue;
+    if (ak->v_next == nullptr && !funcPIBT_following(ak)) continue;
 
     // success to plan next one step
     return true;
@@ -254,10 +268,71 @@ bool Planner::funcPIBT(Agent* ai)
   return false;
 }
 
+bool Planner::funcPIBT_no_following(Agent* ai, Agent* aj)
+{
+  const auto i = ai->id;
+  const auto K = ai->v_now->neighbor.size();
+
+  // get candidates for next locations
+  for (size_t k = 0; k < K; ++k) {
+    auto u = ai->v_now->neighbor[k];
+    C_next[i][k] = u;
+    if (MT != nullptr)
+      tie_breakers[u->id] = get_random_float(MT);  // set tie-breaker
+  }
+  size_t num_candidates = K;
+  if (aj == nullptr) {
+    C_next[i][K] = ai->v_now;
+    num_candidates++;
+  }
+
+  // sort
+  std::sort(C_next[i].begin(), C_next[i].begin() + num_candidates,
+            [&](Vertex* const v, Vertex* const u) {
+              return D.get(i, v) + tie_breakers[v->id] <
+                     D.get(i, u) + tie_breakers[u->id];
+            });
+
+  for (size_t k = 0; k < num_candidates; ++k) {
+    auto u = C_next[i][k];
+
+    // avoid vertex conflicts
+    if (occupied_next[u->id] != nullptr) continue;
+
+
+    // avoid following conflicts
+    auto& ak = occupied_now[u->id];
+    if (ak != nullptr && ak != ai) {
+      if (ak->v_next == nullptr) {
+        // preemptively reserve current location
+        occupied_next[ai->v_now->id] = ai;
+        ai->v_next = ai->v_now;
+
+        if (funcPIBT_no_following(ak, ai)) return true;
+
+        // revert if priority inheritance failed
+        occupied_next[ai->v_now->id] = nullptr;
+        ai->v_next = nullptr;
+      }
+      continue;
+    }
+
+    // success
+    occupied_next[u->id] = ai;
+    ai->v_next = u;
+    return true;
+  }
+
+  // failed to secure node
+  occupied_next[ai->v_now->id] = ai;
+  ai->v_next = ai->v_now;
+  return false;
+}
+
 Solution solve(const Instance& ins, const int verbose, const Deadline* deadline,
-               std::mt19937* MT, const int threshold)
+               std::mt19937* MT, const int threshold, const bool allow_following)
 {
   info(1, verbose, "elapsed:", elapsed_ms(deadline), "ms\tpre-processing");
-  auto planner = Planner(&ins, deadline, MT, verbose, threshold);
+  auto planner = Planner(&ins, deadline, MT, verbose, threshold, allow_following);
   return planner.solve();
 }

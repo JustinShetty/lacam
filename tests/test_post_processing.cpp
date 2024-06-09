@@ -2,9 +2,12 @@
 
 #include "gtest/gtest.h"
 
-TEST(PostProcesing, validate)
+TEST(PostProcessing, validate_following)
 {
   const auto map_filename = "./assets/empty-8-8.map";
+  const auto verbose = 0;
+  const auto N = 2;
+  const auto allow_following = true;
   const auto start_indexes = std::vector<int>({0, 8});
   const auto goal_indexes = std::vector<int>({9, 1});
   const auto ins = Instance(map_filename, start_indexes, goal_indexes);
@@ -14,38 +17,92 @@ TEST(PostProcesing, validate)
   sol[0] = Config({ins.G.U[0], ins.G.U[8]});
   sol[1] = Config({ins.G.U[1], ins.G.U[0]});
   sol[2] = Config({ins.G.U[9], ins.G.U[1]});
-  ASSERT_TRUE(is_feasible_solution(ins, sol));
+  ASSERT_TRUE(is_feasible_solution(ins, sol, verbose, N, allow_following));
 
   // invalid start
   sol[0] = Config({ins.G.U[0], ins.G.U[4]});
   sol[1] = Config({ins.G.U[1], ins.G.U[0]});
   sol[2] = Config({ins.G.U[9], ins.G.U[1]});
-  ASSERT_FALSE(is_feasible_solution(ins, sol));
+  ASSERT_FALSE(is_feasible_solution(ins, sol, verbose, N, allow_following));
 
   // invalid goal
   sol[0] = Config({ins.G.U[0], ins.G.U[8]});
   sol[1] = Config({ins.G.U[1], ins.G.U[0]});
   sol[2] = Config({ins.G.U[10], ins.G.U[1]});
-  ASSERT_FALSE(is_feasible_solution(ins, sol));
+  ASSERT_FALSE(is_feasible_solution(ins, sol, verbose, N, allow_following));
 
   // invalid transition
   sol[0] = Config({ins.G.U[0], ins.G.U[8]});
   sol[1] = Config({ins.G.U[4], ins.G.U[0]});
   sol[2] = Config({ins.G.U[9], ins.G.U[1]});
-  ASSERT_FALSE(is_feasible_solution(ins, sol));
+  ASSERT_FALSE(is_feasible_solution(ins, sol, verbose, N, allow_following));
 
   // swap conflict
   sol[0] = Config({ins.G.U[0], ins.G.U[8]});
   sol[1] = Config({ins.G.U[8], ins.G.U[0]});
   sol[2] = Config({ins.G.U[9], ins.G.U[1]});
-  ASSERT_FALSE(is_feasible_solution(ins, sol));
+  ASSERT_FALSE(is_feasible_solution(ins, sol, verbose, N, allow_following));
 
   // vertex conflict
   sol[0] = Config({ins.G.U[0], ins.G.U[8]});
   sol[1] = Config({ins.G.U[0], ins.G.U[0]});
   sol[2] = Config({ins.G.U[8], ins.G.U[1]});
   sol.push_back(Config({ins.G.U[9], ins.G.U[1]}));
-  ASSERT_FALSE(is_feasible_solution(ins, sol));
+  ASSERT_FALSE(is_feasible_solution(ins, sol, verbose, N, allow_following));
+}
+
+TEST(PostProcessing, validate_no_following)
+{
+  const auto map_filename = "./assets/empty-8-8.map";
+  const auto verbose = 0;
+  const auto N = 2;
+  const auto allow_following = false;
+  const auto start_indexes = std::vector<int>({0, 8});
+  const auto goal_indexes = std::vector<int>({9, 1});
+  const auto ins = Instance(map_filename, start_indexes, goal_indexes);
+
+  // correct solution
+  auto sol = Solution(4);
+  sol[0] = Config({ins.G.U[0], ins.G.U[8]});
+  sol[1] = Config({ins.G.U[1], ins.G.U[8]});
+  sol[2] = Config({ins.G.U[9], ins.G.U[0]});
+  sol[3] = Config({ins.G.U[9], ins.G.U[1]});
+  ASSERT_TRUE(is_feasible_solution(ins, sol, verbose, N, allow_following));
+
+  // invalid start
+  sol[0] = Config({ins.G.U[0], ins.G.U[4]});
+  sol[1] = Config({ins.G.U[1], ins.G.U[8]});
+  sol[2] = Config({ins.G.U[9], ins.G.U[0]});
+  sol[3] = Config({ins.G.U[9], ins.G.U[1]});
+  ASSERT_FALSE(is_feasible_solution(ins, sol, verbose, N, allow_following));
+
+  // invalid goal
+  sol[0] = Config({ins.G.U[0], ins.G.U[8]});
+  sol[1] = Config({ins.G.U[1], ins.G.U[8]});
+  sol[2] = Config({ins.G.U[9], ins.G.U[0]});
+  sol[3] = Config({ins.G.U[10], ins.G.U[1]});
+  ASSERT_FALSE(is_feasible_solution(ins, sol, verbose, N, allow_following));
+
+  // invalid transition
+  sol[0] = Config({ins.G.U[0], ins.G.U[8]});
+  sol[1] = Config({ins.G.U[10], ins.G.U[8]});
+  sol[2] = Config({ins.G.U[9], ins.G.U[0]});
+  sol[3] = Config({ins.G.U[9], ins.G.U[1]});
+  ASSERT_FALSE(is_feasible_solution(ins, sol, verbose, N, allow_following));
+
+  // following conflict
+  sol[0] = Config({ins.G.U[0], ins.G.U[8]});
+  sol[1] = Config({ins.G.U[1], ins.G.U[0]});
+  sol[2] = Config({ins.G.U[9], ins.G.U[1]});
+  sol[3] = Config({ins.G.U[9], ins.G.U[1]});
+  ASSERT_FALSE(is_feasible_solution(ins, sol, verbose, N, allow_following));
+
+  // vertex conflict
+  sol[0] = Config({ins.G.U[0], ins.G.U[8]});
+  sol[1] = Config({ins.G.U[1], ins.G.U[8]});
+  sol[2] = Config({ins.G.U[9], ins.G.U[0]});
+  sol[3] = Config({ins.G.U[1], ins.G.U[1]});
+  ASSERT_FALSE(is_feasible_solution(ins, sol, verbose, N, allow_following));
 }
 
 TEST(PostProcessing, metrics)

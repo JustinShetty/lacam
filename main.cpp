@@ -28,6 +28,10 @@ int main(int argc, char* argv[])
   program.add_argument("-T", "--threshold")
       .help("number of reached goals necessary to terminate. If -1, all agents must reach their goals.")
       .default_value(std::string("-1"));
+  program.add_argument("-f", "--allow_following")
+      .help("allow following conflicts")
+      .default_value(false)
+      .implicit_value(true);
   program.add_argument("--skip_post_processing")
       .help("Skip potentially time-consuming post processing such as calculating sum of costs.")
       .default_value(false)
@@ -59,6 +63,7 @@ int main(int argc, char* argv[])
     return 1;
   }
   const auto threshold = user_threshold;
+  const auto allow_following = program.get<bool>("allow_following");
   const auto skip_post_processing = program.get<bool>("skip_post_processing");
   const auto ins = scen_name.size() > 0 ? Instance(scen_name, map_name, N)
                                         : Instance(map_name, &MT, N);
@@ -66,14 +71,14 @@ int main(int argc, char* argv[])
 
   // solve
   const auto deadline = Deadline(time_limit_sec * 1000);
-  const auto solution = solve(ins, verbose - 1, &deadline, &MT, threshold);
+  const auto solution = solve(ins, verbose - 1, &deadline, &MT, threshold, allow_following);
   const auto comp_time_ms = deadline.elapsed_ms();
 
   // failure
   if (solution.empty()) info(1, verbose, "failed to solve");
 
   // check feasibility
-  if (!is_feasible_solution(ins, solution, verbose, threshold)) {
+  if (!is_feasible_solution(ins, solution, verbose, threshold, allow_following)) {
     info(0, verbose, "invalid solution");
     return 1;
   }
