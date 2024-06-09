@@ -185,8 +185,17 @@ bool Planner::get_new_config(Node* S, Constraint* M)
     // check vertex collision
     if (occupied_next[l] != nullptr) return false;
 
-    // check following conflict
-    if (occupied_now[l] != nullptr && occupied_now[l] != A[i]) return false;
+    if (allow_following) {
+      // check swap collision
+      auto l_pre = S->C[i]->id;
+      if (occupied_next[l_pre] != nullptr && occupied_now[l] != nullptr &&
+          occupied_next[l_pre]->id == occupied_now[l]->id) {
+        return false;
+      }
+    } else {
+      // check following conflict
+      if (occupied_now[l] != nullptr && occupied_now[l] != A[i]) return false;
+    }
 
     // set occupied_next
     A[i]->v_next = M->where[k];
@@ -201,7 +210,65 @@ bool Planner::get_new_config(Node* S, Constraint* M)
   return true;
 }
 
-bool Planner::funcPIBT(Agent* ai, Agent* aj)
+bool Planner::funcPIBT(Agent* ai)
+{
+  if (allow_following) return funcPIBT_following(ai);
+  return funcPIBT_no_following(ai, nullptr);
+}
+
+bool Planner::funcPIBT_following(Agent* ai)
+{
+  const auto i = ai->id;
+  const auto K = ai->v_now->neighbor.size();
+
+  // get candidates for next locations
+  for (size_t k = 0; k < K; ++k) {
+    auto u = ai->v_now->neighbor[k];
+    C_next[i][k] = u;
+    if (MT != nullptr)
+      tie_breakers[u->id] = get_random_float(MT);  // set tie-breaker
+  }
+  C_next[i][K] = ai->v_now;
+
+  // sort, note: K + 1 is sufficient
+  std::sort(C_next[i].begin(), C_next[i].begin() + K + 1,
+            [&](Vertex* const v, Vertex* const u) {
+              return D.get(i, v) + tie_breakers[v->id] <
+                     D.get(i, u) + tie_breakers[u->id];
+            });
+
+  for (size_t k = 0; k < K + 1; ++k) {
+    auto u = C_next[i][k];
+
+    // avoid vertex conflicts
+    if (occupied_next[u->id] != nullptr) continue;
+
+    auto& ak = occupied_now[u->id];
+
+    // avoid swap conflicts with constraints
+    if (ak != nullptr && ak->v_next == ai->v_now) continue;
+
+    // reserve next location
+    occupied_next[u->id] = ai;
+    ai->v_next = u;
+
+    // empty or stay
+    if (ak == nullptr || u == ai->v_now) return true;
+
+    // priority inheritance
+    if (ak->v_next == nullptr && !funcPIBT_following(ak)) continue;
+
+    // success to plan next one step
+    return true;
+  }
+
+  // failed to secure node
+  occupied_next[ai->v_now->id] = ai;
+  ai->v_next = ai->v_now;
+  return false;
+}
+
+bool Planner::funcPIBT_no_following(Agent* ai, Agent* aj)
 {
   const auto i = ai->id;
   const auto K = ai->v_now->neighbor.size();
@@ -241,7 +308,7 @@ bool Planner::funcPIBT(Agent* ai, Agent* aj)
         occupied_next[ai->v_now->id] = ai;
         ai->v_next = ai->v_now;
 
-        if (funcPIBT(ak, ai)) return true;
+        if (funcPIBT_no_following(ak, ai)) return true;
 
         // revert if priority inheritance failed
         occupied_next[ai->v_now->id] = nullptr;

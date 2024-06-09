@@ -67,7 +67,9 @@ struct Planner {
           int _verbose = 0, int _threshold = 1, bool _allow_following = false);
   Solution solve();
   bool get_new_config(Node* S, Constraint* M);
-  bool funcPIBT(Agent* ai, Agent* aj = nullptr);
+  bool funcPIBT(Agent* ai);
+  bool funcPIBT_following(Agent* ai);
+  bool funcPIBT_no_following(Agent* ai, Agent* aj);
 };
 
 // main function

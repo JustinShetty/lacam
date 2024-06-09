@@ -78,7 +78,7 @@ int main(int argc, char* argv[])
   if (solution.empty()) info(1, verbose, "failed to solve");
 
   // check feasibility
-  if (!is_feasible_solution(ins, solution, verbose, threshold)) {
+  if (!is_feasible_solution(ins, solution, verbose, threshold, allow_following)) {
     info(0, verbose, "invalid solution");
     return 1;
   }

@@ -3,7 +3,7 @@
 #include "../include/dist_table.hpp"
 
 bool is_feasible_solution(const Instance& ins, const Solution& solution,
-                          const int verbose, const int threshold)
+                          const int verbose, const int threshold, const bool allow_following)
 {
   if (solution.empty()) return true;
 
@@ -40,10 +40,19 @@ bool is_feasible_solution(const Instance& ins, const Solution& solution,
           info(1, verbose, "vertex conflict");
           return false;
         }
-        // following conflicts
-        if (v_i_to == v_j_from || v_j_to == v_i_from) {
-          info(1, verbose, "following conflict");
-          return false;
+
+        if (allow_following) {
+          // swap conflicts
+          if (v_j_to == v_i_from && v_j_from == v_i_to) {
+            info(1, verbose, "swap conflict");
+            return false;
+          }
+        } else {
+          // following conflicts
+          if (v_i_to == v_j_from || v_j_to == v_i_from) {
+            info(1, verbose, "following conflict");
+            return false;
+          }
         }
       }
     }
