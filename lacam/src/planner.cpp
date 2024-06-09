@@ -185,7 +185,14 @@ bool Planner::get_new_config(Node* S, Constraint* M)
     if (occupied_next[l] != nullptr) return false;
 
     // check cycle conflict
-    if (is_cycle(A[i], M->where[k])) return false;
+    if (is_cycle(A[i], M->where[k]))
+      return false;
+
+    // check swap collision
+    auto l_pre = S->C[i]->id;
+    if (occupied_next[l_pre] != nullptr && occupied_now[l] != nullptr &&
+        occupied_next[l_pre]->id == occupied_now[l]->id)
+      return false;
 
     // set occupied_next
     A[i]->v_next = M->where[k];
@@ -231,6 +238,9 @@ bool Planner::funcPIBT(Agent* ai)
 
     // avoid cycle conflicts
     if (is_cycle(ai, u)) continue;
+
+    // avoid swap conflicts with constraints
+    if (ak != nullptr && ak->v_next == ai->v_now) continue;
 
     // reserve next location
     occupied_next[u->id] = ai;
