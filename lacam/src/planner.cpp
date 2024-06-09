@@ -183,9 +183,17 @@ bool Planner::get_new_config(Node* S, Constraint* M)
 
     // check vertex collision
     if (occupied_next[l] != nullptr) return false;
+<<<<<<< HEAD
 
     // check following conflict
     if (occupied_now[l] != nullptr && occupied_now[l] != A[i]) return false;
+=======
+    // check swap collision
+    auto l_pre = S->C[i]->id;
+    if (occupied_next[l_pre] != nullptr && occupied_now[l] != nullptr &&
+        occupied_next[l_pre]->id == occupied_now[l]->id)
+      return false;
+>>>>>>> dev
 
     // set occupied_next
     A[i]->v_next = M->where[k];
@@ -240,7 +248,12 @@ bool Planner::funcPIBT(Agent* ai, Agent* aj)
         occupied_next[ai->v_now->id] = ai;
         ai->v_next = ai->v_now;
 
+<<<<<<< HEAD
         if (funcPIBT(ak, ai)) return true;
+=======
+    // avoid swap conflicts with constraints
+    if (ak != nullptr && ak->v_next == ai->v_now) continue;
+>>>>>>> dev
 
         // revert if priority inheritance failed
         occupied_next[ai->v_now->id] = nullptr;

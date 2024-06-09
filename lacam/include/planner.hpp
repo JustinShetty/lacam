@@ -66,7 +66,11 @@ struct Planner {
           int _verbose = 0, int _threshold = 1);
   Solution solve();
   bool get_new_config(Node* S, Constraint* M);
+<<<<<<< HEAD
   bool funcPIBT(Agent* ai, Agent* aj = nullptr);
+=======
+  bool funcPIBT(Agent* ai);
+>>>>>>> dev
 };
 
 // main function
