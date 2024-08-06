@@ -12,7 +12,28 @@ struct Vertex {
   Vertex(int _id, int _index);
 };
 using Vertices = std::vector<Vertex*>;
-using Config = std::vector<Vertex*>;  // locations for all agents
+// using Config = std::vector<Vertex*>;  // locations for all agents
+
+class Config : public std::vector<Vertex*> {
+private:
+  int additionalVariable;
+
+public:
+  Config() : additionalVariable(0) {}
+
+  Config(int size, Vertex* value = nullptr, int additionalValue = 0)
+      : std::vector<Vertex*>(size, value), additionalVariable(additionalValue) {}
+
+  Config(std::initializer_list<Vertex*> il, int additionalValue = 0)
+
+  int getAdditionalVariable() const {
+    return additionalVariable;
+  }
+
+  void setAdditionalVariable(int value) {
+    additionalVariable = value;
+  }
+};
 
 struct Graph {
   Vertices V;  // without nullptr
