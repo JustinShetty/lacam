@@ -12,6 +12,23 @@ Instance::Instance(const std::string& map_filename,
   for (auto k : goal_indexes) goals.push_back(G.U[k]);
 }
 
+Instance::Instance(const std::string& map_filename,
+                   const std::vector<int>& start_indexes,
+                   const std::vector<std::vector<int>>& goal_index_sequences)
+    : G(map_filename),
+      starts(Config()),
+      goals(Config()),
+      N(start_indexes.size())       
+{
+  for (auto k : start_indexes) starts.push_back(G.U[k]);
+  for (auto goal_sequence : goal_index_sequences) {
+    std::vector<Vertex*> as_vertices;
+    for (auto k : goal_sequence) as_vertices.push_back(G.U[k]);
+    goal_sequences.push_back(as_vertices);
+    goals.push_back(as_vertices.front());
+  }
+}
+
 // for load instance
 static const std::regex r_instance =
     std::regex(R"(\d+\t.+\.map\t\d+\t\d+\t(\d+)\t(\d+)\t(\d+)\t(\d+)\t.+)");
@@ -45,6 +62,7 @@ Instance::Instance(const std::string& scen_filename,
       if (s == nullptr || g == nullptr) continue;
       starts.push_back(s);
       goals.push_back(g);
+      goal_sequences.push_back(std::vector<Vertex*>{g});
     }
 
     if (starts.size() == N) break;
