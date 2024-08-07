@@ -23,7 +23,7 @@ TEST(Instance, sequence)
   ASSERT_EQ(size(ins.goals), 2);
   ASSERT_EQ(ins.starts[0]->index, 0);
   ASSERT_EQ(ins.goals[0]->index, 2);
-  
+
   ASSERT_EQ(ins.goal_sequences.size(), 2);
   ASSERT_EQ(ins.goal_sequences[0].front()->index, 2);
   ASSERT_EQ(ins.goal_sequences[0].back()->index, 4);

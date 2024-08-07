@@ -11,8 +11,9 @@ struct Instance {
   const Graph G;  // graph
   Config starts;  // initial configuration
   Config goals;   // goal configuration
-  std::vector<std::vector<Vertex*>> goal_sequences; // agent id -> goal sequence
-  const uint N;   // number of agents
+  std::vector<std::vector<Vertex*>>
+      goal_sequences;  // agent id -> goal sequence
+  const uint N;        // number of agents
 
   // for testing
   Instance(const std::string& map_filename,

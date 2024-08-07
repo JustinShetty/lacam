@@ -18,7 +18,7 @@ Instance::Instance(const std::string& map_filename,
     : G(map_filename),
       starts(Config()),
       goals(Config()),
-      N(start_indexes.size())       
+      N(start_indexes.size())
 {
   for (auto k : start_indexes) starts.push_back(G.U[k]);
   for (auto goal_sequence : goal_index_sequences) {
