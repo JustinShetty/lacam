@@ -38,6 +38,7 @@
 # End of https://www.toptal.com/developers/gitignore/api/c++
 **/.DS_Store
 **/build/
+build_debug/
 Manifest.toml
 map
 .vscode/
