@@ -3,7 +3,8 @@
 #include "../include/dist_table.hpp"
 
 bool is_feasible_solution(const Instance& ins, const Solution& solution,
-                          const int verbose, const int threshold, const bool allow_following)
+                          const int verbose, const int threshold,
+                          const bool allow_following)
 {
   if (solution.empty()) return true;
 

@@ -74,5 +74,5 @@ struct Planner {
 
 // main function
 Solution solve(const Instance& ins, const int verbose = 0,
-               const Deadline* deadline = nullptr, std::mt19937* MT = nullptr, 
+               const Deadline* deadline = nullptr, std::mt19937* MT = nullptr,
                const int threshold = 1, const bool allow_following = false);

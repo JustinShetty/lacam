@@ -53,7 +53,8 @@ Node::~Node()
 }
 
 Planner::Planner(const Instance* _ins, const Deadline* _deadline,
-                 std::mt19937* _MT, int _verbose, int _threshold, bool _allow_following)
+                 std::mt19937* _MT, int _verbose, int _threshold,
+                 bool _allow_following)
     : ins(_ins),
       deadline(_deadline),
       MT(_MT),
@@ -299,7 +300,6 @@ bool Planner::funcPIBT_no_following(Agent* ai, Agent* aj)
     // avoid vertex conflicts
     if (occupied_next[u->id] != nullptr) continue;
 
-
     // avoid following conflicts
     auto& ak = occupied_now[u->id];
     if (ak != nullptr && ak != ai) {
@@ -330,9 +330,11 @@ bool Planner::funcPIBT_no_following(Agent* ai, Agent* aj)
 }
 
 Solution solve(const Instance& ins, const int verbose, const Deadline* deadline,
-               std::mt19937* MT, const int threshold, const bool allow_following)
+               std::mt19937* MT, const int threshold,
+               const bool allow_following)
 {
   info(1, verbose, "elapsed:", elapsed_ms(deadline), "ms\tpre-processing");
-  auto planner = Planner(&ins, deadline, MT, verbose, threshold, allow_following);
+  auto planner =
+      Planner(&ins, deadline, MT, verbose, threshold, allow_following);
   return planner.solve();
 }
