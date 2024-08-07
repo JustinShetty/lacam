@@ -26,14 +26,18 @@ int main(int argc, char* argv[])
       .default_value(false)
       .implicit_value(true);
   program.add_argument("-T", "--threshold")
-      .help("number of reached goals necessary to terminate. If -1, all agents must reach their goals.")
+      .help(
+          "number of reached goals necessary to terminate. If -1, all agents "
+          "must reach their goals.")
       .default_value(std::string("-1"));
   program.add_argument("-f", "--allow_following")
       .help("allow following conflicts")
       .default_value(false)
       .implicit_value(true);
   program.add_argument("--skip_post_processing")
-      .help("Skip potentially time-consuming post processing such as calculating sum of costs.")
+      .help(
+          "Skip potentially time-consuming post processing such as calculating "
+          "sum of costs.")
       .default_value(false)
       .implicit_value(true);
 
@@ -57,7 +61,8 @@ int main(int argc, char* argv[])
   const auto log_short = program.get<bool>("log_short");
   const auto N = std::stoi(program.get<std::string>("num"));
   auto user_threshold = std::stoi(program.get<std::string>("threshold"));
-  if (user_threshold < 0) user_threshold = N;
+  if (user_threshold < 0)
+    user_threshold = N;
   else if (user_threshold == 0 || user_threshold > N) {
     info(0, verbose, "invalid threshold");
     return 1;
@@ -71,14 +76,16 @@ int main(int argc, char* argv[])
 
   // solve
   const auto deadline = Deadline(time_limit_sec * 1000);
-  const auto solution = solve(ins, verbose - 1, &deadline, &MT, threshold, allow_following);
+  const auto solution =
+      solve(ins, verbose - 1, &deadline, &MT, threshold, allow_following);
   const auto comp_time_ms = deadline.elapsed_ms();
 
   // failure
   if (solution.empty()) info(1, verbose, "failed to solve");
 
   // check feasibility
-  if (!is_feasible_solution(ins, solution, verbose, threshold, allow_following)) {
+  if (!is_feasible_solution(ins, solution, verbose, threshold,
+                            allow_following)) {
     info(0, verbose, "invalid solution");
     return 1;
   }
@@ -86,6 +93,6 @@ int main(int argc, char* argv[])
   // post processing
   if (!skip_post_processing) print_stats(verbose, ins, solution, comp_time_ms);
   make_log(ins, solution, output_name, comp_time_ms, map_name, seed, log_short,
-    skip_post_processing);
+           skip_post_processing);
   return 0;
 }

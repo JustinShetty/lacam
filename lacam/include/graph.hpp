@@ -30,10 +30,7 @@ bool is_same_config(
     const Config& C1,
     const Config& C2);  // check equivalence of two configurations
 
-bool enough_goals_reached(
-  const Config& C1,
-  const Config& C2,
-  int threshold);
+bool enough_goals_reached(const Config& C1, const Config& C2, int threshold);
 
 // hash function of configuration
 // c.f.
