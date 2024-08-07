@@ -12,19 +12,7 @@ struct Vertex {
   Vertex(int _id, int _index);
 };
 using Vertices = std::vector<Vertex*>;
-// using Config = std::vector<Vertex*>;  // locations for all agents
-
-class Config : public std::vector<Vertex*> {
-private:
-  int additionalVariable = 0;
-
-public:
-  Config() {}
-
-  Config(int size, Vertex* value = nullptr) : std::vector<Vertex*>(size, value) {}
-
-  Config(std::initializer_list<Vertex*> il) : std::vector<Vertex*>(il) {}
-};
+using Config = std::vector<Vertex*>;  // locations for all agents
 
 struct Graph {
   Vertices V;  // without nullptr
@@ -42,10 +30,9 @@ bool is_same_config(
     const Config& C1,
     const Config& C2);  // check equivalence of two configurations
 
-bool enough_goals_reached(
-  const Config& C1,
-  const Config& C2,
-  int threshold);
+bool enough_goals_reached(const Config& C1, const Config& C2, int threshold);
+
+std::vector<int> goals_reached(const Config& C1, const Config& C2);
 
 // hash function of configuration
 // c.f.

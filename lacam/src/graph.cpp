@@ -94,8 +94,7 @@ int Graph::size() const { return V.size(); }
 
 bool is_same_config(const Config& C1, const Config& C2)
 {
-  const auto N = C1.size();
-  for (size_t i = 0; i < N; ++i) {
+  for (size_t i = 0; i < C1.size(); ++i) {
     if (C1[i]->id != C2[i]->id) return false;
   }
   return true;
@@ -103,15 +102,23 @@ bool is_same_config(const Config& C1, const Config& C2)
 
 bool enough_goals_reached(const Config& C1, const Config& C2, int threshold)
 {
-  const auto N = C1.size();
   int count = 0;
-  for (size_t i = 0; i < N; ++i) {
+  for (size_t i = 0; i < C1.size(); ++i) {
     if (C1[i]->id == C2[i]->id) {
       count++;
       if (count >= threshold) return true;
     }
   }
   return false;
+}
+
+std::vector<int> goals_reached(const Config& C1, const Config& C2)
+{
+  std::vector<int> goals;
+  for (size_t i = 0; i < C1.size(); ++i) {
+    if (C1[i]->id == C2[i]->id) goals.push_back(i);
+  }
+  return goals;
 }
 
 uint ConfigHasher::operator()(const Config& C) const
