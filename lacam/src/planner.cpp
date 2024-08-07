@@ -102,13 +102,8 @@ Solution Planner::solve()
     // do not pop here!
     S = OPEN.top();
 
-    auto final_goal_config = Config(N, nullptr);
-    for (auto agent_id = 0; agent_id < N; agent_id++) {
-      final_goal_config[agent_id] = ins->goal_sequences[agent_id].back();
-    }
-
     // check goal condition
-    if (is_same_config(S->C, final_goal_config)) {
+    if (is_same_config(S->C, ins->goals)) {
       // backtrack
       while (S != nullptr) {
         solution.push_back(S->C);
@@ -116,20 +111,6 @@ Solution Planner::solve()
       }
       std::reverse(solution.begin(), solution.end());
       break;
-    }
-
-    auto current_goal_config = Config(N, nullptr);
-    for (auto agent_id = 0; agent_id < N; agent_id++) {
-      current_goal_config[agent_id] =
-          ins->goal_sequences[agent_id][S->goal_indices[agent_id]];
-    }
-    auto agents_to_increment = goals_reached(S->C, current_goal_config);
-    for (auto agent_id : agents_to_increment) {
-      auto new_goal_indices = S->goal_indices;
-      new_goal_indices[agent_id] += 1;
-      auto new_node = new Node(S->C, D, new_goal_indices, S);
-      OPEN.push(new_node);
-      CLOSED[new_node->C] = new_node;
     }
 
     // low-level search end
