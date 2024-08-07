@@ -13,8 +13,10 @@ Constraint::Constraint(Constraint* parent, int i, Vertex* v)
 
 Constraint::~Constraint(){};
 
-Node::Node(Config _C, DistTable& D, Node* _parent)
+Node::Node(Config _C, DistTable& D, std::vector<int> _goal_indices,
+           Node* _parent)
     : C(_C),
+      goal_indices(_goal_indices),
       parent(_parent),
       priorities(C.size(), 0),
       order(C.size(), 0),
@@ -85,7 +87,8 @@ Solution Planner::solve()
   std::vector<Constraint*> GC;  // garbage collection of constraints
 
   // insert initial node
-  auto S = new Node(ins->starts, D);
+  auto initial_goal_indices = std::vector<int>(N, 0);
+  auto S = new Node(ins->starts, D, initial_goal_indices);
   OPEN.push(S);
   CLOSED[S->C] = S;
 
@@ -99,8 +102,13 @@ Solution Planner::solve()
     // do not pop here!
     S = OPEN.top();
 
+    auto final_goal_config = Config(N, nullptr);
+    for (auto agent_id = 0; agent_id < N; agent_id++) {
+      final_goal_config[agent_id] = ins->goal_sequences[agent_id].back();
+    }
+
     // check goal condition
-    if (enough_goals_reached(S->C, ins->goals, threshold)) {
+    if (is_same_config(S->C, final_goal_config)) {
       // backtrack
       while (S != nullptr) {
         solution.push_back(S->C);
@@ -108,6 +116,20 @@ Solution Planner::solve()
       }
       std::reverse(solution.begin(), solution.end());
       break;
+    }
+
+    auto current_goal_config = Config(N, nullptr);
+    for (auto agent_id = 0; agent_id < N; agent_id++) {
+      current_goal_config[agent_id] =
+          ins->goal_sequences[agent_id][S->goal_indices[agent_id]];
+    }
+    auto agents_to_increment = goals_reached(S->C, current_goal_config);
+    for (auto agent_id : agents_to_increment) {
+      auto new_goal_indices = S->goal_indices;
+      new_goal_indices[agent_id] += 1;
+      auto new_node = new Node(S->C, D, new_goal_indices, S);
+      OPEN.push(new_node);
+      CLOSED[new_node->C] = new_node;
     }
 
     // low-level search end
@@ -143,7 +165,7 @@ Solution Planner::solve()
     }
 
     // insert new search node
-    auto S_new = new Node(C, D, S);
+    auto S_new = new Node(C, D, S->goal_indices, S);
     OPEN.push(S_new);
     CLOSED[S_new->C] = S_new;
   }
