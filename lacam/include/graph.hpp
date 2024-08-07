@@ -16,23 +16,14 @@ using Vertices = std::vector<Vertex*>;
 
 class Config : public std::vector<Vertex*> {
 private:
-  int additionalVariable;
+  int additionalVariable = 0;
 
 public:
-  Config() : additionalVariable(0) {}
+  Config() {}
 
-  Config(int size, Vertex* value = nullptr, int additionalValue = 0)
-      : std::vector<Vertex*>(size, value), additionalVariable(additionalValue) {}
+  Config(int size, Vertex* value = nullptr) : std::vector<Vertex*>(size, value) {}
 
-  Config(std::initializer_list<Vertex*> il, int additionalValue = 0)
-
-  int getAdditionalVariable() const {
-    return additionalVariable;
-  }
-
-  void setAdditionalVariable(int value) {
-    additionalVariable = value;
-  }
+  Config(std::initializer_list<Vertex*> il) : std::vector<Vertex*>(il) {}
 };
 
 struct Graph {
