@@ -1,5 +1,7 @@
 #include "../include/utils.hpp"
 
+#include <iterator>
+
 void info(const int level, const int verbose) { std::cout << std::endl; }
 
 Deadline::Deadline(double _time_limit_ms)

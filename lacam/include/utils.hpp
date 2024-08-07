@@ -8,6 +8,7 @@
 #include <climits>
 #include <fstream>
 #include <iostream>
+#include <iterator>
 #include <numeric>
 #include <queue>
 #include <random>
@@ -47,3 +48,13 @@ double elapsed_ns(const Deadline* deadline);
 bool is_expired(const Deadline* deadline);
 
 float get_random_float(std::mt19937* MT, float from = 0, float to = 1);
+
+// pretty-print vectors
+template <typename T>
+std::ostream& operator<<(std::ostream& os, std::vector<T> vec)
+{
+  os << "{ ";
+  std::copy(vec.begin(), vec.end(), std::ostream_iterator<T>(os, " "));
+  os << "}";
+  return os;
+}
