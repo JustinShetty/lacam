@@ -1,5 +1,8 @@
 #include "../include/planner.hpp"
 
+#include <algorithm>
+#include <tuple>
+
 Constraint::Constraint() : who(std::vector<int>()), where(Vertices()), depth(0)
 {
 }
@@ -74,6 +77,53 @@ Planner::Planner(const Instance* _ins, const Deadline* _deadline,
 {
 }
 
+size_t hash_combine(size_t lhs, size_t rhs)
+{
+  lhs ^= rhs + 0x9e3779b9 + (lhs << 6) + (lhs >> 2);
+  return lhs;
+}
+
+struct MyHasher {
+  uint operator()(const std::tuple<Config, std::vector<int>>& t) const
+  {
+    Config C;
+    std::vector<int> indices;
+    std::tie(C, indices) = t;
+    uint config_hash = C.size();
+    for (auto& v : C) {
+      config_hash ^=
+          v->id + 0x9e3779b9 + (config_hash << 6) + (config_hash >> 2);
+    }
+
+    uint indices_hash = indices.size();
+    for (auto& i : indices) {
+      indices_hash ^=
+          i + 0x9e3779b9 + (indices_hash << 6) + (indices_hash >> 2);
+    }
+
+    return hash_combine(config_hash, indices_hash);
+  }
+};
+
+void print_config_and_indices(const std::tuple<Config, std::vector<int>>& t)
+{
+  Config C;
+  std::vector<int> indices;
+  std::tie(C, indices) = t;
+  std::cout << "{" << std::endl;
+  std::cout << "\tConfig: ";
+  for (auto& v : C) {
+    std::cout << v->id << " ";
+  }
+  std::cout << std::endl;
+  std::cout << "\tIndices: ";
+  for (auto& i : indices) {
+    std::cout << i << " ";
+  }
+  std::cout << std::endl;
+  std::cout << "}" << std::endl;
+}
+
 Solution Planner::solve()
 {
   info(1, verbose, "elapsed:", elapsed_ms(deadline), "ms\tstart search");
@@ -83,14 +133,16 @@ Solution Planner::solve()
 
   // setup search queues
   std::stack<Node*> OPEN;
-  std::unordered_map<Config, Node*, ConfigHasher> CLOSED;
+  std::unordered_map<std::tuple<Config, std::vector<int>>, Node*, MyHasher>
+      CLOSED;
   std::vector<Constraint*> GC;  // garbage collection of constraints
 
   // insert initial node
   auto initial_goal_indices = std::vector<int>(N, 0);
   auto S = new Node(ins->starts, D, initial_goal_indices);
   OPEN.push(S);
-  CLOSED[S->C] = S;
+  CLOSED[std::make_tuple(S->C, S->goal_indices)] = S;
+  print_config_and_indices(std::make_tuple(S->C, S->goal_indices));
 
   // depth first search
   int loop_cnt = 0;
@@ -103,7 +155,23 @@ Solution Planner::solve()
     S = OPEN.top();
 
     // check goal condition
-    if (is_same_config(S->C, ins->goals)) {
+    auto latest_goal_indices = S->goal_indices;
+    for (auto i = 0; i < N; ++i) {
+      if (S->C[i]->id == ins->goals[i][S->goal_indices[i]].id) {
+        latest_goal_indices[i] = std::min(latest_goal_indices[i] + 1,
+                                          (int)ins->goal_sequences[i].size());
+      }
+    }
+
+    bool all_goals_reached = true;
+    for (auto i = 0; i < N; i++) {
+      if (latest_goal_indices[i] < (int)ins->goal_sequences[i].size()) {
+        all_goals_reached = false;
+        break;
+      }
+    }
+
+    if (all_goals_reached) {
       // backtrack
       while (S != nullptr) {
         solution.push_back(S->C);
@@ -139,16 +207,17 @@ Solution Planner::solve()
     for (auto a : A) C[a->id] = a->v_next;
 
     // check explored list
-    auto iter = CLOSED.find(C);
+    auto iter = CLOSED.find(std::make_tuple(C, latest_goal_indices));
     if (iter != CLOSED.end()) {
       OPEN.push(iter->second);
       continue;
     }
 
     // insert new search node
-    auto S_new = new Node(C, D, S->goal_indices, S);
+    auto S_new = new Node(C, D, latest_goal_indices, S);
     OPEN.push(S_new);
-    CLOSED[S_new->C] = S_new;
+    CLOSED[std::make_tuple(S_new->C, S_new->goal_indices)] = S_new;
+    print_config_and_indices(std::make_tuple(S_new->C, S_new->goal_indices));
   }
 
   info(1, verbose, "elapsed:", elapsed_ms(deadline), "ms\t",
