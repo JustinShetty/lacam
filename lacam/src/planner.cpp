@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <tuple>
 
+using ConfigAndIndices = std::tuple<Config, std::vector<int>>;
+
 Constraint::Constraint() : who(std::vector<int>()), where(Vertices()), depth(0)
 {
 }
@@ -77,30 +79,22 @@ Planner::Planner(const Instance* _ins, const Deadline* _deadline,
 {
 }
 
-size_t hash_combine(size_t lhs, size_t rhs)
-{
-  lhs ^= rhs + 0x9e3779b9 + (lhs << 6) + (lhs >> 2);
-  return lhs;
-}
-
-struct MyHasher {
-  uint operator()(const std::tuple<Config, std::vector<int>>& t) const
+struct ConfigAndIndicesHasher {
+  uint operator()(const ConfigAndIndices& cai) const
   {
     Config C;
     std::vector<int> indices;
-    std::tie(C, indices) = t;
+    std::tie(C, indices) = cai;
     uint config_hash = C.size();
     for (auto& v : C) {
       config_hash ^=
           v->id + 0x9e3779b9 + (config_hash << 6) + (config_hash >> 2);
     }
-
     uint indices_hash = indices.size();
     for (auto& i : indices) {
       indices_hash ^=
           i + 0x9e3779b9 + (indices_hash << 6) + (indices_hash >> 2);
     }
-
     return hash_combine(config_hash, indices_hash);
   }
 };
@@ -114,15 +108,14 @@ Solution Planner::solve()
 
   // setup search queues
   std::stack<Node*> OPEN;
-  std::unordered_map<std::tuple<Config, std::vector<int>>, Node*, MyHasher>
-      CLOSED;
+  std::unordered_map<ConfigAndIndices, Node*, ConfigAndIndicesHasher> CLOSED;
   std::vector<Constraint*> GC;  // garbage collection of constraints
 
   // insert initial node
   auto initial_goal_indices = std::vector<int>(N, 0);
   auto S = new Node(ins->starts, D, initial_goal_indices);
   OPEN.push(S);
-  CLOSED[std::make_tuple(S->C, S->goal_indices)] = S;
+  CLOSED[ConfigAndIndices(S->C, S->goal_indices)] = S;
 
   // depth first search
   int loop_cnt = 0;
@@ -190,7 +183,7 @@ Solution Planner::solve()
     for (auto a : A) C[a->id] = a->v_next;
 
     // check explored list
-    auto iter = CLOSED.find(std::make_tuple(C, latest_goal_indices));
+    auto iter = CLOSED.find(ConfigAndIndices(C, latest_goal_indices));
     if (iter != CLOSED.end()) {
       OPEN.push(iter->second);
       continue;
@@ -199,7 +192,7 @@ Solution Planner::solve()
     // insert new search node
     auto S_new = new Node(C, D, latest_goal_indices, S);
     OPEN.push(S_new);
-    CLOSED[std::make_tuple(S_new->C, S_new->goal_indices)] = S_new;
+    CLOSED[ConfigAndIndices(S_new->C, S_new->goal_indices)] = S_new;
   }
 
   info(1, verbose, "elapsed:", elapsed_ms(deadline), "ms\t",
