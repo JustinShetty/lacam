@@ -112,15 +112,6 @@ bool enough_goals_reached(const Config& C1, const Config& C2, int threshold)
   return false;
 }
 
-std::vector<int> goals_reached(const Config& C1, const Config& C2)
-{
-  std::vector<int> goals;
-  for (size_t i = 0; i < C1.size(); ++i) {
-    if (C1[i]->id == C2[i]->id) goals.push_back(i);
-  }
-  return goals;
-}
-
 uint ConfigHasher::operator()(const Config& C) const
 {
   uint hash = C.size();

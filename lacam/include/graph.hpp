@@ -32,8 +32,6 @@ bool is_same_config(
 
 bool enough_goals_reached(const Config& C1, const Config& C2, int threshold);
 
-std::vector<int> goals_reached(const Config& C1, const Config& C2);
-
 // hash function of configuration
 // c.f.
 // https://stackoverflow.com/questions/10405030/c-unordered-map-fail-when-used-with-a-vector-as-key
