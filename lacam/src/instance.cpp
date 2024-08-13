@@ -25,7 +25,7 @@ Instance::Instance(const std::string& map_filename,
     std::vector<Vertex*> as_vertices;
     for (auto k : goal_sequence) as_vertices.push_back(G.U[k]);
     goal_sequences.push_back(as_vertices);
-    goals.push_back(as_vertices.front());
+    goals.push_back(as_vertices.back());
   }
 }
 
