@@ -105,25 +105,6 @@ struct MyHasher {
   }
 };
 
-void print_config_and_indices(const std::tuple<Config, std::vector<int>>& t)
-{
-  Config C;
-  std::vector<int> indices;
-  std::tie(C, indices) = t;
-  std::cout << "{" << std::endl;
-  std::cout << "\tConfig: ";
-  for (auto& v : C) {
-    std::cout << v->id << " ";
-  }
-  std::cout << std::endl;
-  std::cout << "\tIndices: ";
-  for (auto& i : indices) {
-    std::cout << i << " ";
-  }
-  std::cout << std::endl;
-  std::cout << "}" << std::endl;
-}
-
 Solution Planner::solve()
 {
   info(1, verbose, "elapsed:", elapsed_ms(deadline), "ms\tstart search");
@@ -142,7 +123,6 @@ Solution Planner::solve()
   auto S = new Node(ins->starts, D, initial_goal_indices);
   OPEN.push(S);
   CLOSED[std::make_tuple(S->C, S->goal_indices)] = S;
-  print_config_and_indices(std::make_tuple(S->C, S->goal_indices));
 
   // depth first search
   int loop_cnt = 0;
@@ -157,9 +137,12 @@ Solution Planner::solve()
     // check goal condition
     auto latest_goal_indices = S->goal_indices;
     for (auto i = 0; i < N; ++i) {
-      if (S->C[i]->id == ins->goals[i][S->goal_indices[i]].id) {
-        latest_goal_indices[i] = std::min(latest_goal_indices[i] + 1,
-                                          (int)ins->goal_sequences[i].size());
+      const auto current_location = S->C[i];
+      const auto goal_seq = ins->goal_sequences[i];
+      auto& goal_idx = latest_goal_indices[i];
+      const auto next_goal = goal_seq[latest_goal_indices[i]];
+      if (current_location == next_goal && goal_idx < (int)goal_seq.size()) {
+        goal_idx += 1;
       }
     }
 
@@ -217,7 +200,6 @@ Solution Planner::solve()
     auto S_new = new Node(C, D, latest_goal_indices, S);
     OPEN.push(S_new);
     CLOSED[std::make_tuple(S_new->C, S_new->goal_indices)] = S_new;
-    print_config_and_indices(std::make_tuple(S_new->C, S_new->goal_indices));
   }
 
   info(1, verbose, "elapsed:", elapsed_ms(deadline), "ms\t",
