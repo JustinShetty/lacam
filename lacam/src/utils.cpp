@@ -44,15 +44,6 @@ float get_random_float(std::mt19937* MT, float from, float to)
   return r(*MT);
 }
 
-template <typename T>
-std::ostream& operator<<(std::ostream& os, std::vector<T> vec)
-{
-  os << "{ ";
-  std::copy(vec.begin(), vec.end(), std::ostream_iterator<T>(os, " "));
-  os << "}";
-  return os;
-}
-
 uint hash_combine(uint a, uint b)
 {
   a ^= b + 0x9e3779b9 + (a << 6) + (a >> 2);

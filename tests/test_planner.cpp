@@ -35,10 +35,6 @@ TEST(planner, solve_multiple_goals_2x1)
   const auto ins = Instance(map_filename, starts, goal_sequences);
 
   auto solution = solve(ins, 0, nullptr, nullptr, N);
-  // std::cout << "solution.size(): " << solution.size() << std::endl;
-  // for (size_t t = 0; t < solution.size(); t++) {
-  //   std::cout << "solution[" << t << "]: " << solution[t] << std::endl;
-  // }
 
   for (size_t agent_id = 0; agent_id < N; agent_id++) {
     for (auto c : solution) {
@@ -60,10 +56,6 @@ TEST(planner, solve_multiple_goals_2x2)
   const auto ins = Instance(map_filename, starts, goal_sequences);
 
   auto solution = solve(ins, 0, nullptr, nullptr, N);
-  // std::cout << "solution.size(): " << solution.size() << std::endl;
-  // for (size_t t = 0; t < solution.size(); t++) {
-  //   std::cout << "solution[" << t << "]: " << solution[t] << std::endl;
-  // }
 
   for (size_t agent_id = 0; agent_id < N; agent_id++) {
     for (auto c : solution) {
