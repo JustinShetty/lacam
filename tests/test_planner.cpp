@@ -44,7 +44,7 @@ TEST(planner, solve_multiple_goals_2x2)
   const auto N = 1;
 
   const std::vector<int> starts = {0};
-  std::vector<std::vector<int>> goal_sequences = {{1, 2, 3}};
+  std::vector<std::vector<int>> goal_sequences = {{1, 0}};
   const auto ins = Instance(map_filename, starts, goal_sequences);
 
   auto solution = solve(ins, 1, nullptr, nullptr, N);
