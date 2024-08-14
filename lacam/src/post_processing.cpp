@@ -15,7 +15,7 @@ bool is_feasible_solution(const Instance& ins, const Solution& solution,
   }
 
   // check goal locations
-  if (ins.goal_sequences[0].size() > 0) {
+  if (ins.goal_sequences[0].size() > 1) {
     for (size_t agent_id = 0; agent_id < ins.N; agent_id++) {
       size_t idx = 0;
       for (auto c : solution) {

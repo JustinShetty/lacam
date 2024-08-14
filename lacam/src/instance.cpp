@@ -9,7 +9,11 @@ Instance::Instance(const std::string& map_filename,
       N(start_indexes.size())
 {
   for (auto k : start_indexes) starts.push_back(G.U[k]);
-  for (auto k : goal_indexes) goals.push_back(G.U[k]);
+  for (auto k : goal_indexes) {
+    auto vp = G.U[k];
+    goals.push_back(vp);
+    goal_sequences.push_back(std::vector<Vertex*>{vp});
+  }
 }
 
 Instance::Instance(const std::string& map_filename,
@@ -95,7 +99,9 @@ Instance::Instance(const std::string& map_filename, std::mt19937* MT,
   int j = 0;
   while (true) {
     if (j >= K) return;
-    goals.push_back(G.V[g_indexes[j]]);
+    auto vp = G.V[g_indexes[j]];
+    goals.push_back(vp);
+    goal_sequences.push_back(std::vector<Vertex*>{vp});
     if (goals.size() == N) break;
     ++j;
   }
