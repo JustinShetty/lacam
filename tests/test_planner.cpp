@@ -11,7 +11,7 @@ TEST(planner, solve)
   const auto ins = Instance(scen_filename, map_filename, N);
 
   auto solution = solve(ins, 0, nullptr, nullptr, N);
-  ASSERT_TRUE(is_feasible_solution(ins, solution, 1));
+  ASSERT_TRUE(is_feasible_solution(ins, solution, 1, N, false));
 }
 
 TEST(planner, unsolvable_instance)
@@ -25,27 +25,6 @@ TEST(planner, unsolvable_instance)
   ASSERT_TRUE(solution.empty());
 }
 
-TEST(planner, solve_multiple_goals_2x1)
-{
-  const auto map_filename = "./tests/assets/2x1.map";
-  const auto N = 1;
-
-  const std::vector<int> starts = {0};
-  std::vector<std::vector<int>> goal_sequences = {{1, 0}};
-  const auto ins = Instance(map_filename, starts, goal_sequences);
-
-  auto solution = solve(ins, 0, nullptr, nullptr, N);
-
-  for (size_t agent_id = 0; agent_id < N; agent_id++) {
-    for (auto c : solution) {
-      if (c[agent_id]->id == goal_sequences[agent_id].front()) {
-        goal_sequences[agent_id].erase(goal_sequences[agent_id].begin());
-      }
-    }
-    ASSERT_TRUE(goal_sequences[agent_id].empty());
-  }
-}
-
 TEST(planner, solve_multiple_goals_2x2)
 {
   const auto map_filename = "./tests/assets/2x2.map";
@@ -57,12 +36,19 @@ TEST(planner, solve_multiple_goals_2x2)
 
   auto solution = solve(ins, 0, nullptr, nullptr, N);
 
-  for (size_t agent_id = 0; agent_id < N; agent_id++) {
-    for (auto c : solution) {
-      if (c[agent_id]->id == goal_sequences[agent_id].front()) {
-        goal_sequences[agent_id].erase(goal_sequences[agent_id].begin());
-      }
-    }
-    ASSERT_TRUE(goal_sequences[agent_id].empty());
-  }
+  ASSERT_TRUE(is_feasible_solution(ins, solution, 1, N, false));
+}
+
+TEST(planner, solve_multiple_goals_2x2_2agents)
+{
+  const auto map_filename = "./tests/assets/2x2.map";
+  const auto N = 2;
+
+  const std::vector<int> starts = {0, 3};
+  std::vector<std::vector<int>> goal_sequences = {{3, 0}, {0, 3}};
+  const auto ins = Instance(map_filename, starts, goal_sequences);
+
+  auto solution = solve(ins, 0, nullptr, nullptr, N);
+
+  ASSERT_TRUE(is_feasible_solution(ins, solution, 1, N, false));
 }

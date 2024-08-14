@@ -15,7 +15,20 @@ bool is_feasible_solution(const Instance& ins, const Solution& solution,
   }
 
   // check goal locations
-  if (!enough_goals_reached(solution.back(), ins.goals, threshold)) {
+  if (ins.goal_sequences[0].size() > 0) {
+    for (size_t agent_id = 0; agent_id < ins.N; agent_id++) {
+      size_t idx = 0;
+      for (auto c : solution) {
+        if (c[agent_id] == ins.goal_sequences[agent_id][idx]) {
+          idx++;
+        }
+      }
+      if (idx != ins.goal_sequences[agent_id].size()) {
+        info(1, verbose, "invalid goals");
+        return false;
+      }
+    }
+  } else if (!enough_goals_reached(solution.back(), ins.goals, threshold)) {
     info(1, verbose, "invalid goals");
     return false;
   }
