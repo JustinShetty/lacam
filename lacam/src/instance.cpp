@@ -16,6 +16,19 @@ Instance::Instance(const std::string& map_filename,
   }
 }
 
+Instance::Instance(const Graph& graph, const std::vector<int>& start_indexes,
+                   const std::vector<std::vector<int>>& goal_index_sequences)
+    : G(graph), starts(Config()), goals(Config()), N(start_indexes.size())
+{
+  for (auto k : start_indexes) starts.push_back(G.U[k]);
+  for (auto goal_sequence : goal_index_sequences) {
+    std::vector<Vertex*> as_vertices;
+    for (auto k : goal_sequence) as_vertices.push_back(G.U[k]);
+    goal_sequences.push_back(as_vertices);
+    goals.push_back(as_vertices.back());
+  }
+}
+
 Instance::Instance(const std::string& map_filename,
                    const std::vector<int>& start_indexes,
                    const std::vector<std::vector<int>>& goal_index_sequences)
