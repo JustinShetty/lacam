@@ -22,8 +22,6 @@ struct Instance {
   Instance(const std::string& map_filename,
            const std::vector<int>& start_indexes,
            const std::vector<std::vector<int>>& goal_index_sequences);
-  Instance(const Graph& graph, const std::vector<int>& start_indexes,
-           const std::vector<std::vector<int>>& goal_index_sequences);
   // for MAPF benchmark
   Instance(const std::string& scen_filename, const std::string& map_filename,
            const int _N = 1);
