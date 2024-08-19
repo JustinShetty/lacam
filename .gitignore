@@ -42,3 +42,6 @@ build_debug/
 Manifest.toml
 map
 .vscode/
+lacam/CMakeFiles/
+lacam/Makefile
+lacam/cmake_install.cmake
