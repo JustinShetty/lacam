@@ -66,7 +66,21 @@ TEST(planner, solve_multiple_goals_32x32)
   ASSERT_TRUE(is_feasible_solution(ins, solution, 1, N, allow_following));
 }
 
-TEST(planner, solve_multiple_goals_32x32_2agents)
+TEST(planner, solve_multiple_goals_32x32_2agents0)
+{
+  const auto map_filename = "./assets/random-32-32-10.map";
+  const auto N = 2;
+
+  const std::vector<int> starts = {174, 662};
+  std::vector<std::vector<int>> goal_sequences = {{0}, {992}};
+  const auto ins = Instance(map_filename, starts, goal_sequences);
+
+  const bool allow_following = false;
+  auto solution = solve(ins, 0, nullptr, nullptr, N, allow_following);
+  ASSERT_TRUE(is_feasible_solution(ins, solution, 1, N, allow_following));
+}
+
+TEST(planner, solve_multiple_goals_32x32_2agents1)
 {
   const auto map_filename = "./assets/random-32-32-10.map";
   const auto N = 2;
@@ -80,8 +94,53 @@ TEST(planner, solve_multiple_goals_32x32_2agents)
   ASSERT_TRUE(is_feasible_solution(ins, solution, 1, N, allow_following));
 }
 
-// too slow, disabled.
-// TEST(planner, solve_multiple_goals_32x32_3agents)
+TEST(planner, solve_multiple_goals_32x32_3agents0)
+{
+  const auto map_filename = "./assets/random-32-32-10.map";
+  const auto N = 2;
+
+  const std::vector<int> starts = {174, 662, 0};
+  std::vector<std::vector<int>> goal_sequences = {{0}, {992}, {1023}};
+  const auto ins = Instance(map_filename, starts, goal_sequences);
+
+  const bool allow_following = false;
+  auto solution = solve(ins, 0, nullptr, nullptr, N, allow_following);
+  ASSERT_TRUE(is_feasible_solution(ins, solution, 1, N, allow_following));
+}
+
+// THESE ARE ALL VERY SLOW
+
+// TEST(planner, solve_multiple_goals_32x32_3agents1)
+// {
+//   const auto map_filename = "./assets/random-32-32-10.map";
+//   const auto N = 2;
+
+//   const std::vector<int> starts = {174, 662, 0};
+//   std::vector<std::vector<int>> goal_sequences = {
+//       {0, 1023}, {992}, {1023}};
+//   const auto ins = Instance(map_filename, starts, goal_sequences);
+
+//   const bool allow_following = false;
+//   auto solution = solve(ins, 0, nullptr, nullptr, N, allow_following);
+//   ASSERT_TRUE(is_feasible_solution(ins, solution, 1, N, allow_following));
+// }
+
+// TEST(planner, solve_multiple_goals_32x32_3agents2)
+// {
+//   const auto map_filename = "./assets/random-32-32-10.map";
+//   const auto N = 2;
+
+//   const std::vector<int> starts = {174, 662, 0};
+//   std::vector<std::vector<int>> goal_sequences = {
+//       {0, 1023}, {992, 31}, {1023}};
+//   const auto ins = Instance(map_filename, starts, goal_sequences);
+
+//   const bool allow_following = false;
+//   auto solution = solve(ins, 0, nullptr, nullptr, N, allow_following);
+//   ASSERT_TRUE(is_feasible_solution(ins, solution, 1, N, allow_following));
+// }
+
+// TEST(planner, solve_multiple_goals_32x32_3agents2)
 // {
 //   const auto map_filename = "./assets/random-32-32-10.map";
 //   const auto N = 2;
