@@ -29,4 +29,8 @@ TEST(Instance, sequence)
   ASSERT_EQ(ins.goal_sequences[0].back()->index, 4);
   ASSERT_EQ(ins.goal_sequences[1].front()->index, 5);
   ASSERT_EQ(ins.goal_sequences[1].back()->index, 7);
+
+  Config goals({ins.G.U[4], ins.G.U[7]});
+  goals.goal_indices = {3, 3};
+  ASSERT_EQ(ins.goals, goals);
 }
