@@ -11,7 +11,7 @@ Instance::Instance(const std::string& map_filename,
   for (auto k : start_indexes) starts.push_back(G.U[k], 0);
   for (auto k : goal_indexes) {
     auto vp = G.U[k];
-    goals.push_back(vp, 1);
+    goals.push_back(vp, 0);
     goal_sequences.push_back(std::vector<Vertex*>{vp});
   }
 }
@@ -29,7 +29,7 @@ Instance::Instance(const std::string& map_filename,
     std::vector<Vertex*> as_vertices;
     for (auto k : goal_sequence) as_vertices.push_back(G.U[k]);
     goal_sequences.push_back(as_vertices);
-    goals.push_back(as_vertices.back(), as_vertices.size());
+    goals.push_back(as_vertices.back(), as_vertices.size() - 1);
   }
 }
 
@@ -65,7 +65,7 @@ Instance::Instance(const std::string& scen_filename,
       auto g = G.U[G.width * y_g + x_g];
       if (s == nullptr || g == nullptr) continue;
       starts.push_back(s, 0);
-      goals.push_back(g, 1);
+      goals.push_back(g, 0);
       goal_sequences.push_back(std::vector<Vertex*>{g});
     }
 
@@ -100,7 +100,7 @@ Instance::Instance(const std::string& map_filename, std::mt19937* MT,
   while (true) {
     if (j >= K) return;
     auto vp = G.V[g_indexes[j]];
-    goals.push_back(vp, 1);
+    goals.push_back(vp, 0);
     goal_sequences.push_back(std::vector<Vertex*>{vp});
     if (goals.size() == N) break;
     ++j;

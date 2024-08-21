@@ -13,7 +13,7 @@ TEST(Instance, initialize)
   ASSERT_EQ(ins.starts[0]->index, 203);
   ASSERT_EQ(ins.goals[0]->index, 583);
 
-  ASSERT_EQ(ins.goals.goal_indices, std::vector<int>({1, 1, 1}));
+  ASSERT_EQ(ins.goals.goal_indices, std::vector<int>({0, 0, 0}));
 }
 
 TEST(Instance, sequence)
@@ -33,6 +33,6 @@ TEST(Instance, sequence)
   ASSERT_EQ(ins.goal_sequences[1].back()->index, 7);
 
   Config goals({ins.G.U[4], ins.G.U[7]});
-  goals.goal_indices = {3, 3};
+  goals.goal_indices = {2, 2};
   ASSERT_EQ(ins.goals, goals);
 }

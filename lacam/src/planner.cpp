@@ -79,7 +79,7 @@ std::vector<int> update_goal_indices(const Instance& ins, const Config& c) {
     const auto goal_seq = ins.goal_sequences[i];
     auto& goal_idx = latest_goal_indices[i];
     const auto next_goal = goal_seq[latest_goal_indices[i]];
-    if (current_location == next_goal && goal_idx < (int)goal_seq.size()) {
+    if (current_location == next_goal && goal_idx + 1 < (int)goal_seq.size()) {
       goal_idx += 1;
     }
   }
