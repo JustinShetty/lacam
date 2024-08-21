@@ -23,7 +23,6 @@ add_test(test_instance ./tests/test_instance.cpp)
 add_test(test_dist_table ./tests/test_dist_table.cpp)
 add_test(test_planner ./tests/test_planner.cpp)
 add_test(test_post_processing ./tests/test_post_processing.cpp)
-add_test(test_benchmark ./tests/test_benchmark.cpp)
 
 add_executable(test_all ${TEST_ALL_SRC})
 target_link_libraries(test_all lacam gtest)

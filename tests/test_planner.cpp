@@ -14,15 +14,34 @@ TEST(planner, solve)
   ASSERT_TRUE(is_feasible_solution(ins, solution, 1, N, false));
 }
 
-TEST(planner, unsolvable_instance)
+TEST(planner, already_solved)
 {
-  const auto scen_filename = "./tests/assets/2x1.scen";
-  const auto map_filename = "./tests/assets/2x1.map";
+  const auto map_filename = "./tests/assets/2x2.map";
   const auto N = 2;
-  const auto ins = Instance(scen_filename, map_filename, N);
+  const std::vector<int> starts = {0, 3};
+  const std::vector<int> goals = {0, 3};
+  const Instance ins(map_filename, starts, goals);
 
   auto solution = solve(ins, 0, nullptr, nullptr, N);
-  ASSERT_TRUE(solution.empty());
+  ASSERT_TRUE(is_feasible_solution(ins, solution, 1, N, false));
+  ASSERT_EQ(solution.size(), 1);
+}
+
+TEST(planner, benchmark)
+{
+  auto MT = std::mt19937(0);
+  const auto allow_following = true;
+  const auto verbosity = 0;
+  const auto scen_filename = "./assets/random-32-32-10-random-1.scen";
+  const auto map_filename = "./assets/random-32-32-10.map";
+  const auto N = 50;
+
+  const auto ins = Instance(scen_filename, map_filename, N);
+  ASSERT_TRUE(ins.is_valid(verbosity));
+
+  auto solution = solve(ins, verbosity, nullptr, &MT, N, allow_following);
+  ASSERT_TRUE(
+      is_feasible_solution(ins, solution, verbosity, N, allow_following));
 }
 
 TEST(planner, solve_multiple_goals_2x2)
