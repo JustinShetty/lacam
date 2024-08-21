@@ -114,11 +114,16 @@ bool enough_goals_reached(const Config& C1, const Config& C2, int threshold)
 
 uint ConfigHasher::operator()(const Config& C) const
 {
-  uint hash = C.size();
+  uint location_hash = C.size();
   for (auto& v : C) {
-    hash ^= v->id + 0x9e3779b9 + (hash << 6) + (hash >> 2);
+    location_hash ^= v->id + 0x9e3779b9 + (location_hash << 6) + (location_hash >> 2);
   }
-  return hash;
+  uint indices_hash = C.goal_indices.size();
+  for (auto& idx : C.goal_indices) {
+    indices_hash ^=
+        idx + 0x9e3779b9 + (indices_hash << 6) + (indices_hash >> 2);
+  }
+  return hash_combine(location_hash, indices_hash);
 }
 
 std::ostream& operator<<(std::ostream& os, const Vertex* v)

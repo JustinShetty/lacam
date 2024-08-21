@@ -43,7 +43,6 @@ public:
     goal_indices.push_back(0);
   }
 
-private:
   std::vector<int> goal_indices;
 };
 
