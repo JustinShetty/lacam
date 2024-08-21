@@ -21,7 +21,6 @@ struct Constraint {
 // high-level search node
 struct Node {
   const Config C;
-  const std::vector<int> goal_indices;
   Node* parent;
 
   // for low-level search
@@ -29,8 +28,7 @@ struct Node {
   std::vector<int> order;
   std::queue<Constraint*> search_tree;
 
-  Node(Config _C, DistTable& _D, std::vector<int> _goal_indices,
-       Node* _parent = nullptr);
+  Node(Config _C, DistTable& _D, Node* _parent = nullptr);
   ~Node();
 };
 using Nodes = std::vector<Node*>;

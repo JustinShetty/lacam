@@ -3,8 +3,6 @@
 #include <algorithm>
 #include <tuple>
 
-using ExplorationKey = std::tuple<Config, std::vector<int>>;
-
 Constraint::Constraint() : who(std::vector<int>()), where(Vertices()), depth(0)
 {
 }
@@ -18,10 +16,8 @@ Constraint::Constraint(Constraint* parent, int i, Vertex* v)
 
 Constraint::~Constraint() {};
 
-Node::Node(Config _C, DistTable& D, std::vector<int> _goal_indices,
-           Node* _parent)
+Node::Node(Config _C, DistTable& D, Node* _parent)
     : C(_C),
-      goal_indices(_goal_indices),
       parent(_parent),
       priorities(C.size(), 0),
       order(C.size(), 0),
@@ -79,45 +75,22 @@ Planner::Planner(const Instance* _ins, const Deadline* _deadline,
 {
 }
 
-struct ExplorationKeyHasher {
-  uint operator()(const ExplorationKey& cai) const
-  {
-    Config C;
-    std::vector<int> indices;
-    std::tie(C, indices) = cai;
-    uint config_hash = C.size();
-    for (auto& v : C) {
-      config_hash ^=
-          v->id + 0x9e3779b9 + (config_hash << 6) + (config_hash >> 2);
-    }
-    uint indices_hash = indices.size();
-    for (auto& idx : indices) {
-      indices_hash ^=
-          idx + 0x9e3779b9 + (indices_hash << 6) + (indices_hash >> 2);
-    }
-    return hash_combine(config_hash, indices_hash);
-  }
-};
-
 Solution Planner::solve()
 {
   info(1, verbose, "elapsed:", elapsed_ms(deadline), "ms\tstart search");
-
-  const bool multiple_goals = ins->goal_sequences[0].size() > 1;
 
   // setup agents
   for (auto i = 0; i < N; ++i) A[i] = new Agent(i);
 
   // setup search queues
   std::stack<Node*> OPEN;
-  std::unordered_map<ExplorationKey, Node*, ExplorationKeyHasher> CLOSED;
+  std::unordered_map<Config, Node*, ConfigHasher> CLOSED;
   std::vector<Constraint*> GC;  // garbage collection of constraints
 
   // insert initial node
-  auto initial_goal_indices = std::vector<int>(N, 0);
-  auto S = new Node(ins->starts, D, initial_goal_indices);
+  auto S = new Node(ins->starts, D);
   OPEN.push(S);
-  CLOSED[ExplorationKey(S->C, S->goal_indices)] = S;
+  CLOSED[S->C] = S;
 
   // depth first search
   int loop_cnt = 0;
@@ -130,7 +103,7 @@ Solution Planner::solve()
     S = OPEN.top();
 
     // check goal condition
-    auto latest_goal_indices = S->goal_indices;
+    auto latest_goal_indices = S->C.goal_indices;
     for (auto i = 0; i < N; ++i) {
       const auto current_location = S->C[i];
       const auto goal_seq = ins->goal_sequences[i];
@@ -141,17 +114,9 @@ Solution Planner::solve()
       }
     }
 
-    bool goals_exhausted = true;
-    for (auto i = 0; i < N; i++) {
-      if (latest_goal_indices[i] < (int)ins->goal_sequences[i].size()) {
-        goals_exhausted = false;
-        break;
-      }
-    }
-
-    const auto threshold_met =
-        enough_goals_reached(S->C, ins->goals, threshold);
-    if (goals_exhausted && (multiple_goals || threshold_met)) {
+    auto conf = S->C;
+    conf.goal_indices = latest_goal_indices;
+    if (conf == ins->goals) {
       // backtrack
       while (S != nullptr) {
         solution.push_back(S->C);
@@ -185,18 +150,20 @@ Solution Planner::solve()
     // create new configuration
     auto C = Config(N, nullptr);
     for (auto a : A) C[a->id] = a->v_next;
+    // XXX check goal indices here?
+    for (auto idx : latest_goal_indices) C.goal_indices.push_back(idx);
 
     // check explored list
-    auto iter = CLOSED.find(ExplorationKey(C, latest_goal_indices));
+    auto iter = CLOSED.find(C);
     if (iter != CLOSED.end()) {
       OPEN.push(iter->second);
       continue;
     }
 
     // insert new search node
-    auto S_new = new Node(C, D, latest_goal_indices, S);
+    auto S_new = new Node(C, D, S);
     OPEN.push(S_new);
-    CLOSED[ExplorationKey(S_new->C, S_new->goal_indices)] = S_new;
+    CLOSED[S_new->C] = S_new;
   }
 
   info(1, verbose, "elapsed:", elapsed_ms(deadline), "ms\t",
