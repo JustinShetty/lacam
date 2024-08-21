@@ -37,7 +37,7 @@ public:
     return true;
   }
 
-  void push_back(Vertex* v, int goal_index = 0)
+  void push_back(Vertex* v, int goal_index)
   {
     std::vector<Vertex*>::push_back(v);
     goal_indices.push_back(goal_index);

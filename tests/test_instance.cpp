@@ -12,6 +12,8 @@ TEST(Instance, initialize)
   ASSERT_EQ(size(ins.goals), 3);
   ASSERT_EQ(ins.starts[0]->index, 203);
   ASSERT_EQ(ins.goals[0]->index, 583);
+
+  ASSERT_EQ(ins.goals.goal_indices, std::vector<int>({1, 1, 1}));
 }
 
 TEST(Instance, sequence)
