@@ -19,7 +19,7 @@ bool is_feasible_solution(const Instance& ins, const Solution& solution,
     for (size_t agent_id = 0; agent_id < ins.N; agent_id++) {
       size_t idx = 0;
       for (auto c : solution) {
-        if (c[agent_id] == ins.goal_sequences[agent_id][idx]) {
+        if (idx < ins.goal_sequences[agent_id].size() && c[agent_id] == ins.goal_sequences[agent_id][idx]) {
           idx++;
         }
       }
