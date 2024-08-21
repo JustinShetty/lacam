@@ -16,7 +16,7 @@ Constraint::Constraint(Constraint* parent, int i, Vertex* v)
   where.push_back(v);
 }
 
-Constraint::~Constraint(){};
+Constraint::~Constraint() {};
 
 Node::Node(Config _C, DistTable& D, std::vector<int> _goal_indices,
            Node* _parent)
@@ -149,7 +149,8 @@ Solution Planner::solve()
       }
     }
 
-    const auto threshold_met = enough_goals_reached(S->C, ins->goals, threshold);
+    const auto threshold_met =
+        enough_goals_reached(S->C, ins->goals, threshold);
     if (goals_exhausted && (multiple_goals || threshold_met)) {
       // backtrack
       while (S != nullptr) {
