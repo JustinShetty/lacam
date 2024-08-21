@@ -20,8 +20,12 @@ public:
       : std::vector<Vertex*>(N, v), goal_indices(N, 0)
   {
   }
-  Config(const std::initializer_list<Vertex*> init_list)
-      : std::vector<Vertex*>(init_list), goal_indices(init_list.size(), 0)
+  Config(const std::initializer_list<Vertex*> vertices)
+      : std::vector<Vertex*>(vertices), goal_indices(vertices.size(), 0)
+  {
+  }
+  Config(const std::initializer_list<Vertex*> vertices, const std::initializer_list<int> goal_indices)
+      : std::vector<Vertex*>(vertices), goal_indices(goal_indices)
   {
   }
 
