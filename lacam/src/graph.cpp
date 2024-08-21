@@ -116,7 +116,8 @@ uint ConfigHasher::operator()(const Config& C) const
 {
   uint location_hash = C.size();
   for (auto& v : C) {
-    location_hash ^= v->id + 0x9e3779b9 + (location_hash << 6) + (location_hash >> 2);
+    location_hash ^=
+        v->id + 0x9e3779b9 + (location_hash << 6) + (location_hash >> 2);
   }
   uint indices_hash = C.goal_indices.size();
   for (auto& idx : C.goal_indices) {
@@ -129,5 +130,17 @@ uint ConfigHasher::operator()(const Config& C) const
 std::ostream& operator<<(std::ostream& os, const Vertex* v)
 {
   os << v->index;
+  return os;
+}
+
+std::ostream& operator<<(std::ostream& os, const Config& c)
+{
+  os << "{ ";
+  std::copy(c.begin(), c.end(), std::ostream_iterator<Vertex*>(os, " "));
+  os << "} ";
+  os << "{ ";
+  std::copy(c.goal_indices.begin(), c.goal_indices.end(),
+            std::ostream_iterator<int>(os, " "));
+  os << "}";
   return os;
 }

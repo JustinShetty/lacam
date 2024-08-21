@@ -37,14 +37,16 @@ public:
     return true;
   }
 
-  void push_back(Vertex* v)
+  void push_back(Vertex* v, int goal_index = 0)
   {
     std::vector<Vertex*>::push_back(v);
-    goal_indices.push_back(0);
+    goal_indices.push_back(goal_index);
   }
 
   std::vector<int> goal_indices;
 };
+
+std::ostream& operator<<(std::ostream& os, const Config& c);
 
 struct Graph {
   Vertices V;  // without nullptr
