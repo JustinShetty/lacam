@@ -12,7 +12,40 @@ struct Vertex {
   Vertex(int _id, int _index);
 };
 using Vertices = std::vector<Vertex*>;
-using Config = std::vector<Vertex*>;  // locations for all agents
+class Config : public std::vector<Vertex*>
+{
+public:
+  Config() : std::vector<Vertex*>(), goal_indices() {}
+  Config(const int N, Vertex* v)
+      : std::vector<Vertex*>(N, v), goal_indices(N, 0)
+  {
+  }
+  Config(const std::initializer_list<Vertex*> init_list)
+      : std::vector<Vertex*>(init_list), goal_indices(init_list.size(), 0)
+  {
+  }
+
+  bool operator==(const Config& C) const
+  {
+    if (this->size() != C.size()) return false;
+    for (int i = 0; i < this->size(); ++i) {
+      if (this->at(i) != C.at(i)) return false;
+    }
+    for (int i = 0; i < goal_indices.size(); i++) {
+      if (goal_indices[i] != C.goal_indices[i]) return false;
+    }
+    return true;
+  }
+
+  void push_back(Vertex* v)
+  {
+    std::vector<Vertex*>::push_back(v);
+    goal_indices.push_back(0);
+  }
+
+private:
+  std::vector<int> goal_indices;
+};
 
 struct Graph {
   Vertices V;  // without nullptr
