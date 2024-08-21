@@ -37,6 +37,8 @@ public:
     return true;
   }
 
+  bool operator!=(const Config& C) const { return !(*this == C); }
+
   void push_back(Vertex* v, int goal_index)
   {
     std::vector<Vertex*>::push_back(v);

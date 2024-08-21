@@ -75,6 +75,20 @@ Planner::Planner(const Instance* _ins, const Deadline* _deadline,
 {
 }
 
+std::vector<int> update_goal_indices(const Instance& ins, const Config& c) {
+  auto latest_goal_indices = c.goal_indices;
+  for (auto i = 0; i < ins.N; ++i) {
+    const auto current_location = c[i];
+    const auto goal_seq = ins.goal_sequences[i];
+    auto& goal_idx = latest_goal_indices[i];
+    const auto next_goal = goal_seq[latest_goal_indices[i]];
+    if (current_location == next_goal && goal_idx < (int)goal_seq.size()) {
+      goal_idx += 1;
+    }
+  }
+  return latest_goal_indices;
+}
+
 Solution Planner::solve()
 {
   info(1, verbose, "elapsed:", elapsed_ms(deadline), "ms\tstart search");
@@ -88,7 +102,9 @@ Solution Planner::solve()
   std::vector<Constraint*> GC;  // garbage collection of constraints
 
   // insert initial node
-  auto S = new Node(ins->starts, D);
+  auto initial_config = ins->starts;
+  initial_config.goal_indices = update_goal_indices(*ins, initial_config);
+  auto S = new Node(initial_config, D);
   OPEN.push(S);
   CLOSED[S->C] = S;
 
@@ -103,20 +119,7 @@ Solution Planner::solve()
     S = OPEN.top();
 
     // check goal condition
-    auto latest_goal_indices = S->C.goal_indices;
-    for (auto i = 0; i < N; ++i) {
-      const auto current_location = S->C[i];
-      const auto goal_seq = ins->goal_sequences[i];
-      auto& goal_idx = latest_goal_indices[i];
-      const auto next_goal = goal_seq[latest_goal_indices[i]];
-      if (current_location == next_goal && goal_idx < (int)goal_seq.size()) {
-        goal_idx += 1;
-      }
-    }
-
-    auto conf = S->C;
-    conf.goal_indices = latest_goal_indices;
-    if (conf == ins->goals) {
+    if (S->C == ins->goals) {
       // backtrack
       while (S != nullptr) {
         solution.push_back(S->C);
@@ -150,8 +153,7 @@ Solution Planner::solve()
     // create new configuration
     auto C = Config(N, nullptr);
     for (auto a : A) C[a->id] = a->v_next;
-    // XXX check goal indices here?
-    for (auto idx : latest_goal_indices) C.goal_indices.push_back(idx);
+    C.goal_indices = update_goal_indices(*ins, C);
 
     // check explored list
     auto iter = CLOSED.find(C);
