@@ -1,8 +1,5 @@
 #include "../include/planner.hpp"
 
-#include <algorithm>
-#include <tuple>
-
 Constraint::Constraint() : who(std::vector<int>()), where(Vertices()), depth(0)
 {
 }
