@@ -11,7 +11,7 @@ Constraint::Constraint(Constraint* parent, int i, Vertex* v)
   where.push_back(v);
 }
 
-Constraint::~Constraint() {};
+Constraint::~Constraint(){};
 
 Node::Node(Config _C, DistTable& D, Node* _parent)
     : C(_C),
@@ -72,18 +72,20 @@ Planner::Planner(const Instance* _ins, const Deadline* _deadline,
 {
 }
 
-std::vector<int> update_goal_indices(const Instance& ins, const Config& c) {
-  auto latest_goal_indices = c.goal_indices;
-  for (size_t i = 0; i < ins.N; ++i) {
+std::vector<int> calculate_goal_indices(const Instance* ins, const Config& c,
+                                        const Config& prev_config)
+{
+  auto goal_indices = prev_config.goal_indices;
+  for (size_t i = 0; i < ins->N; ++i) {
     const auto current_location = c[i];
-    const auto goal_seq = ins.goal_sequences[i];
-    auto& goal_idx = latest_goal_indices[i];
-    const auto next_goal = goal_seq[latest_goal_indices[i]];
+    const auto goal_seq = ins->goal_sequences[i];
+    auto& goal_idx = goal_indices[i];
+    const auto next_goal = goal_seq[goal_indices[i]];
     if (current_location == next_goal && goal_idx + 1 < (int)goal_seq.size()) {
       goal_idx += 1;
     }
   }
-  return latest_goal_indices;
+  return goal_indices;
 }
 
 Solution Planner::solve()
@@ -100,7 +102,8 @@ Solution Planner::solve()
 
   // insert initial node
   auto initial_config = ins->starts;
-  initial_config.goal_indices = update_goal_indices(*ins, initial_config);
+  initial_config.goal_indices =
+      calculate_goal_indices(ins, initial_config, initial_config);
   auto S = new Node(initial_config, D);
   OPEN.push(S);
   CLOSED[S->C] = S;
@@ -150,7 +153,7 @@ Solution Planner::solve()
     // create new configuration
     auto C = Config(N, nullptr);
     for (auto a : A) C[a->id] = a->v_next;
-    C.goal_indices = update_goal_indices(*ins, C);
+    C.goal_indices = calculate_goal_indices(ins, C, S->C);
 
     // check explored list
     auto iter = CLOSED.find(C);

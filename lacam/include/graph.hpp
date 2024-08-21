@@ -24,7 +24,8 @@ public:
       : std::vector<Vertex*>(vertices), goal_indices(vertices.size(), 0)
   {
   }
-  Config(const std::initializer_list<Vertex*> vertices, const std::initializer_list<int> goal_indices)
+  Config(const std::initializer_list<Vertex*> vertices,
+         const std::initializer_list<int> goal_indices)
       : std::vector<Vertex*>(vertices), goal_indices(goal_indices)
   {
   }
