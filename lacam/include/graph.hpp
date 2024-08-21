@@ -32,10 +32,10 @@ public:
   bool operator==(const Config& C) const
   {
     if (this->size() != C.size()) return false;
-    for (int i = 0; i < this->size(); ++i) {
+    for (size_t i = 0; i < this->size(); ++i) {
       if (this->at(i) != C.at(i)) return false;
     }
-    for (int i = 0; i < goal_indices.size(); i++) {
+    for (size_t i = 0; i < goal_indices.size(); i++) {
       if (goal_indices[i] != C.goal_indices[i]) return false;
     }
     return true;

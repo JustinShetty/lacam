@@ -74,7 +74,7 @@ Planner::Planner(const Instance* _ins, const Deadline* _deadline,
 
 std::vector<int> update_goal_indices(const Instance& ins, const Config& c) {
   auto latest_goal_indices = c.goal_indices;
-  for (auto i = 0; i < ins.N; ++i) {
+  for (size_t i = 0; i < ins.N; ++i) {
     const auto current_location = c[i];
     const auto goal_seq = ins.goal_sequences[i];
     auto& goal_idx = latest_goal_indices[i];
