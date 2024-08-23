@@ -28,7 +28,7 @@ struct Node {
   std::vector<int> order;
   std::queue<Constraint*> search_tree;
 
-  Node(Config _C, DistTableMultiGoal& _D, Node* _parent = nullptr);
+  Node(Config _C, DistTableMultiGoal& D, Node* _parent = nullptr);
   ~Node();
 };
 using Nodes = std::vector<Node*>;
