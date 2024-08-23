@@ -28,7 +28,7 @@ struct Node {
   std::vector<int> order;
   std::queue<Constraint*> search_tree;
 
-  Node(Config _C, DistTable& _D, Node* _parent = nullptr);
+  Node(Config _C, DistTableMultiGoal& _D, Node* _parent = nullptr);
   ~Node();
 };
 using Nodes = std::vector<Node*>;
@@ -56,7 +56,7 @@ struct Planner {
   // solver utils
   const int N;  // number of agents
   const int V_size;
-  DistTable D;
+  DistTableMultiGoal D;
   Candidates C_next;                // next location candidates
   std::vector<float> tie_breakers;  // random values, used in PIBT
   Agents A;
@@ -67,9 +67,10 @@ struct Planner {
           int _verbose = 0, int _threshold = 1, bool _allow_following = false);
   Solution solve();
   bool get_new_config(Node* S, Constraint* M);
-  bool funcPIBT(Agent* ai);
-  bool funcPIBT_following(Agent* ai);
-  bool funcPIBT_no_following(Agent* ai, Agent* aj);
+  bool funcPIBT(Agent* ai, const std::vector<int>& goal_indices);
+  bool funcPIBT_following(Agent* ai, const std::vector<int>& goal_indices);
+  bool funcPIBT_no_following(Agent* ai, Agent* aj,
+                             const std::vector<int>& goal_indices);
 };
 
 // main function

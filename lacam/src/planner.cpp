@@ -13,7 +13,7 @@ Constraint::Constraint(Constraint* parent, int i, Vertex* v)
 
 Constraint::~Constraint(){};
 
-Node::Node(Config _C, DistTable& D, Node* _parent)
+Node::Node(Config _C, DistTableMultiGoal& D, Node* _parent)
     : C(_C),
       parent(_parent),
       priorities(C.size(), 0),
@@ -26,11 +26,13 @@ Node::Node(Config _C, DistTable& D, Node* _parent)
   // set priorities
   if (parent == nullptr) {
     // initialize
-    for (size_t i = 0; i < N; ++i) priorities[i] = (float)D.get(i, C[i]) / N;
+    for (size_t i = 0; i < N; ++i) {
+      priorities[i] = (float)D.get(i, C.goal_indices[i], C[i]) / N;
+    }
   } else {
     // dynamic priorities, akin to PIBT
     for (size_t i = 0; i < N; ++i) {
-      if (D.get(i, C[i]) != 0) {
+      if (D.get(i, C.goal_indices[i], C[i]) != 0) {
         priorities[i] = parent->priorities[i] + 1;
       } else {
         priorities[i] = parent->priorities[i] - (int)parent->priorities[i];
@@ -63,7 +65,7 @@ Planner::Planner(const Instance* _ins, const Deadline* _deadline,
       allow_following(_allow_following),
       N(ins->N),
       V_size(ins->G.size()),
-      D(DistTable(ins)),
+      D(DistTableMultiGoal(ins)),
       C_next(Candidates(N, std::array<Vertex*, 5>())),
       tie_breakers(std::vector<float>(V_size, 0)),
       A(Agents(N, nullptr)),
@@ -226,18 +228,20 @@ bool Planner::get_new_config(Node* S, Constraint* M)
   // perform PIBT
   for (auto k : S->order) {
     auto a = A[k];
-    if (a->v_next == nullptr && !funcPIBT(a)) return false;  // planning failure
+    if (a->v_next == nullptr && !funcPIBT(a, S->C.goal_indices))
+      return false;  // planning failure
   }
   return true;
 }
 
-bool Planner::funcPIBT(Agent* ai)
+bool Planner::funcPIBT(Agent* ai, const std::vector<int>& goal_indices)
 {
-  if (allow_following) return funcPIBT_following(ai);
-  return funcPIBT_no_following(ai, nullptr);
+  if (allow_following) return funcPIBT_following(ai, goal_indices);
+  return funcPIBT_no_following(ai, nullptr, goal_indices);
 }
 
-bool Planner::funcPIBT_following(Agent* ai)
+bool Planner::funcPIBT_following(Agent* ai,
+                                 const std::vector<int>& goal_indices)
 {
   const auto i = ai->id;
   const auto K = ai->v_now->neighbor.size();
@@ -254,8 +258,8 @@ bool Planner::funcPIBT_following(Agent* ai)
   // sort, note: K + 1 is sufficient
   std::sort(C_next[i].begin(), C_next[i].begin() + K + 1,
             [&](Vertex* const v, Vertex* const u) {
-              return D.get(i, v) + tie_breakers[v->id] <
-                     D.get(i, u) + tie_breakers[u->id];
+              return D.get(i, goal_indices[i], v) + tie_breakers[v->id] <
+                     D.get(i, goal_indices[i], u) + tie_breakers[u->id];
             });
 
   for (size_t k = 0; k < K + 1; ++k) {
@@ -277,7 +281,8 @@ bool Planner::funcPIBT_following(Agent* ai)
     if (ak == nullptr || u == ai->v_now) return true;
 
     // priority inheritance
-    if (ak->v_next == nullptr && !funcPIBT_following(ak)) continue;
+    if (ak->v_next == nullptr && !funcPIBT_following(ak, goal_indices))
+      continue;
 
     // success to plan next one step
     return true;
@@ -289,7 +294,8 @@ bool Planner::funcPIBT_following(Agent* ai)
   return false;
 }
 
-bool Planner::funcPIBT_no_following(Agent* ai, Agent* aj)
+bool Planner::funcPIBT_no_following(Agent* ai, Agent* aj,
+                                    const std::vector<int>& goal_indices)
 {
   const auto i = ai->id;
   const auto K = ai->v_now->neighbor.size();
@@ -310,8 +316,8 @@ bool Planner::funcPIBT_no_following(Agent* ai, Agent* aj)
   // sort
   std::sort(C_next[i].begin(), C_next[i].begin() + num_candidates,
             [&](Vertex* const v, Vertex* const u) {
-              return D.get(i, v) + tie_breakers[v->id] <
-                     D.get(i, u) + tie_breakers[u->id];
+              return D.get(i, goal_indices[i], v) + tie_breakers[v->id] <
+                     D.get(i, goal_indices[i], u) + tie_breakers[u->id];
             });
 
   for (size_t k = 0; k < num_candidates; ++k) {
@@ -328,7 +334,7 @@ bool Planner::funcPIBT_no_following(Agent* ai, Agent* aj)
         occupied_next[ai->v_now->id] = ai;
         ai->v_next = ai->v_now;
 
-        if (funcPIBT_no_following(ak, ai)) return true;
+        if (funcPIBT_no_following(ak, ai, goal_indices)) return true;
 
         // revert if priority inheritance failed
         occupied_next[ai->v_now->id] = nullptr;

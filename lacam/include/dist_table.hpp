@@ -9,9 +9,9 @@
 
 struct DistTable {
   const int K;  // number of vertices
-  std::vector<std::vector<int> >
+  std::vector<std::vector<int>>
       table;  // distance table, index: agent-id & vertex-id
-  std::vector<std::queue<Vertex*> > OPEN;  // search queue
+  std::vector<std::queue<Vertex*>> OPEN;  // search queue
 
   int get(int i, int v_id);         // agent, vertex-id
   inline int get(int i, Vertex* v)  // agent, vertex
@@ -38,14 +38,14 @@ struct DistTable {
 
 struct DistTableMultiGoal {
   const int K;  // number of vertices
-  std::vector<std::vector<int> >
-      table;  // distance table, index: agent-id & vertex-id
-  std::vector<std::queue<Vertex*> > OPEN;  // search queue
+  std::vector<std::vector<std::vector<int>>>
+      table;  // distance table, index: agent-id, goal_index, vertex-id
+  std::vector<std::vector<std::queue<Vertex*>>> OPEN;  // search queues
 
-  int get(int i, int v_id);         // agent, vertex-id
-  inline int get(int i, Vertex* v)  // agent, vertex
+  int get(int agent_id, int goal_index, int from_id);
+  inline int get(int agent_id, int goal_index, Vertex* from)
   {
-    return get(i, v->id);
+    return get(agent_id, goal_index, from->id);
   }
 
   DistTableMultiGoal(const Instance* ins);
