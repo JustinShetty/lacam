@@ -84,10 +84,10 @@ int DistTableMultiGoal::get(int agent_id, int goal_index, int from_id)
     return table[agent_id][goal_index][from_id];
 
   /*
-    * BFS with lazy evaluation
-    * c.f., Reverse Resumable A*
-    * https://www.aaai.org/Papers/AIIDE/2005/AIIDE05-020.pdf
-    */
+   * BFS with lazy evaluation
+   * c.f., Reverse Resumable A*
+   * https://www.aaai.org/Papers/AIIDE/2005/AIIDE05-020.pdf
+   */
 
   while (!OPEN[agent_id][goal_index].empty()) {
     auto n = OPEN[agent_id][goal_index].front();
