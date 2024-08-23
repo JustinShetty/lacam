@@ -6,7 +6,7 @@
 #include "instance.hpp"
 #include "utils.hpp"
 
-bool is_feasible_solution(const Instance& teins, const Solution& solution,
+bool is_feasible_solution(const Instance& ins, const Solution& solution,
                           const int verbose, const int threshold,
                           const bool allow_following);
 int get_makespan(const Solution& solution);
