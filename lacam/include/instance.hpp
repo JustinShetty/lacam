@@ -31,6 +31,8 @@ struct Instance {
 
   // simple feasibility check of instance
   bool is_valid(const int verbose = 0) const;
+
+  int get_total_goals() const;
 };
 
 // solution: a sequence of configurations

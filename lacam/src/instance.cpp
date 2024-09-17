@@ -126,3 +126,12 @@ bool Instance::is_valid(const int verbose) const
 
   return true;
 }
+
+int Instance::get_total_goals() const
+{
+  int total_goals = 0;
+  for (const auto& goals : goal_sequences) {
+    total_goals += goals.size();
+  }
+  return total_goals;
+}
