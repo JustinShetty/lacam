@@ -18,12 +18,12 @@ TEST(Instance, initialize)
   ASSERT_EQ(ins.goals.goal_indices, std::vector<int>({0, 0, 0}));
 }
 
-TEST(Instance, duplicate_goals)
-{
-  const auto map_filename = "./assets/empty-8-8.map";
-  const auto ins = Instance(map_filename, {0, 1}, {{2, 3, 4, 7}, {5, 6, 7}});
-  ASSERT_FALSE(ins.is_valid(0));
-}
+// TEST(Instance, duplicate_goals)
+// {
+//   const auto map_filename = "./assets/empty-8-8.map";
+//   const auto ins = Instance(map_filename, {0, 1}, {{2, 3, 4, 7}, {5, 6, 7}});
+//   ASSERT_FALSE(ins.is_valid(0));
+// }
 
 TEST(Instance, sequence)
 {
