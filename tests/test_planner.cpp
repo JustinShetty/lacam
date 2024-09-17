@@ -24,7 +24,7 @@ TEST(planner, solve)
 
   auto solution = solve(ins, VERBOSITY, nullptr, nullptr, N);
   ASSERT_GT(solution.size(), 0);
-  ASSERT_TRUE(is_feasible_solution(ins, solution, 1, N, false));
+  ASSERT_TRUE(is_feasible_solution(ins, solution, VERBOSITY, N, false));
 }
 
 TEST(planner, already_solved)
@@ -38,7 +38,7 @@ TEST(planner, already_solved)
 
   auto solution = solve(ins, VERBOSITY, nullptr, nullptr, N);
   ASSERT_GT(solution.size(), 0);
-  ASSERT_TRUE(is_feasible_solution(ins, solution, 1, N, false));
+  ASSERT_TRUE(is_feasible_solution(ins, solution, VERBOSITY, N, false));
 }
 
 TEST(planner, benchmark)
@@ -70,7 +70,7 @@ TEST(planner, solve_multiple_goals_2x2)
   const auto threshold = calc_total_goals(goal_sequences);
   auto solution = solve(ins, VERBOSITY, nullptr, nullptr, threshold);
   ASSERT_GT(solution.size(), 0);
-  ASSERT_TRUE(is_feasible_solution(ins, solution, 1, threshold, false));
+  ASSERT_TRUE(is_feasible_solution(ins, solution, VERBOSITY, threshold, false));
 }
 
 TEST(planner, solve_multiple_goals_2x2_2agents)
@@ -85,7 +85,7 @@ TEST(planner, solve_multiple_goals_2x2_2agents)
   const auto threshold = calc_total_goals(goal_sequences);
   auto solution = solve(ins, VERBOSITY, nullptr, nullptr, threshold);
   ASSERT_GT(solution.size(), 0);
-  ASSERT_TRUE(is_feasible_solution(ins, solution, 1, threshold, false));
+  ASSERT_TRUE(is_feasible_solution(ins, solution, VERBOSITY, threshold, false));
 }
 
 TEST(planner, solve_multiple_goals_32x32a)
@@ -102,7 +102,7 @@ TEST(planner, solve_multiple_goals_32x32a)
   const bool allow_following = false;
   auto solution = solve(ins, VERBOSITY, nullptr, nullptr, threshold, allow_following);
   ASSERT_GT(solution.size(), 0);
-  ASSERT_TRUE(is_feasible_solution(ins, solution, 1, threshold, allow_following));
+  ASSERT_TRUE(is_feasible_solution(ins, solution, VERBOSITY, threshold, allow_following));
 }
 
 TEST(planner, solve_multiple_goals_32x32b)
@@ -119,7 +119,7 @@ TEST(planner, solve_multiple_goals_32x32b)
   const bool allow_following = false;
   auto solution = solve(ins, VERBOSITY, nullptr, nullptr, threshold, allow_following);
   ASSERT_GT(solution.size(), 0);
-  ASSERT_TRUE(is_feasible_solution(ins, solution, 1, threshold, allow_following));
+  ASSERT_TRUE(is_feasible_solution(ins, solution, VERBOSITY, threshold, allow_following));
 }
 
 TEST(planner, solve_multiple_goals_32x32_2agents0)
@@ -134,7 +134,7 @@ TEST(planner, solve_multiple_goals_32x32_2agents0)
   const auto threshold = calc_total_goals(goal_sequences);
   const bool allow_following = false;
   auto solution = solve(ins, VERBOSITY, nullptr, nullptr, threshold, allow_following);
-  ASSERT_TRUE(is_feasible_solution(ins, solution, 1, threshold, allow_following));
+  ASSERT_TRUE(is_feasible_solution(ins, solution, VERBOSITY, threshold, allow_following));
 }
 
 TEST(planner, solve_multiple_goals_32x32_2agents1)
@@ -149,7 +149,7 @@ TEST(planner, solve_multiple_goals_32x32_2agents1)
   const auto threshold = calc_total_goals(goal_sequences);
   const bool allow_following = false;
   auto solution = solve(ins, VERBOSITY, nullptr, nullptr, threshold, allow_following);
-  ASSERT_TRUE(is_feasible_solution(ins, solution, 1, threshold, allow_following));
+  ASSERT_TRUE(is_feasible_solution(ins, solution, VERBOSITY, threshold, allow_following));
 }
 
 TEST(planner, solve_multiple_goals_32x32_3agents0)
@@ -164,7 +164,7 @@ TEST(planner, solve_multiple_goals_32x32_3agents0)
   const auto threshold = calc_total_goals(goal_sequences);
   const bool allow_following = false;
   auto solution = solve(ins, VERBOSITY, nullptr, nullptr, threshold, allow_following);
-  ASSERT_TRUE(is_feasible_solution(ins, solution, 1, threshold, allow_following));
+  ASSERT_TRUE(is_feasible_solution(ins, solution, VERBOSITY, threshold, allow_following));
 }
 
 TEST(planner, solve_multiple_goals_32x32_3agents1)
@@ -179,7 +179,7 @@ TEST(planner, solve_multiple_goals_32x32_3agents1)
   const auto threshold = calc_total_goals(goal_sequences);
   const bool allow_following = false;
   auto solution = solve(ins, VERBOSITY, nullptr, nullptr, threshold, allow_following);
-  ASSERT_TRUE(is_feasible_solution(ins, solution, 1, threshold, allow_following));
+  ASSERT_TRUE(is_feasible_solution(ins, solution, VERBOSITY, threshold, allow_following));
 }
 
 TEST(planner, solve_multiple_goals_32x32_3agents2)
@@ -195,5 +195,19 @@ TEST(planner, solve_multiple_goals_32x32_3agents2)
   const auto threshold = calc_total_goals(goal_sequences);
   const bool allow_following = false;
   auto solution = solve(ins, VERBOSITY, nullptr, nullptr, threshold, allow_following);
-  ASSERT_TRUE(is_feasible_solution(ins, solution, 1, threshold, allow_following));
+  ASSERT_TRUE(is_feasible_solution(ins, solution, VERBOSITY, threshold, allow_following));
+}
+
+TEST(planner, solve_multiple_goals_thresholded)
+{
+  const auto map_filename = "./tests/assets/2x2.map";
+
+  const std::vector<int> starts = {0};
+  std::vector<std::vector<int>> goal_sequences = {{3, 0}};
+  const auto ins = Instance(map_filename, starts, goal_sequences);
+  ASSERT_TRUE(ins.is_valid(VERBOSITY));
+
+  const auto threshold = 1;
+  auto solution = solve(ins, VERBOSITY, nullptr, nullptr, threshold);
+  ASSERT_TRUE(is_feasible_solution(ins, solution, VERBOSITY, threshold, false));
 }
