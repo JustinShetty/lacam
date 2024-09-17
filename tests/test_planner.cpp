@@ -211,3 +211,19 @@ TEST(planner, solve_multiple_goals_thresholded)
   auto solution = solve(ins, VERBOSITY, nullptr, nullptr, threshold);
   ASSERT_TRUE(is_feasible_solution(ins, solution, VERBOSITY, threshold, false));
 }
+
+TEST(planner, solver_multiple_goals_thresholded2)
+{
+  const auto map_filename = "./assets/random-32-32-10.map";
+
+  const std::vector<int> starts = {0, 1, 2};
+  std::vector<std::vector<int>> goal_sequences = {
+      {1}, {0}, {3, 30, 60}};
+  const auto ins = Instance(map_filename, starts, goal_sequences);
+  ASSERT_TRUE(ins.is_valid(VERBOSITY));
+
+  const auto threshold = 3;
+  const bool allow_following = false;
+  auto solution = solve(ins, VERBOSITY, nullptr, nullptr, threshold, allow_following);
+  ASSERT_TRUE(is_feasible_solution(ins, solution, VERBOSITY, threshold, allow_following));
+}
