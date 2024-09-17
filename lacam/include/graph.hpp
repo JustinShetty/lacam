@@ -12,7 +12,48 @@ struct Vertex {
   Vertex(int _id, int _index);
 };
 using Vertices = std::vector<Vertex*>;
-using Config = std::vector<Vertex*>;  // locations for all agents
+class Config : public std::vector<Vertex*>
+{
+public:
+  Config() : std::vector<Vertex*>(), goal_indices() {}
+  Config(const int N, Vertex* v)
+      : std::vector<Vertex*>(N, v), goal_indices(N, 0)
+  {
+  }
+  Config(const std::initializer_list<Vertex*> vertices)
+      : std::vector<Vertex*>(vertices), goal_indices(vertices.size(), 0)
+  {
+  }
+  Config(const std::initializer_list<Vertex*> vertices,
+         const std::initializer_list<int> goal_indices)
+      : std::vector<Vertex*>(vertices), goal_indices(goal_indices)
+  {
+  }
+
+  bool operator==(const Config& C) const
+  {
+    if (this->size() != C.size()) return false;
+    for (size_t i = 0; i < this->size(); ++i) {
+      if (this->at(i) != C.at(i)) return false;
+    }
+    for (size_t i = 0; i < goal_indices.size(); i++) {
+      if (goal_indices[i] != C.goal_indices[i]) return false;
+    }
+    return true;
+  }
+
+  bool operator!=(const Config& C) const { return !(*this == C); }
+
+  void push_back(Vertex* v, int goal_index)
+  {
+    std::vector<Vertex*>::push_back(v);
+    goal_indices.push_back(goal_index);
+  }
+
+  std::vector<int> goal_indices;
+};
+
+std::ostream& operator<<(std::ostream& os, const Config& c);
 
 struct Graph {
   Vertices V;  // without nullptr

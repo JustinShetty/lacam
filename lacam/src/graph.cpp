@@ -94,8 +94,7 @@ int Graph::size() const { return V.size(); }
 
 bool is_same_config(const Config& C1, const Config& C2)
 {
-  const auto N = C1.size();
-  for (size_t i = 0; i < N; ++i) {
+  for (size_t i = 0; i < C1.size(); ++i) {
     if (C1[i]->id != C2[i]->id) return false;
   }
   return true;
@@ -103,9 +102,8 @@ bool is_same_config(const Config& C1, const Config& C2)
 
 bool enough_goals_reached(const Config& C1, const Config& C2, int threshold)
 {
-  const auto N = C1.size();
   int count = 0;
-  for (size_t i = 0; i < N; ++i) {
+  for (size_t i = 0; i < C1.size(); ++i) {
     if (C1[i]->id == C2[i]->id) {
       count++;
       if (count >= threshold) return true;
@@ -116,15 +114,33 @@ bool enough_goals_reached(const Config& C1, const Config& C2, int threshold)
 
 uint ConfigHasher::operator()(const Config& C) const
 {
-  uint hash = C.size();
+  uint location_hash = C.size();
   for (auto& v : C) {
-    hash ^= v->id + 0x9e3779b9 + (hash << 6) + (hash >> 2);
+    location_hash ^=
+        v->id + 0x9e3779b9 + (location_hash << 6) + (location_hash >> 2);
   }
-  return hash;
+  uint indices_hash = C.goal_indices.size();
+  for (auto& idx : C.goal_indices) {
+    indices_hash ^=
+        idx + 0x9e3779b9 + (indices_hash << 6) + (indices_hash >> 2);
+  }
+  return hash_combine(location_hash, indices_hash);
 }
 
 std::ostream& operator<<(std::ostream& os, const Vertex* v)
 {
   os << v->index;
+  return os;
+}
+
+std::ostream& operator<<(std::ostream& os, const Config& c)
+{
+  os << "{ ";
+  std::copy(c.begin(), c.end(), std::ostream_iterator<Vertex*>(os, " "));
+  os << "} ";
+  os << "{ ";
+  std::copy(c.goal_indices.begin(), c.goal_indices.end(),
+            std::ostream_iterator<int>(os, " "));
+  os << "}";
   return os;
 }

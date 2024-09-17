@@ -15,7 +15,8 @@ bool is_feasible_solution(const Instance& ins, const Solution& solution,
   }
 
   // check goal locations
-  if (!enough_goals_reached(solution.back(), ins.goals, threshold)) {
+  // XXX ignoring threshold
+  if (solution.back() != ins.goals) {
     info(1, verbose, "invalid goals");
     return false;
   }

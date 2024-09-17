@@ -13,7 +13,7 @@ Constraint::Constraint(Constraint* parent, int i, Vertex* v)
 
 Constraint::~Constraint(){};
 
-Node::Node(Config _C, DistTable& D, Node* _parent)
+Node::Node(Config _C, DistTableMultiGoal& D, Node* _parent)
     : C(_C),
       parent(_parent),
       priorities(C.size(), 0),
@@ -26,11 +26,13 @@ Node::Node(Config _C, DistTable& D, Node* _parent)
   // set priorities
   if (parent == nullptr) {
     // initialize
-    for (size_t i = 0; i < N; ++i) priorities[i] = (float)D.get(i, C[i]) / N;
+    for (size_t i = 0; i < N; ++i) {
+      priorities[i] = (float)D.get(i, C.goal_indices[i], C[i]) / N;
+    }
   } else {
     // dynamic priorities, akin to PIBT
     for (size_t i = 0; i < N; ++i) {
-      if (D.get(i, C[i]) != 0) {
+      if (D.get(i, C.goal_indices[i], C[i]) != 0) {
         priorities[i] = parent->priorities[i] + 1;
       } else {
         priorities[i] = parent->priorities[i] - (int)parent->priorities[i];
@@ -63,13 +65,29 @@ Planner::Planner(const Instance* _ins, const Deadline* _deadline,
       allow_following(_allow_following),
       N(ins->N),
       V_size(ins->G.size()),
-      D(DistTable(ins)),
+      D(DistTableMultiGoal(ins)),
       C_next(Candidates(N, std::array<Vertex*, 5>())),
       tie_breakers(std::vector<float>(V_size, 0)),
       A(Agents(N, nullptr)),
       occupied_now(Agents(V_size, nullptr)),
       occupied_next(Agents(V_size, nullptr))
 {
+}
+
+std::vector<int> calculate_goal_indices(const Instance* ins, const Config& c,
+                                        const Config& prev_config)
+{
+  auto goal_indices = prev_config.goal_indices;
+  for (size_t i = 0; i < ins->N; ++i) {
+    const auto current_location = c[i];
+    const auto goal_seq = ins->goal_sequences[i];
+    auto& goal_idx = goal_indices[i];
+    const auto next_goal = goal_seq[goal_indices[i]];
+    if (current_location == next_goal && goal_idx + 1 < (int)goal_seq.size()) {
+      goal_idx += 1;
+    }
+  }
+  return goal_indices;
 }
 
 Solution Planner::solve()
@@ -85,7 +103,10 @@ Solution Planner::solve()
   std::vector<Constraint*> GC;  // garbage collection of constraints
 
   // insert initial node
-  auto S = new Node(ins->starts, D);
+  auto initial_config = ins->starts;
+  initial_config.goal_indices =
+      calculate_goal_indices(ins, initial_config, initial_config);
+  auto S = new Node(initial_config, D);
   OPEN.push(S);
   CLOSED[S->C] = S;
 
@@ -100,7 +121,7 @@ Solution Planner::solve()
     S = OPEN.top();
 
     // check goal condition
-    if (enough_goals_reached(S->C, ins->goals, threshold)) {
+    if (S->C == ins->goals) {
       // backtrack
       while (S != nullptr) {
         solution.push_back(S->C);
@@ -134,6 +155,7 @@ Solution Planner::solve()
     // create new configuration
     auto C = Config(N, nullptr);
     for (auto a : A) C[a->id] = a->v_next;
+    C.goal_indices = calculate_goal_indices(ins, C, S->C);
 
     // check explored list
     auto iter = CLOSED.find(C);
@@ -206,18 +228,20 @@ bool Planner::get_new_config(Node* S, Constraint* M)
   // perform PIBT
   for (auto k : S->order) {
     auto a = A[k];
-    if (a->v_next == nullptr && !funcPIBT(a)) return false;  // planning failure
+    if (a->v_next == nullptr && !funcPIBT(a, S->C.goal_indices))
+      return false;  // planning failure
   }
   return true;
 }
 
-bool Planner::funcPIBT(Agent* ai)
+bool Planner::funcPIBT(Agent* ai, const std::vector<int>& goal_indices)
 {
-  if (allow_following) return funcPIBT_following(ai);
-  return funcPIBT_no_following(ai, nullptr);
+  if (allow_following) return funcPIBT_following(ai, goal_indices);
+  return funcPIBT_no_following(ai, nullptr, goal_indices);
 }
 
-bool Planner::funcPIBT_following(Agent* ai)
+bool Planner::funcPIBT_following(Agent* ai,
+                                 const std::vector<int>& goal_indices)
 {
   const auto i = ai->id;
   const auto K = ai->v_now->neighbor.size();
@@ -234,8 +258,8 @@ bool Planner::funcPIBT_following(Agent* ai)
   // sort, note: K + 1 is sufficient
   std::sort(C_next[i].begin(), C_next[i].begin() + K + 1,
             [&](Vertex* const v, Vertex* const u) {
-              return D.get(i, v) + tie_breakers[v->id] <
-                     D.get(i, u) + tie_breakers[u->id];
+              return D.get(i, goal_indices[i], v) + tie_breakers[v->id] <
+                     D.get(i, goal_indices[i], u) + tie_breakers[u->id];
             });
 
   for (size_t k = 0; k < K + 1; ++k) {
@@ -257,7 +281,8 @@ bool Planner::funcPIBT_following(Agent* ai)
     if (ak == nullptr || u == ai->v_now) return true;
 
     // priority inheritance
-    if (ak->v_next == nullptr && !funcPIBT_following(ak)) continue;
+    if (ak->v_next == nullptr && !funcPIBT_following(ak, goal_indices))
+      continue;
 
     // success to plan next one step
     return true;
@@ -269,7 +294,8 @@ bool Planner::funcPIBT_following(Agent* ai)
   return false;
 }
 
-bool Planner::funcPIBT_no_following(Agent* ai, Agent* aj)
+bool Planner::funcPIBT_no_following(Agent* ai, Agent* aj,
+                                    const std::vector<int>& goal_indices)
 {
   const auto i = ai->id;
   const auto K = ai->v_now->neighbor.size();
@@ -290,8 +316,8 @@ bool Planner::funcPIBT_no_following(Agent* ai, Agent* aj)
   // sort
   std::sort(C_next[i].begin(), C_next[i].begin() + num_candidates,
             [&](Vertex* const v, Vertex* const u) {
-              return D.get(i, v) + tie_breakers[v->id] <
-                     D.get(i, u) + tie_breakers[u->id];
+              return D.get(i, goal_indices[i], v) + tie_breakers[v->id] <
+                     D.get(i, goal_indices[i], u) + tie_breakers[u->id];
             });
 
   for (size_t k = 0; k < num_candidates; ++k) {
@@ -308,7 +334,7 @@ bool Planner::funcPIBT_no_following(Agent* ai, Agent* aj)
         occupied_next[ai->v_now->id] = ai;
         ai->v_next = ai->v_now;
 
-        if (funcPIBT_no_following(ak, ai)) return true;
+        if (funcPIBT_no_following(ak, ai, goal_indices)) return true;
 
         // revert if priority inheritance failed
         occupied_next[ai->v_now->id] = nullptr;
