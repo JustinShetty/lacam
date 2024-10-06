@@ -125,6 +125,7 @@ TEST(planner, solve_multiple_goals_32x32_2agents0)
   const auto threshold = ins.get_total_goals();
   const bool allow_following = false;
   auto solution = solve(ins, VERBOSITY, nullptr, nullptr, threshold, allow_following);
+  ASSERT_GT(solution.size(), 0);
   ASSERT_TRUE(is_feasible_solution(ins, solution, VERBOSITY, threshold, allow_following));
 }
 
@@ -140,6 +141,7 @@ TEST(planner, solve_multiple_goals_32x32_2agents1)
   const auto threshold = ins.get_total_goals();
   const bool allow_following = false;
   auto solution = solve(ins, VERBOSITY, nullptr, nullptr, threshold, allow_following);
+  ASSERT_GT(solution.size(), 0);
   ASSERT_TRUE(is_feasible_solution(ins, solution, VERBOSITY, threshold, allow_following));
 }
 
@@ -155,6 +157,7 @@ TEST(planner, solve_multiple_goals_32x32_3agents0)
   const auto threshold = ins.get_total_goals();
   const bool allow_following = false;
   auto solution = solve(ins, VERBOSITY, nullptr, nullptr, threshold, allow_following);
+  ASSERT_GT(solution.size(), 0);
   ASSERT_TRUE(is_feasible_solution(ins, solution, VERBOSITY, threshold, allow_following));
 }
 
@@ -170,6 +173,7 @@ TEST(planner, solve_multiple_goals_32x32_3agents1)
   const auto threshold = ins.get_total_goals();
   const bool allow_following = false;
   auto solution = solve(ins, VERBOSITY, nullptr, nullptr, threshold, allow_following);
+  ASSERT_GT(solution.size(), 0);
   ASSERT_TRUE(is_feasible_solution(ins, solution, VERBOSITY, threshold, allow_following));
 }
 
@@ -186,6 +190,7 @@ TEST(planner, solve_multiple_goals_32x32_3agents2)
   const auto threshold = ins.get_total_goals();
   const bool allow_following = false;
   auto solution = solve(ins, VERBOSITY, nullptr, nullptr, threshold, allow_following);
+  ASSERT_GT(solution.size(), 0);
   ASSERT_TRUE(is_feasible_solution(ins, solution, VERBOSITY, threshold, allow_following));
 }
 
@@ -200,6 +205,7 @@ TEST(planner, solve_multiple_goals_thresholded)
 
   const auto threshold = 1;
   auto solution = solve(ins, VERBOSITY, nullptr, nullptr, threshold);
+  ASSERT_GT(solution.size(), 0);
   ASSERT_TRUE(is_feasible_solution(ins, solution, VERBOSITY, threshold, false));
 }
 
@@ -216,5 +222,6 @@ TEST(planner, solver_multiple_goals_thresholded2)
   const auto threshold = 3;
   const bool allow_following = false;
   auto solution = solve(ins, VERBOSITY, nullptr, nullptr, threshold, allow_following);
+  ASSERT_GT(solution.size(), 0);
   ASSERT_TRUE(is_feasible_solution(ins, solution, VERBOSITY, threshold, allow_following));
 }
