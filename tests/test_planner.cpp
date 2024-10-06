@@ -225,3 +225,19 @@ TEST(planner, solver_multiple_goals_thresholded2)
   ASSERT_GT(solution.size(), 0);
   ASSERT_TRUE(is_feasible_solution(ins, solution, VERBOSITY, threshold, allow_following));
 }
+
+TEST(planner, solver_duplicate_goal_end)
+{
+  const auto map_filename = "./tests/assets/2x2.map";
+
+  const std::vector<int> starts = {0, 1};
+  std::vector<std::vector<int>> goal_sequences = {{2}, {2}};
+  const auto ins = Instance(map_filename, starts, goal_sequences);
+  ASSERT_TRUE(ins.is_valid(VERBOSITY));
+
+  const auto threshold = ins.get_total_goals();
+  const bool allow_following = false;
+  auto solution = solve(ins, VERBOSITY, nullptr, nullptr, threshold, allow_following);
+  ASSERT_GT(solution.size(), 0);
+  ASSERT_TRUE(is_feasible_solution(ins, solution, VERBOSITY, threshold, allow_following));
+}
