@@ -105,7 +105,6 @@ bool enough_goals_reached(const Config& C1, const Config& C2, int threshold)
   int count = 0;
   for (size_t i = 0; i < C1.size(); ++i) {
     count += C1.goal_indices[i];
-    if (C1[i] -> id == C2[i] -> id) count++;
     if (count >= threshold) return true;
   }
   return false;

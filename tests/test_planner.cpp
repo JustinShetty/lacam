@@ -91,9 +91,11 @@ TEST(planner, solve_multiple_goals_32x32a)
 
   const auto threshold = ins.get_total_goals();
   const bool allow_following = false;
-  auto solution = solve(ins, VERBOSITY, nullptr, nullptr, threshold, allow_following);
+  auto solution =
+      solve(ins, VERBOSITY, nullptr, nullptr, threshold, allow_following);
   ASSERT_GT(solution.size(), 0);
-  ASSERT_TRUE(is_feasible_solution(ins, solution, VERBOSITY, threshold, allow_following));
+  ASSERT_TRUE(is_feasible_solution(ins, solution, VERBOSITY, threshold,
+                                   allow_following));
 }
 
 TEST(planner, solve_multiple_goals_32x32b)
@@ -108,9 +110,11 @@ TEST(planner, solve_multiple_goals_32x32b)
 
   const auto threshold = ins.get_total_goals();
   const bool allow_following = false;
-  auto solution = solve(ins, VERBOSITY, nullptr, nullptr, threshold, allow_following);
+  auto solution =
+      solve(ins, VERBOSITY, nullptr, nullptr, threshold, allow_following);
   ASSERT_GT(solution.size(), 0);
-  ASSERT_TRUE(is_feasible_solution(ins, solution, VERBOSITY, threshold, allow_following));
+  ASSERT_TRUE(is_feasible_solution(ins, solution, VERBOSITY, threshold,
+                                   allow_following));
 }
 
 TEST(planner, solve_multiple_goals_32x32_2agents0)
@@ -124,9 +128,11 @@ TEST(planner, solve_multiple_goals_32x32_2agents0)
 
   const auto threshold = ins.get_total_goals();
   const bool allow_following = false;
-  auto solution = solve(ins, VERBOSITY, nullptr, nullptr, threshold, allow_following);
+  auto solution =
+      solve(ins, VERBOSITY, nullptr, nullptr, threshold, allow_following);
   ASSERT_GT(solution.size(), 0);
-  ASSERT_TRUE(is_feasible_solution(ins, solution, VERBOSITY, threshold, allow_following));
+  ASSERT_TRUE(is_feasible_solution(ins, solution, VERBOSITY, threshold,
+                                   allow_following));
 }
 
 TEST(planner, solve_multiple_goals_32x32_2agents1)
@@ -140,9 +146,11 @@ TEST(planner, solve_multiple_goals_32x32_2agents1)
 
   const auto threshold = ins.get_total_goals();
   const bool allow_following = false;
-  auto solution = solve(ins, VERBOSITY, nullptr, nullptr, threshold, allow_following);
+  auto solution =
+      solve(ins, VERBOSITY, nullptr, nullptr, threshold, allow_following);
   ASSERT_GT(solution.size(), 0);
-  ASSERT_TRUE(is_feasible_solution(ins, solution, VERBOSITY, threshold, allow_following));
+  ASSERT_TRUE(is_feasible_solution(ins, solution, VERBOSITY, threshold,
+                                   allow_following));
 }
 
 TEST(planner, solve_multiple_goals_32x32_3agents0)
@@ -156,9 +164,11 @@ TEST(planner, solve_multiple_goals_32x32_3agents0)
 
   const auto threshold = ins.get_total_goals();
   const bool allow_following = false;
-  auto solution = solve(ins, VERBOSITY, nullptr, nullptr, threshold, allow_following);
+  auto solution =
+      solve(ins, VERBOSITY, nullptr, nullptr, threshold, allow_following);
   ASSERT_GT(solution.size(), 0);
-  ASSERT_TRUE(is_feasible_solution(ins, solution, VERBOSITY, threshold, allow_following));
+  ASSERT_TRUE(is_feasible_solution(ins, solution, VERBOSITY, threshold,
+                                   allow_following));
 }
 
 TEST(planner, solve_multiple_goals_32x32_3agents1)
@@ -172,9 +182,11 @@ TEST(planner, solve_multiple_goals_32x32_3agents1)
 
   const auto threshold = ins.get_total_goals();
   const bool allow_following = false;
-  auto solution = solve(ins, VERBOSITY, nullptr, nullptr, threshold, allow_following);
+  auto solution =
+      solve(ins, VERBOSITY, nullptr, nullptr, threshold, allow_following);
   ASSERT_GT(solution.size(), 0);
-  ASSERT_TRUE(is_feasible_solution(ins, solution, VERBOSITY, threshold, allow_following));
+  ASSERT_TRUE(is_feasible_solution(ins, solution, VERBOSITY, threshold,
+                                   allow_following));
 }
 
 TEST(planner, solve_multiple_goals_32x32_3agents2)
@@ -189,9 +201,11 @@ TEST(planner, solve_multiple_goals_32x32_3agents2)
 
   const auto threshold = ins.get_total_goals();
   const bool allow_following = false;
-  auto solution = solve(ins, VERBOSITY, nullptr, nullptr, threshold, allow_following);
+  auto solution =
+      solve(ins, VERBOSITY, nullptr, nullptr, threshold, allow_following);
   ASSERT_GT(solution.size(), 0);
-  ASSERT_TRUE(is_feasible_solution(ins, solution, VERBOSITY, threshold, allow_following));
+  ASSERT_TRUE(is_feasible_solution(ins, solution, VERBOSITY, threshold,
+                                   allow_following));
 }
 
 TEST(planner, solve_multiple_goals_thresholded)
@@ -214,16 +228,17 @@ TEST(planner, solver_multiple_goals_thresholded2)
   const auto map_filename = "./assets/random-32-32-10.map";
 
   const std::vector<int> starts = {0, 1, 2};
-  std::vector<std::vector<int>> goal_sequences = {
-      {1}, {0}, {3, 30, 60}};
+  std::vector<std::vector<int>> goal_sequences = {{1}, {0}, {3, 30, 60}};
   const auto ins = Instance(map_filename, starts, goal_sequences);
   ASSERT_TRUE(ins.is_valid(VERBOSITY));
 
   const auto threshold = 3;
   const bool allow_following = false;
-  auto solution = solve(ins, VERBOSITY, nullptr, nullptr, threshold, allow_following);
+  auto solution =
+      solve(ins, VERBOSITY, nullptr, nullptr, threshold, allow_following);
   ASSERT_GT(solution.size(), 0);
-  ASSERT_TRUE(is_feasible_solution(ins, solution, VERBOSITY, threshold, allow_following));
+  ASSERT_TRUE(is_feasible_solution(ins, solution, VERBOSITY, threshold,
+                                   allow_following));
 }
 
 TEST(planner, solver_duplicate_goal_end)
@@ -237,7 +252,12 @@ TEST(planner, solver_duplicate_goal_end)
 
   const auto threshold = ins.get_total_goals();
   const bool allow_following = false;
-  auto solution = solve(ins, VERBOSITY, nullptr, nullptr, threshold, allow_following);
+  auto solution =
+      solve(ins, VERBOSITY, nullptr, nullptr, threshold, allow_following);
   ASSERT_GT(solution.size(), 0);
-  ASSERT_TRUE(is_feasible_solution(ins, solution, VERBOSITY, threshold, allow_following));
+  for (const auto& c : solution) {
+    std::cout << c << std::endl;
+  }
+  ASSERT_TRUE(is_feasible_solution(ins, solution, VERBOSITY, threshold,
+                                   allow_following));
 }

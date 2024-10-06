@@ -1,5 +1,7 @@
 #include "../include/dist_table.hpp"
 
+#include <algorithm>
+
 DistTable::DistTable(const Instance* ins)
     : K(ins->G.V.size()), table(ins->N, std::vector<int>(K, K))
 {
@@ -80,6 +82,10 @@ void DistTableMultiGoal::setup(const Instance* ins)
 
 int DistTableMultiGoal::get(int agent_id, int goal_index, int from_id)
 {
+  // goal_index can be past the end to signify we've already reached the last
+  // goal, but when we want to use the index we need to cap it at the last goal
+  goal_index = std::min(goal_index, (int)(table[agent_id].size() - 1));
+
   if (table[agent_id][goal_index][from_id] < K)
     return table[agent_id][goal_index][from_id];
 

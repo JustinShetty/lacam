@@ -11,7 +11,7 @@ Constraint::Constraint(Constraint* parent, int i, Vertex* v)
   where.push_back(v);
 }
 
-Constraint::~Constraint(){};
+Constraint::~Constraint() {};
 
 Node::Node(Config _C, DistTableMultiGoal& D, Node* _parent)
     : C(_C),
@@ -83,7 +83,7 @@ std::vector<int> calculate_goal_indices(const Instance* ins, const Config& c,
     const auto goal_seq = ins->goal_sequences[i];
     auto& goal_idx = goal_indices[i];
     const auto next_goal = goal_seq[goal_indices[i]];
-    if (current_location == next_goal && goal_idx + 1 < (int)goal_seq.size()) {
+    if (current_location == next_goal && goal_idx < (int)goal_seq.size()) {
       goal_idx += 1;
     }
   }
