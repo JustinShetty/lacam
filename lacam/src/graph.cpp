@@ -100,11 +100,11 @@ bool is_same_config(const Config& C1, const Config& C2)
   return true;
 }
 
-bool enough_goals_reached(const Config& C1, const Config& C2, int threshold)
+bool enough_goals_reached(const Config& C, int threshold)
 {
   int count = 0;
-  for (size_t i = 0; i < C1.size(); ++i) {
-    count += C1.goal_indices[i];
+  for (size_t i = 0; i < C.size(); ++i) {
+    count += C.goal_indices[i];
     if (count >= threshold) return true;
   }
   return false;

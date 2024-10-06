@@ -255,9 +255,6 @@ TEST(planner, solver_duplicate_goal_end)
   auto solution =
       solve(ins, VERBOSITY, nullptr, nullptr, threshold, allow_following);
   ASSERT_GT(solution.size(), 0);
-  for (const auto& c : solution) {
-    std::cout << c << std::endl;
-  }
   ASSERT_TRUE(is_feasible_solution(ins, solution, VERBOSITY, threshold,
                                    allow_following));
 }

@@ -121,7 +121,7 @@ Solution Planner::solve()
     S = OPEN.top();
 
     // check goal condition
-    if (enough_goals_reached(S->C, ins->goals, threshold)) {
+    if (enough_goals_reached(S->C, threshold)) {
       // backtrack
       while (S != nullptr) {
         solution.push_back(S->C);
