@@ -115,14 +115,6 @@ bool Instance::is_valid(const int verbose) const
     info(1, verbose, "invalid N, check instance");
     return false;
   }
-  // auto seen_goals = std::set<Vertex*>();
-  // for (const auto& g : goals) {
-  //   if (seen_goals.find(g) != seen_goals.end()) {
-  //     info(1, verbose, "duplicate goals, check instance");
-  //     return false;
-  //   }
-  //   seen_goals.insert(g);
-  // }
 
   return true;
 }
