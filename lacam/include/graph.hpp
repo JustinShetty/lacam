@@ -12,6 +12,30 @@ struct Vertex {
   Vertex(int _id, int _index);
 };
 using Vertices = std::vector<Vertex*>;
+
+class Orientation
+{
+public:
+  enum Value : int8_t
+  {
+    NONE = -1,
+    UP = 0,
+    LEFT = 1,
+    DOWN = 2,
+    RIGHT = 3,
+    // NUM_ORIENTATIONS = 4
+  };
+
+  constexpr Orientation(Value v) : value(v) {}
+  constexpr bool operator==(const Orientation& o) const { return value == o.value; }
+  constexpr bool operator!=(const Orientation& o) const { return value != o.value; }
+
+  std::vector<Orientation> adjacent() const;
+
+private:
+  Value value;
+};
+
 class Config : public std::vector<Vertex*>
 {
 public:
@@ -51,6 +75,7 @@ public:
   }
 
   std::vector<int> goal_indices;
+  std::vector<Orientation> orientations;
 };
 
 std::ostream& operator<<(std::ostream& os, const Config& c);

@@ -5,6 +5,22 @@ Vertex::Vertex(int _id, int _index)
 {
 }
 
+std::vector<Orientation> Orientation::adjacent() const
+{
+  switch (value) {
+    case UP:
+      return {Orientation::LEFT, Orientation::UP, Orientation::RIGHT};
+    case LEFT:
+      return {Orientation::UP, Orientation::LEFT, Orientation::DOWN};
+    case DOWN:
+      return {Orientation::LEFT, Orientation::DOWN, Orientation::RIGHT};
+    case RIGHT:
+      return {Orientation::UP, Orientation::RIGHT, Orientation::DOWN};
+    default:
+      return {};
+  }
+}
+
 Graph::Graph() : V(Vertices()), width(0), height(0) {}
 Graph::~Graph()
 {
