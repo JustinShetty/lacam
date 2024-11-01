@@ -82,7 +82,7 @@ private:
 
 std::ostream& operator<<(std::ostream& os, const State& s);
 
-class Config : public std::vector<Vertex*>
+class Config
 {
 public:
   Config() : goal_indices(), data() {}
