@@ -52,14 +52,6 @@ State::State(Vertex* _v, int _goal_index, Orientation _o)
 {
 }
 
-std::vector<State> State::get_neighbors()
-{
-  if (!neighbors_generated) {
-    gen_neighbors();
-  }
-  return neighbors;
-}
-
 void State::gen_neighbors()
 {
   neighbors = std::vector<State>();

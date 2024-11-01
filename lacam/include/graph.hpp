@@ -67,7 +67,11 @@ public:
   State() : v(nullptr), o(Orientation::NONE), goal_index(0) {}
   State(Vertex* _v, int _goal_index, Orientation _o = Orientation::NONE);
 
-  std::vector<State> get_neighbors();
+  inline std::vector<State> get_neighbors()
+  {
+    if (!neighbors_generated) gen_neighbors();
+    return neighbors;
+  }
 
   bool operator==(const State& other) const
   {

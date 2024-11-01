@@ -42,9 +42,6 @@ struct Agent {
 };
 using Agents = std::vector<Agent*>;
 
-// next location candidates, for saving memory allocation
-// using Candidates = std::vector<std::array<Vertex*, 5> >;
-
 struct Planner {
   const Instance* ins;
   const Deadline* deadline;
@@ -57,7 +54,6 @@ struct Planner {
   const int N;  // number of agents
   const int V_size;
   DistTableMultiGoal D;
-  // Candidates C_next;                // next location candidates
   std::vector<float> tie_breakers;  // random values, used in PIBT
   Agents A;
   Agents occupied_now;   // for quick collision checking
