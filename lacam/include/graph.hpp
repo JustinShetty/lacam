@@ -39,43 +39,42 @@ private:
 class Config : public std::vector<Vertex*>
 {
 public:
-  Config() : std::vector<Vertex*>(), goal_indices() {}
+  Config() : goal_indices(), orientations(), data() {}
   Config(const int N, Vertex* v)
-      : std::vector<Vertex*>(N, v), goal_indices(N, 0)
-  {
-  }
+    : goal_indices(N, 0), orientations(), data(N, v) {}
   Config(const std::initializer_list<Vertex*> vertices)
-      : std::vector<Vertex*>(vertices), goal_indices(vertices.size(), 0)
-  {
-  }
+      : goal_indices(vertices.size(), 0), orientations(), data(vertices) {}
   Config(const std::initializer_list<Vertex*> vertices,
          const std::initializer_list<int> goal_indices)
-      : std::vector<Vertex*>(vertices), goal_indices(goal_indices)
-  {
-  }
+      : goal_indices(goal_indices), orientations(), data(vertices) {}
 
-  bool operator==(const Config& C) const
-  {
-    if (this->size() != C.size()) return false;
-    for (size_t i = 0; i < this->size(); ++i) {
-      if (this->at(i) != C.at(i)) return false;
-    }
-    for (size_t i = 0; i < goal_indices.size(); i++) {
-      if (goal_indices[i] != C.goal_indices[i]) return false;
-    }
-    return true;
-  }
+  size_t size() const { return data.size(); }
 
-  bool operator!=(const Config& C) const { return !(*this == C); }
+  bool operator==(const Config& other) const
+  {
+    return data == other.data && goal_indices == other.goal_indices;
+  }
+  bool operator!=(const Config& other) const { return !(*this == other); }
+
+  Vertex*& operator[](size_t i) { return data[i]; }
+  Vertex* operator[](size_t i) const { return data[i]; }
+
+  auto begin() { return data.begin(); }
+  auto begin() const { return data.begin(); }
+  auto end() { return data.end(); }
+  auto end() const { return data.end(); }
+
 
   void push_back(Vertex* v, int goal_index)
   {
-    std::vector<Vertex*>::push_back(v);
+    data.push_back(v);
     goal_indices.push_back(goal_index);
   }
 
   std::vector<int> goal_indices;
   std::vector<Orientation> orientations;
+private:
+  std::vector<Vertex*> data;
 };
 
 std::ostream& operator<<(std::ostream& os, const Config& c);

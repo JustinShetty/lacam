@@ -10,8 +10,8 @@ TEST(Instance, initialize)
 
   ASSERT_TRUE(ins.is_valid(0));
 
-  ASSERT_EQ(size(ins.starts), 3);
-  ASSERT_EQ(size(ins.goals), 3);
+  ASSERT_EQ(ins.starts.size(), 3);
+  ASSERT_EQ(ins.goals.size(), 3);
   ASSERT_EQ(ins.starts[0]->index, 203);
   ASSERT_EQ(ins.goals[0]->index, 583);
 
@@ -23,8 +23,8 @@ TEST(Instance, sequence)
   const auto map_filename = "./assets/empty-8-8.map";
   const auto ins = Instance(map_filename, {0, 1}, {{2, 3, 4}, {5, 6, 7}});
 
-  ASSERT_EQ(size(ins.starts), 2);
-  ASSERT_EQ(size(ins.goals), 2);
+  ASSERT_EQ(ins.starts.size(), 2);
+  ASSERT_EQ(ins.goals.size(), 2);
   ASSERT_EQ(ins.starts[0]->index, 0);
   ASSERT_EQ(ins.goals[0]->index, 4);
 
