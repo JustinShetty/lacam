@@ -9,13 +9,13 @@ bool is_feasible_solution(const Instance& ins, const Solution& solution,
   if (solution.empty()) return true;
 
   // check start locations
-  if (!is_same_config(solution.front(), ins.starts)) {
+  if (solution.front() != ins.starts) {
     info(1, verbose, "invalid starts");
     return false;
   }
 
   // check goal locations
-  if (!enough_goals_reached(solution.back(), threshold)) {
+  if (!solution.back().enough_goals_reached(threshold)) {
     info(1, verbose, "invalid goals");
     return false;
   }

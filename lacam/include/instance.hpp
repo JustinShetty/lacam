@@ -37,6 +37,8 @@ struct Instance {
   bool is_valid(const int verbose = 0) const;
 
   int get_total_goals() const;
+
+  std::vector<int> calculate_goal_indices(const Config& c, const Config& c_prev) const;
 };
 
 // solution: a sequence of configurations

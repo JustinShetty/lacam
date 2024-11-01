@@ -108,24 +108,6 @@ Graph::Graph(const std::string& filename) : V(Vertices()), width(0), height(0)
 
 int Graph::size() const { return V.size(); }
 
-bool is_same_config(const Config& C1, const Config& C2)
-{
-  for (size_t i = 0; i < C1.size(); ++i) {
-    if (C1[i]->id != C2[i]->id) return false;
-  }
-  return true;
-}
-
-bool enough_goals_reached(const Config& C, int threshold)
-{
-  int count = 0;
-  for (size_t i = 0; i < C.size(); ++i) {
-    count += C.goal_indices[i];
-    if (count >= threshold) return true;
-  }
-  return false;
-}
-
 uint ConfigHasher::operator()(const Config& C) const
 {
   uint location_hash = C.size();

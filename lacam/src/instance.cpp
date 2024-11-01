@@ -16,6 +16,7 @@ Instance::Instance(const std::string& map_filename,
     goals.push_back(vp, 0);
     goal_sequences.push_back(std::vector<Vertex*>{vp});
   }
+  starts.goal_indices = calculate_goal_indices(starts, starts);
 }
 
 Instance::Instance(const std::string& map_filename,
@@ -33,6 +34,7 @@ Instance::Instance(const std::string& map_filename,
     goal_sequences.push_back(as_vertices);
     goals.push_back(as_vertices.back(), as_vertices.size() - 1);
   }
+  starts.goal_indices = calculate_goal_indices(starts, starts);
 }
 
 // for load instance
@@ -73,6 +75,7 @@ Instance::Instance(const std::string& scen_filename,
 
     if (starts.size() == N) break;
   }
+  starts.goal_indices = calculate_goal_indices(starts, starts);
 }
 
 Instance::Instance(const std::string& map_filename, std::mt19937* MT,
@@ -107,6 +110,8 @@ Instance::Instance(const std::string& map_filename, std::mt19937* MT,
     if (goals.size() == N) break;
     ++j;
   }
+
+  starts.goal_indices = calculate_goal_indices(starts, starts);
 }
 
 bool Instance::is_valid(const int verbose) const
@@ -126,4 +131,19 @@ int Instance::get_total_goals() const
     total_goals += goals.size();
   }
   return total_goals;
+}
+
+std::vector<int> Instance::calculate_goal_indices(const Config& c, const Config& c_prev) const
+{
+  auto goal_indices = c_prev.goal_indices;
+  for (size_t i = 0; i < N; ++i) {
+    const auto current_location = c[i];
+    const auto goal_seq = goal_sequences[i];
+    auto& goal_idx = goal_indices[i];
+    const auto next_goal = goal_seq[goal_indices[i]];
+    if (current_location == next_goal && goal_idx < (int)goal_seq.size()) {
+      goal_idx += 1;
+    }
+  }
+  return goal_indices;
 }

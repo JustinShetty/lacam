@@ -81,6 +81,16 @@ public:
     goal_indices.push_back(goal_index);
   }
 
+  bool enough_goals_reached(int threshold) const
+  {
+    int count = 0;
+    for (size_t i = 0; i < size(); ++i) {
+      count += goal_indices[i];
+      if (count >= threshold) return true;
+    }
+    return false;
+  }
+
   std::vector<int> goal_indices;
   std::vector<Orientation> orientations;
 
@@ -101,12 +111,6 @@ struct Graph {
 
   int size() const;  // the number of vertices, |V|
 };
-
-bool is_same_config(
-    const Config& C1,
-    const Config& C2);  // check equivalence of two configurations
-
-bool enough_goals_reached(const Config& C, int threshold);
 
 // hash function of configuration
 // c.f.
