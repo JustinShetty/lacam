@@ -25,12 +25,19 @@ bool is_feasible_solution(const Instance& ins, const Solution& solution,
       auto s_i_from = solution[t - 1][i];
       auto s_i_to = solution[t][i];
       // check connectivity
-      if (s_i_from != s_i_to &&
-          std::find(s_i_from.get_neighbors().begin(),
-                    s_i_from.get_neighbors().end(),
-                    s_i_to) == s_i_from.get_neighbors().end()) {
-        info(1, verbose, "invalid move");
-        return false;
+      if (s_i_from != s_i_to) {
+        auto s_i_from_neighbors = s_i_from.get_neighbors();
+        bool found = false;
+        for (auto s : s_i_from_neighbors) {
+          if (s.v == s_i_to.v && s.o == s_i_to.o) {
+            found = true;
+            break;
+          }
+        }
+        if (!found) {
+          info(1, verbose, "invalid move: ", s_i_from, " -> ", s_i_to);
+          return false;
+        }
       }
 
       auto v_i_from = s_i_from.v;
@@ -42,7 +49,8 @@ bool is_feasible_solution(const Instance& ins, const Solution& solution,
         auto v_j_to = solution[t][j].v;
         // vertex conflicts
         if (v_j_to == v_i_to) {
-          info(1, verbose, "vertex conflict");
+          info(1, verbose, "vertex conflict", "t=", t, "i=", i, "j=", j, "at",
+               v_j_to);
           return false;
         }
 

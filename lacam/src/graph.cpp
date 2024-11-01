@@ -17,7 +17,7 @@ std::vector<Orientation> Orientation::adjacent() const
     case RIGHT:
       return {Orientation::UP, Orientation::DOWN};
     default:
-      return {Orientation::NONE};
+      return {};
   }
 }
 
@@ -43,7 +43,7 @@ std::ostream& operator<<(std::ostream& os, const Orientation& o)
   return os;
 }
 
-State::State(Vertex* _v, Orientation _o, int _goal_index)
+State::State(Vertex* _v, int _goal_index, Orientation _o)
     : v(_v),
       o(_o),
       goal_index(_goal_index),
@@ -64,7 +64,7 @@ void State::gen_neighbors()
 {
   neighbors = std::vector<State>();
   for (auto oa : o.adjacent()) {
-    neighbors.emplace_back(v, oa, goal_index);
+    neighbors.emplace_back(v, goal_index, oa);
   }
   for (auto u : v->neighbor) {
     if (o == Orientation::UP && u->y != v->y + 1)
@@ -75,7 +75,7 @@ void State::gen_neighbors()
       continue;
     else if (o == Orientation::RIGHT && u->x != v->x + 1)
       continue;
-    neighbors.push_back({u, o, goal_index});
+    neighbors.push_back({u, goal_index, o});
   }
   neighbors_generated = true;
 }
@@ -195,14 +195,12 @@ std::ostream& operator<<(std::ostream& os, const Vertex* v)
   return os;
 }
 
-// std::ostream& operator<<(std::ostream& os, const Config& c)
-// {
-//   os << "{ ";
-//   std::copy(c.begin(), c.end(), std::ostream_iterator<Vertex*>(os, " "));
-//   os << "} ";
-//   os << "{ ";
-//   std::copy(c.goal_indices.begin(), c.goal_indices.end(),
-//             std::ostream_iterator<int>(os, " "));
-//   os << "}";
-//   return os;
-// }
+std::ostream& operator<<(std::ostream& os, const Config& c)
+{
+  os << "{ ";
+  for (const auto& s : c) {
+    os << s << " ";
+  }
+  os << "}";
+  return os;
+}

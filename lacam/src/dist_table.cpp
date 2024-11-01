@@ -29,7 +29,7 @@ int DistTableMultiGoal::get(int agent_id, const State& from)
   // goal, but when we want to use the index we need to cap it at the last goal
   auto goal_index = std::min(from.goal_index,
                              (int)(ins->goal_sequences[agent_id].size() - 1));
-  auto key = State(from.v, from.o, goal_index);
+  auto key = State(from.v, goal_index, from.o);
 
   if (table[agent_id].find(key) != table[agent_id].end()) {
     return table[agent_id][key];

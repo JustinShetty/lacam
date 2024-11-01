@@ -2,8 +2,8 @@
  * instance definition
  */
 #pragma once
-#include <random>
 #include <memory>
+#include <random>
 
 #include "graph.hpp"
 #include "utils.hpp"

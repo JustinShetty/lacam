@@ -5,6 +5,20 @@
 
 static bool VERBOSITY = 0;
 
+TEST(planner, basic)
+{
+  const auto map_filename = "./tests/assets/2x2.map";
+  const auto N = 2;
+  const std::vector<int> starts = {0, 3};
+  const std::vector<int> goals = {3, 0};
+  const Instance ins(map_filename, starts, goals);
+  ASSERT_TRUE(ins.is_valid(VERBOSITY));
+
+  auto solution = solve(ins, VERBOSITY, nullptr, nullptr, N);
+  ASSERT_GT(solution.size(), 0);
+  ASSERT_TRUE(is_feasible_solution(ins, solution, VERBOSITY, N, false));
+}
+
 TEST(planner, solve)
 {
   const auto scen_filename = "./assets/random-32-32-10-random-1.scen";

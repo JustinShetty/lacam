@@ -68,7 +68,7 @@ struct Planner {
   Solution solve();
   bool get_new_config(Node* S, Constraint* M);
   bool funcPIBT(Agent* ai);
-  // bool funcPIBT_following(Agent* ai);
+  bool funcPIBT_following(Agent* ai);
   bool funcPIBT_no_following(Agent* ai, Agent* aj);
 };
 

@@ -5,14 +5,15 @@
 Instance::Instance(const std::string& map_filename,
                    const std::vector<int>& start_indexes,
                    const std::vector<int>& goal_indexes)
-    : G(std::shared_ptr<Graph>(new Graph(map_filename))), starts(Config()), N(start_indexes.size())
+    : G(std::shared_ptr<Graph>(new Graph(map_filename))),
+      starts(Config()),
+      N(start_indexes.size())
 {
   for (auto k : start_indexes) {
-    starts.push_back(State(G->U[k], Orientation::NONE, 0));
+    starts.push_back(State(G->U[k], 0));
   }
   for (auto k : goal_indexes) {
-    goal_sequences.push_back(
-        std::vector<State>{State(G->U[k], Orientation::NONE, 0)});
+    goal_sequences.push_back(std::vector<State>{State(G->U[k], 0)});
   }
   update_goal_indices(starts, starts);
 }
@@ -20,20 +21,25 @@ Instance::Instance(const std::string& map_filename,
 Instance::Instance(const std::string& map_filename,
                    const std::vector<int>& start_indexes,
                    const std::vector<std::vector<int>>& goal_index_sequences)
-    : G(std::shared_ptr<Graph>(new Graph(map_filename))), starts(Config()), N(start_indexes.size())
+    : G(std::shared_ptr<Graph>(new Graph(map_filename))),
+      starts(Config()),
+      N(start_indexes.size())
 {
-  for (auto k : start_indexes)
-    starts.push_back(State(G->U[k], Orientation::NONE, 0));
+  for (auto k : start_indexes) {
+    starts.push_back(State(G->U[k], 0));
+  }
   for (auto goal_sequence : goal_index_sequences) {
     std::vector<State> as_states;
-    for (auto k : goal_sequence)
-      as_states.push_back(State(G->U[k], Orientation::NONE, 0));
+    for (int k = 0; k < goal_sequence.size(); ++k) {
+      as_states.push_back(State(G->U[goal_sequence[k]], k));
+    }
     goal_sequences.push_back(as_states);
   }
   update_goal_indices(starts, starts);
 }
 
-Instance::Instance(const std::shared_ptr<Graph> _G, const std::vector<State>& _starts,
+Instance::Instance(const std::shared_ptr<Graph> _G,
+                   const std::vector<State>& _starts,
                    const std::vector<std::vector<State>>& _goal_sequences)
     : G(_G), starts(_starts), goal_sequences(_goal_sequences), N(starts.size())
 {
@@ -46,7 +52,9 @@ static const std::regex r_instance =
 
 Instance::Instance(const std::string& scen_filename,
                    const std::string& map_filename, const int _N)
-    : G(std::shared_ptr<Graph>(new Graph(map_filename))), starts(Config()), N(_N)
+    : G(std::shared_ptr<Graph>(new Graph(map_filename))),
+      starts(Config()),
+      N(_N)
 {
   // load start-goal pairs
   std::ifstream file(scen_filename);
@@ -71,9 +79,8 @@ Instance::Instance(const std::string& scen_filename,
       auto s = G->U[G->width * y_s + x_s];
       auto g = G->U[G->width * y_g + x_g];
       if (s == nullptr || g == nullptr) continue;
-      starts.push_back(State(s, Orientation::NONE, 0));
-      goal_sequences.push_back(
-          std::vector<State>{State(g, Orientation::NONE, 0)});
+      starts.push_back(State(s, 0));
+      goal_sequences.push_back(std::vector<State>{State(g, 0)});
     }
 
     if (starts.size() == N) break;
@@ -83,7 +90,9 @@ Instance::Instance(const std::string& scen_filename,
 
 Instance::Instance(const std::string& map_filename, std::mt19937* MT,
                    const int _N)
-    : G(std::shared_ptr<Graph>(new Graph(map_filename))), starts(Config()), N(_N)
+    : G(std::shared_ptr<Graph>(new Graph(map_filename))),
+      starts(Config()),
+      N(_N)
 {
   // random assignment
   const auto K = G->size();
@@ -95,7 +104,7 @@ Instance::Instance(const std::string& map_filename, std::mt19937* MT,
   int i = 0;
   while (true) {
     if (i >= K) return;
-    starts.push_back(State(G->V[s_indexes[i]], Orientation::NONE, 0));
+    starts.push_back(State(G->V[s_indexes[i]], 0));
     if (starts.size() == N) break;
     ++i;
   }
@@ -107,8 +116,7 @@ Instance::Instance(const std::string& map_filename, std::mt19937* MT,
   int j = 0;
   while (true) {
     if (j >= K) return;
-    goal_sequences.push_back(
-        std::vector<State>{State(G->V[g_indexes[j]], Orientation::NONE, 0)});
+    goal_sequences.push_back(std::vector<State>{State(G->V[g_indexes[j]], 0)});
     if (goal_sequences.size() == N) break;
     ++j;
   }
@@ -140,10 +148,9 @@ void Instance::update_goal_indices(Config& c, const Config& c_prev) const
     const auto current = c[i];
     const auto goal_seq = goal_sequences[i];
     auto goal_idx = c_prev[i].goal_index;
-    const auto next_goal = goal_seq[goal_idx];
-    if (current == next_goal && goal_idx < (int)goal_seq.size()) {
+    if (goal_idx < goal_seq.size() && current == goal_seq[goal_idx]) {
       goal_idx += 1;
     }
-    c[i] = State(current.v, current.o, goal_idx);
+    c[i] = State(current.v, goal_idx, current.o);
   }
 }
