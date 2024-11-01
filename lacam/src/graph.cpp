@@ -82,8 +82,8 @@ void State::gen_neighbors()
 
 std::ostream& operator<<(std::ostream& os, const State& s)
 {
-  os << "State((" << s.v->x << ", " << s.v->y << ") " << s.o << " "
-     << s.goal_index;
+  os << "State((" << s.v->x << ", " << s.v->y << ") Orientation::" << s.o << " "
+     << s.goal_index << ")";
   return os;
 }
 
