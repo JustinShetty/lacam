@@ -16,8 +16,7 @@ using Vertices = std::vector<Vertex*>;
 class Orientation
 {
 public:
-  enum Value : int8_t
-  {
+  enum Value : int8_t {
     NONE = -1,
     UP = 0,
     LEFT = 1,
@@ -27,8 +26,14 @@ public:
   };
 
   constexpr Orientation(Value v) : value(v) {}
-  constexpr bool operator==(const Orientation& o) const { return value == o.value; }
-  constexpr bool operator!=(const Orientation& o) const { return value != o.value; }
+  constexpr bool operator==(const Orientation& o) const
+  {
+    return value == o.value;
+  }
+  constexpr bool operator!=(const Orientation& o) const
+  {
+    return value != o.value;
+  }
 
   std::vector<Orientation> adjacent() const;
 
@@ -41,12 +46,18 @@ class Config : public std::vector<Vertex*>
 public:
   Config() : goal_indices(), orientations(), data() {}
   Config(const int N, Vertex* v)
-    : goal_indices(N, 0), orientations(), data(N, v) {}
+      : goal_indices(N, 0), orientations(), data(N, v)
+  {
+  }
   Config(const std::initializer_list<Vertex*> vertices)
-      : goal_indices(vertices.size(), 0), orientations(), data(vertices) {}
+      : goal_indices(vertices.size(), 0), orientations(), data(vertices)
+  {
+  }
   Config(const std::initializer_list<Vertex*> vertices,
          const std::initializer_list<int> goal_indices)
-      : goal_indices(goal_indices), orientations(), data(vertices) {}
+      : goal_indices(goal_indices), orientations(), data(vertices)
+  {
+  }
 
   size_t size() const { return data.size(); }
 
@@ -64,7 +75,6 @@ public:
   auto end() { return data.end(); }
   auto end() const { return data.end(); }
 
-
   void push_back(Vertex* v, int goal_index)
   {
     data.push_back(v);
@@ -73,6 +83,7 @@ public:
 
   std::vector<int> goal_indices;
   std::vector<Orientation> orientations;
+
 private:
   std::vector<Vertex*> data;
 };
