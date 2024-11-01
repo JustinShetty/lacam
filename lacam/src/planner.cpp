@@ -74,22 +74,6 @@ Planner::Planner(const Instance* _ins, const Deadline* _deadline,
 {
 }
 
-std::vector<int> calculate_goal_indices(const Instance* ins, const Config& c,
-                                        const Config& prev_config)
-{
-  auto goal_indices = prev_config.goal_indices;
-  for (size_t i = 0; i < ins->N; ++i) {
-    const auto current_location = c[i];
-    const auto goal_seq = ins->goal_sequences[i];
-    auto& goal_idx = goal_indices[i];
-    const auto next_goal = goal_seq[goal_indices[i]];
-    if (current_location == next_goal && goal_idx < (int)goal_seq.size()) {
-      goal_idx += 1;
-    }
-  }
-  return goal_indices;
-}
-
 Solution Planner::solve()
 {
   info(1, verbose, "elapsed:", elapsed_ms(deadline), "ms\tstart search");
@@ -104,8 +88,8 @@ Solution Planner::solve()
 
   // insert initial node
   auto initial_config = ins->starts;
-  initial_config.goal_indices =
-      calculate_goal_indices(ins, initial_config, initial_config);
+  // initial_config.goal_indices =
+  //     calculate_goal_indices(ins, initial_config, initial_config);
   auto S = new Node(initial_config, D);
   OPEN.push(S);
   CLOSED[S->C] = S;
@@ -121,7 +105,7 @@ Solution Planner::solve()
     S = OPEN.top();
 
     // check goal condition
-    if (enough_goals_reached(S->C, threshold)) {
+    if (S->C.enough_goals_reached(threshold)) {
       // backtrack
       while (S != nullptr) {
         solution.push_back(S->C);
@@ -155,7 +139,7 @@ Solution Planner::solve()
     // create new configuration
     auto C = Config(N, nullptr);
     for (auto a : A) C[a->id] = a->v_next;
-    C.goal_indices = calculate_goal_indices(ins, C, S->C);
+    C.goal_indices = ins->calculate_goal_indices(C, S->C);
 
     // check explored list
     auto iter = CLOSED.find(C);
