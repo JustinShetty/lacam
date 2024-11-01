@@ -82,14 +82,19 @@ void State::gen_neighbors()
 
 std::ostream& operator<<(std::ostream& os, const State& s)
 {
-  os << "State((" << s.v->x << ", " << s.v->y << ") Orientation::" << s.o << " "
+  os << "State((" << s.v->x << ", " << s.v->y << ") " << s.o << " "
      << s.goal_index << ")";
   return os;
 }
 
 Graph::Graph() : V(Vertices()), width(0), height(0) {}
+Graph::Graph(const Graph& g)
+    : V(g.V), U(g.U), width(g.width), height(g.height), garbage_collect(false)
+{
+}
 Graph::~Graph()
 {
+  if (!garbage_collect) return;
   for (auto& v : V)
     if (v != nullptr) delete v;
   V.clear();

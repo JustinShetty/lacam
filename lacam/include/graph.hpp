@@ -83,13 +83,14 @@ private:
 
 std::ostream& operator<<(std::ostream& os, const State& s);
 
-class Config : public std::vector<Vertex*>
+class Config
 {
 public:
   Config() : data() {}
   Config(const int N) : data(N) {}
   Config(const int N, State s) : data(N, s) {}
   Config(const std::initializer_list<State> states) : data(states) {}
+  Config(const std::vector<State>& states) : data(states) {}
 
   size_t size() const { return data.size(); }
 
@@ -128,10 +129,14 @@ struct Graph {
   int width;   // grid width
   int height;  // grid height
   Graph();
+  Graph(const Graph& g);
   Graph(const std::string& filename);  // taking map filename
   ~Graph();
 
   int size() const;  // the number of vertices, |V|
+
+private:
+  bool garbage_collect = true;
 };
 
 // c.f.

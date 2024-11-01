@@ -12,23 +12,21 @@ struct Instance {
   Config starts;                                   // initial configuration
   std::vector<std::vector<State>> goal_sequences;  // agent id -> goal sequence
   const uint N;                                    // number of agents
-  const bool consider_orientation;
 
   // for testing
   Instance(const std::string& map_filename,
            const std::vector<int>& start_indexes,
-           const std::vector<int>& goal_indexes,
-           const bool _consider_orientation = false);
+           const std::vector<int>& goal_indexes);
   Instance(const std::string& map_filename,
            const std::vector<int>& start_indexes,
-           const std::vector<std::vector<int>>& goal_index_sequences,
-           const bool _consider_orientation = false);
+           const std::vector<std::vector<int>>& goal_index_sequences);
+  Instance(const Graph& _G, const std::vector<State>& _starts,
+           const std::vector<std::vector<State>>& _goal_sequences);
   // for MAPF benchmark
   Instance(const std::string& scen_filename, const std::string& map_filename,
-           const int _N = 1, const bool _consider_orientation = false);
+           const int _N = 1);
   // random instance generation
-  Instance(const std::string& map_filename, std::mt19937* MT, const int _N = 1,
-           const bool _consider_orientation = false);
+  Instance(const std::string& map_filename, std::mt19937* MT, const int _N = 1);
   ~Instance() {}
 
   // simple feasibility check of instance

@@ -12,7 +12,7 @@ Constraint::Constraint(Constraint* parent, int i, State s)
   where.push_back(s);
 }
 
-Constraint::~Constraint() {};
+Constraint::~Constraint(){};
 
 Node::Node(Config _C, DistTableMultiGoal& D, Node* _parent)
     : C(_C),

@@ -4,12 +4,8 @@
 
 Instance::Instance(const std::string& map_filename,
                    const std::vector<int>& start_indexes,
-                   const std::vector<int>& goal_indexes,
-                   const bool _consider_orientation)
-    : G(map_filename),
-      starts(Config()),
-      N(start_indexes.size()),
-      consider_orientation(_consider_orientation)
+                   const std::vector<int>& goal_indexes)
+    : G(map_filename), starts(Config()), N(start_indexes.size())
 {
   for (auto k : start_indexes) {
     starts.push_back(State(G.U[k], Orientation::NONE, 0));
@@ -23,12 +19,8 @@ Instance::Instance(const std::string& map_filename,
 
 Instance::Instance(const std::string& map_filename,
                    const std::vector<int>& start_indexes,
-                   const std::vector<std::vector<int>>& goal_index_sequences,
-                   const bool _consider_orientation)
-    : G(map_filename),
-      starts(Config()),
-      N(start_indexes.size()),
-      consider_orientation(_consider_orientation)
+                   const std::vector<std::vector<int>>& goal_index_sequences)
+    : G(map_filename), starts(Config()), N(start_indexes.size())
 {
   for (auto k : start_indexes)
     starts.push_back(State(G.U[k], Orientation::NONE, 0));
@@ -41,17 +33,20 @@ Instance::Instance(const std::string& map_filename,
   update_goal_indices(starts, starts);
 }
 
+Instance::Instance(const Graph& _G, const std::vector<State>& _starts,
+                   const std::vector<std::vector<State>>& _goal_sequences)
+    : G(_G), starts(_starts), goal_sequences(_goal_sequences), N(starts.size())
+{
+  update_goal_indices(starts, starts);
+}
+
 // for load instance
 static const std::regex r_instance =
     std::regex(R"(\d+\t.+\.map\t\d+\t\d+\t(\d+)\t(\d+)\t(\d+)\t(\d+)\t.+)");
 
 Instance::Instance(const std::string& scen_filename,
-                   const std::string& map_filename, const int _N,
-                   const bool _consider_orientation)
-    : G(Graph(map_filename)),
-      starts(Config()),
-      N(_N),
-      consider_orientation(_consider_orientation)
+                   const std::string& map_filename, const int _N)
+    : G(Graph(map_filename)), starts(Config()), N(_N)
 {
   // load start-goal pairs
   std::ifstream file(scen_filename);
@@ -87,11 +82,8 @@ Instance::Instance(const std::string& scen_filename,
 }
 
 Instance::Instance(const std::string& map_filename, std::mt19937* MT,
-                   const int _N, const bool _consider_orientation)
-    : G(Graph(map_filename)),
-      starts(Config()),
-      N(_N),
-      consider_orientation(_consider_orientation)
+                   const int _N)
+    : G(Graph(map_filename)), starts(Config()), N(_N)
 {
   // random assignment
   const auto K = G.size();

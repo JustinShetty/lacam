@@ -30,10 +30,8 @@ int DistTableMultiGoal::get(int agent_id, const State& from)
   auto goal_index = std::min(from.goal_index,
                              (int)(ins->goal_sequences[agent_id].size() - 1));
   auto key = State(from.v, from.o, goal_index);
-  std::cout << "key: " << key << std::endl;
 
   if (table[agent_id].find(key) != table[agent_id].end()) {
-    std::cout << "found key" << std::endl;
     return table[agent_id][key];
   }
 
@@ -45,10 +43,8 @@ int DistTableMultiGoal::get(int agent_id, const State& from)
 
   const auto K = ins->G.size();
   const auto next_goal = ins->goal_sequences[agent_id][goal_index];
-  std::cout << from << " -> " << next_goal << std::endl;
   while (!OPEN[agent_id].empty()) {
     auto n = OPEN[agent_id].front();
-    std::cout << n << std::endl;
     OPEN[agent_id].pop();
     if (table[agent_id].find(n) == table[agent_id].end()) {
       table[agent_id][n] = K;
@@ -64,7 +60,7 @@ int DistTableMultiGoal::get(int agent_id, const State& from)
       table[agent_id][m] = d_n + 1;
       OPEN[agent_id].push(m);
     }
-    if (n == next_goal) return d_n;
+    if (n == from) return d_n;
   }
   return K;
 }
