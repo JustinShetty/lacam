@@ -113,41 +113,41 @@ int get_sum_of_loss(const Solution& solution)
   return c;
 }
 
-// int get_makespan_lower_bound(const Instance& ins, DistTable& dist_table)
-// {
-//   int c = 0;
-//   for (size_t i = 0; i < ins.N; ++i) {
-//     c = std::max(c, dist_table.get(i, ins.starts[i]));
-//   }
-//   return c;
-// }
+int get_makespan_lower_bound(const Instance& ins, DistTableMultiGoal& dist_table)
+{
+  int c = 0;
+  for (size_t i = 0; i < ins.N; ++i) {
+    c = std::max(c, dist_table.get(i, ins.starts[i]));
+  }
+  return c;
+}
 
-// int get_sum_of_costs_lower_bound(const Instance& ins, DistTable& dist_table)
-// {
-//   int c = 0;
-//   for (size_t i = 0; i < ins.N; ++i) {
-//     c += dist_table.get(i, ins.starts[i]);
-//   }
-//   return c;
-// }
+int get_sum_of_costs_lower_bound(const Instance& ins, DistTableMultiGoal& dist_table)
+{
+  int c = 0;
+  for (size_t i = 0; i < ins.N; ++i) {
+    c += dist_table.get(i, ins.starts[i]);
+  }
+  return c;
+}
 
 void print_stats(const int verbose, const Instance& ins,
                  const Solution& solution, const double comp_time_ms)
 {
-  // auto ceil = [](float x) { return std::ceil(x * 100) / 100; };
-  // auto dist_table = DistTableM(ins);
-  // const auto makespan = get_makespan(solution);
-  // const auto makespan_lb = get_makespan_lower_bound(ins, dist_table);
-  // const auto sum_of_costs = get_sum_of_costs(solution);
-  // const auto sum_of_costs_lb = get_sum_of_costs_lower_bound(ins, dist_table);
-  // const auto sum_of_loss = get_sum_of_loss(solution);
-  // info(1, verbose, "solved: ", comp_time_ms, "ms", "\tmakespan: ", makespan,
-  //      " (lb=", makespan_lb, ", ub=", ceil((float)makespan / makespan_lb),
-  //      ")",
-  //      "\tsum_of_costs: ", sum_of_costs, " (lb=", sum_of_costs_lb,
-  //      ", ub=", ceil((float)sum_of_costs / sum_of_costs_lb), ")",
-  //      "\tsum_of_loss: ", sum_of_loss, " (lb=", sum_of_costs_lb,
-  //      ", ub=", ceil((float)sum_of_loss / sum_of_costs_lb), ")");
+  auto ceil = [](float x) { return std::ceil(x * 100) / 100; };
+  auto dist_table = DistTableMultiGoal(ins);
+  const auto makespan = get_makespan(solution);
+  const auto makespan_lb = get_makespan_lower_bound(ins, dist_table);
+  const auto sum_of_costs = get_sum_of_costs(solution);
+  const auto sum_of_costs_lb = get_sum_of_costs_lower_bound(ins, dist_table);
+  const auto sum_of_loss = get_sum_of_loss(solution);
+  info(1, verbose, "solved: ", comp_time_ms, "ms", "\tmakespan: ", makespan,
+       " (lb=", makespan_lb, ", ub=", ceil((float)makespan / makespan_lb),
+       ")",
+       "\tsum_of_costs: ", sum_of_costs, " (lb=", sum_of_costs_lb,
+       ", ub=", ceil((float)sum_of_costs / sum_of_costs_lb), ")",
+       "\tsum_of_loss: ", sum_of_loss, " (lb=", sum_of_costs_lb,
+       ", ub=", ceil((float)sum_of_loss / sum_of_costs_lb), ")");
 }
 
 // for log of map_name
@@ -158,57 +158,57 @@ void make_log(const Instance& ins, const Solution& solution,
               const std::string& map_name, const int seed, const bool log_short,
               const bool skip_post_processing)
 {
-  //   // map name
-  //   std::smatch results;
-  //   const auto map_recorded_name =
-  //       (std::regex_match(map_name, results, r_map_name)) ? results[1].str()
-  //                                                         : map_name;
+    // map name
+    std::smatch results;
+    const auto map_recorded_name =
+        (std::regex_match(map_name, results, r_map_name)) ? results[1].str()
+                                                          : map_name;
 
-  //   // for instance-specific values
-  //   auto dist_table = DistTable(ins);
+    // for instance-specific values
+    auto dist_table = DistTableMultiGoal(ins);
 
-  //   // log for visualizer
-  //   auto get_x = [&](int k) { return k % ins.G.width; };
-  //   auto get_y = [&](int k) { return k / ins.G.width; };
-  //   std::ofstream log;
-  //   log.open(output_name, std::ios::out);
-  //   log << "agents=" << ins.N << "\n";
-  //   log << "map_file=" << map_recorded_name << "\n";
-  //   log << "solver=planner\n";
-  //   log << "solved=" << !solution.empty() << "\n";
+    // log for visualizer
+    auto get_x = [&](int k) { return k % ins.G->width; };
+    auto get_y = [&](int k) { return k / ins.G->width; };
+    std::ofstream log;
+    log.open(output_name, std::ios::out);
+    log << "agents=" << ins.N << "\n";
+    log << "map_file=" << map_recorded_name << "\n";
+    log << "solver=planner\n";
+    log << "solved=" << !solution.empty() << "\n";
 
-  //   if (!skip_post_processing) {
-  //     log << "soc=" << get_sum_of_costs(solution) << "\n";
-  //     log << "soc_lb=" << get_sum_of_costs_lower_bound(ins, dist_table) <<
-  //     "\n"; log << "makespan=" << get_makespan(solution) << "\n"; log <<
-  //     "makespan_lb=" << get_makespan_lower_bound(ins, dist_table) << "\n";
-  //     log << "sum_of_loss=" << get_sum_of_loss(solution) << "\n";
-  //     log << "sum_of_loss_lb=" << get_sum_of_costs_lower_bound(ins,
-  //     dist_table)
-  //         << "\n";
-  //   }
+    if (!skip_post_processing) {
+      log << "soc=" << get_sum_of_costs(solution) << "\n";
+      log << "soc_lb=" << get_sum_of_costs_lower_bound(ins, dist_table) <<
+      "\n"; log << "makespan=" << get_makespan(solution) << "\n"; log <<
+      "makespan_lb=" << get_makespan_lower_bound(ins, dist_table) << "\n";
+      log << "sum_of_loss=" << get_sum_of_loss(solution) << "\n";
+      log << "sum_of_loss_lb=" << get_sum_of_costs_lower_bound(ins,
+      dist_table)
+          << "\n";
+    }
 
-  //   log << "comp_time=" << comp_time_ms << "\n";
-  //   log << "seed=" << seed << "\n";
-  //   if (log_short) return;
-  //   log << "starts=";
-  //   for (size_t i = 0; i < ins.N; ++i) {
-  //     auto k = ins.starts[i]->index;
-  //     log << "(" << get_x(k) << "," << get_y(k) << "),";
-  //   }
-  //   log << "\ngoals=";
-  //   for (size_t i = 0; i < ins.N; ++i) {
-  //     auto k = ins.goals[i]->index;
-  //     log << "(" << get_x(k) << "," << get_y(k) << "),";
-  //   }
-  //   log << "\nsolution=\n";
-  //   for (size_t t = 0; t < solution.size(); ++t) {
-  //     log << t << ":";
-  //     auto C = solution[t];
-  //     for (auto v : C) {
-  //       log << "(" << get_x(v->index) << "," << get_y(v->index) << "),";
-  //     }
-  //     log << "\n";
-  //   }
-  //   log.close();
+    log << "comp_time=" << comp_time_ms << "\n";
+    log << "seed=" << seed << "\n";
+    if (log_short) return;
+    // log << "starts=";
+    // for (size_t i = 0; i < ins.N; ++i) {
+    //   auto k = ins.starts[i]->index;
+    //   log << "(" << get_x(k) << "," << get_y(k) << "),";
+    // }
+    // log << "\ngoals=";
+    // for (size_t i = 0; i < ins.N; ++i) {
+    //   auto k = ins.goals[i]->index;
+    //   log << "(" << get_x(k) << "," << get_y(k) << "),";
+    // }
+    log << "\nsolution=\n";
+    for (size_t t = 0; t < solution.size(); ++t) {
+      log << t << ":";
+      auto C = solution[t];
+      for (auto s : C) {
+        log << "(" << get_x(s.v->index) << "," << get_y(s.v->index) << "),";
+      }
+      log << "\n";
+    }
+    log.close();
 }
