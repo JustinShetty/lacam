@@ -41,7 +41,7 @@ int DistTableMultiGoal::get(int agent_id, const State& from)
    * https://www.aaai.org/Papers/AIIDE/2005/AIIDE05-020.pdf
    */
 
-  const auto K = ins->G.size();
+  const auto K = ins->G->size();
   const auto next_goal = ins->goal_sequences[agent_id][goal_index];
   while (!OPEN[agent_id].empty()) {
     auto n = OPEN[agent_id].front();

@@ -134,9 +134,6 @@ struct Graph {
   ~Graph();
 
   int size() const;  // the number of vertices, |V|
-
-private:
-  bool garbage_collect = true;
 };
 
 // c.f.
