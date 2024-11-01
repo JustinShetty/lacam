@@ -2,14 +2,18 @@
  * graph definition
  */
 #pragma once
+#include <optional>
+
 #include "utils.hpp"
 
 struct Vertex {
+  const int x;
+  const int y;
   const int id;     // index for V in Graph
   const int index;  // index for U (width * y + x) in Graph
   std::vector<Vertex*> neighbor;
 
-  Vertex(int _id, int _index);
+  Vertex(int _x, int y_, int _id, int _index);
 };
 using Vertices = std::vector<Vertex*>;
 
@@ -26,14 +30,25 @@ public:
   };
 
   constexpr Orientation(Value v) : value(v) {}
+  constexpr bool operator==(const Orientation::Value& v) const
+  {
+    return value == v;
+  }
   constexpr bool operator==(const Orientation& o) const
   {
     return value == o.value;
+  }
+  constexpr bool operator!=(const Orientation::Value& v) const
+  {
+    return value != v;
   }
   constexpr bool operator!=(const Orientation& o) const
   {
     return value != o.value;
   }
+
+  constexpr operator Value() const { return value; }
+  explicit operator bool() const = delete;
 
   std::vector<Orientation> adjacent() const;
 
@@ -41,14 +56,37 @@ private:
   Value value;
 };
 
+std::ostream& operator<<(std::ostream& os, const Orientation& o);
+
+class State
+{
+public:
+  const Vertex* v;
+  const Orientation o;
+  const int goal_index;
+
+  State(const Vertex* _v, Orientation _o, int _goal_index);
+
+  std::vector<State> get_neighbors();
+
+  bool operator==(const State& other) const
+  {
+    return v == other.v && o == other.o && goal_index == other.goal_index;
+  }
+  bool operator!=(const State& other) const { return !(*this == other); }
+
+private:
+  std::optional<std::vector<State>> neighbors;
+  void gen_neighbors();
+};
+
+std::ostream& operator<<(std::ostream& os, const State& s);
+
 class Config : public std::vector<Vertex*>
 {
 public:
   Config() : goal_indices(), data() {}
-  Config(const int N, Vertex* v)
-      : goal_indices(N, 0), data(N, v)
-  {
-  }
+  Config(const int N, Vertex* v) : goal_indices(N, 0), data(N, v) {}
   Config(const std::initializer_list<Vertex*> vertices)
       : goal_indices(vertices.size(), 0), data(vertices)
   {

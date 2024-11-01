@@ -1,7 +1,7 @@
 #include "../include/graph.hpp"
 
-Vertex::Vertex(int _id, int _index)
-    : id(_id), index(_index), neighbor(Vertices())
+Vertex::Vertex(int _x, int _y, int _id, int _index)
+    : x(_x), y(_y), id(_id), index(_index), neighbor(Vertices())
 {
 }
 
@@ -9,16 +9,77 @@ std::vector<Orientation> Orientation::adjacent() const
 {
   switch (value) {
     case UP:
-      return {Orientation::LEFT, Orientation::UP, Orientation::RIGHT};
+      return {Orientation::LEFT, Orientation::RIGHT};
     case LEFT:
-      return {Orientation::UP, Orientation::LEFT, Orientation::DOWN};
+      return {Orientation::UP, Orientation::DOWN};
     case DOWN:
-      return {Orientation::LEFT, Orientation::DOWN, Orientation::RIGHT};
+      return {Orientation::LEFT, Orientation::RIGHT};
     case RIGHT:
-      return {Orientation::UP, Orientation::RIGHT, Orientation::DOWN};
+      return {Orientation::UP, Orientation::DOWN};
     default:
       return {};
   }
+}
+
+std::ostream& operator<<(std::ostream& os, const Orientation& o)
+{
+  switch (o) {
+    case Orientation::UP:
+      os << "UP";
+      break;
+    case Orientation::LEFT:
+      os << "LEFT";
+      break;
+    case Orientation::DOWN:
+      os << "DOWN";
+      break;
+    case Orientation::RIGHT:
+      os << "RIGHT";
+      break;
+    default:
+      os << "NONE";
+      break;
+  }
+  return os;
+}
+
+State::State(const Vertex* _v, Orientation _o, int _goal_index)
+    : v(_v), o(_o), goal_index(_goal_index), neighbors()
+{
+}
+
+std::vector<State> State::get_neighbors()
+{
+  if (!neighbors.has_value()) {
+    gen_neighbors();
+  }
+  return neighbors.value();
+}
+
+void State::gen_neighbors()
+{
+  neighbors = std::vector<State>();
+  for (auto oa : o.adjacent()) {
+    neighbors->emplace_back(v, oa, goal_index);
+  }
+  for (auto u : v->neighbor) {
+    if (o == Orientation::UP && u->y != v->y + 1)
+      continue;
+    else if (o == Orientation::DOWN && u->y != v->y - 1)
+      continue;
+    else if (o == Orientation::LEFT && u->x != v->x - 1)
+      continue;
+    else if (o == Orientation::RIGHT && u->x != v->x + 1)
+      continue;
+    neighbors->push_back({u, o, goal_index});
+  }
+}
+
+std::ostream& operator<<(std::ostream& os, const State& s)
+{
+  os << "State((" << s.v->x << ", " << s.v->y << ") " << s.o << " "
+     << s.goal_index;
+  return os;
 }
 
 Graph::Graph() : V(Vertices()), width(0), height(0) {}
@@ -69,7 +130,7 @@ Graph::Graph(const std::string& filename) : V(Vertices()), width(0), height(0)
       char s = line[x];
       if (s == 'T' or s == '@') continue;  // object
       auto index = width * y + x;
-      auto v = new Vertex(V.size(), index);
+      auto v = new Vertex(x, y, V.size(), index);
       V.push_back(v);
       U[index] = v;
     }

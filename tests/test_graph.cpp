@@ -13,3 +13,34 @@ TEST(Graph, load_graph)
   ASSERT_EQ(G.width, 32);
   ASSERT_EQ(G.height, 32);
 }
+
+TEST(Orientation, adjacent)
+{
+  Orientation up = Orientation::UP;
+  Orientation down = Orientation::DOWN;
+  Orientation left = Orientation::LEFT;
+  Orientation right = Orientation::RIGHT;
+  ASSERT_EQ(up.adjacent(),
+            std::vector<Orientation>({Orientation::LEFT, Orientation::RIGHT}));
+  ASSERT_EQ(down.adjacent(),
+            std::vector<Orientation>({Orientation::LEFT, Orientation::RIGHT}));
+  ASSERT_EQ(left.adjacent(),
+            std::vector<Orientation>({Orientation::UP, Orientation::DOWN}));
+  ASSERT_EQ(right.adjacent(),
+            std::vector<Orientation>({Orientation::UP, Orientation::DOWN}));
+}
+
+TEST(State, get_neighbors)
+{
+  const std::string filename = "./assets/random-32-32-10.map";
+  auto G = Graph(filename);
+  auto s = State(G.V[0], Orientation::UP, 0);
+  auto neighbors = s.get_neighbors();
+  std::vector<State> expected_neighbors = {State(G.V[0], Orientation::LEFT, 0),
+                                           State(G.V[0], Orientation::RIGHT, 0),
+                                           State(G.U[32], Orientation::UP, 0)};
+  ASSERT_EQ(neighbors.size(), expected_neighbors.size());
+  for (size_t i = 0; i < neighbors.size(); ++i) {
+    ASSERT_EQ(neighbors[i], expected_neighbors[i]);
+  }
+}
