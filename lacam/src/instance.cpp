@@ -4,11 +4,13 @@
 
 Instance::Instance(const std::string& map_filename,
                    const std::vector<int>& start_indexes,
-                   const std::vector<int>& goal_indexes)
+                   const std::vector<int>& goal_indexes,
+                   const bool _consider_orientation)
     : G(map_filename),
       starts(Config()),
       goals(Config()),
-      N(start_indexes.size())
+      N(start_indexes.size()),
+      consider_orientation(_consider_orientation)
 {
   for (auto k : start_indexes) starts.push_back(G.U[k], 0);
   for (auto k : goal_indexes) {
@@ -21,11 +23,13 @@ Instance::Instance(const std::string& map_filename,
 
 Instance::Instance(const std::string& map_filename,
                    const std::vector<int>& start_indexes,
-                   const std::vector<std::vector<int>>& goal_index_sequences)
+                   const std::vector<std::vector<int>>& goal_index_sequences,
+                   const bool _consider_orientation)
     : G(map_filename),
       starts(Config()),
       goals(Config()),
-      N(start_indexes.size())
+      N(start_indexes.size()),
+      consider_orientation(_consider_orientation)
 {
   for (auto k : start_indexes) starts.push_back(G.U[k], 0);
   for (auto goal_sequence : goal_index_sequences) {
@@ -42,8 +46,13 @@ static const std::regex r_instance =
     std::regex(R"(\d+\t.+\.map\t\d+\t\d+\t(\d+)\t(\d+)\t(\d+)\t(\d+)\t.+)");
 
 Instance::Instance(const std::string& scen_filename,
-                   const std::string& map_filename, const int _N)
-    : G(Graph(map_filename)), starts(Config()), goals(Config()), N(_N)
+                   const std::string& map_filename, const int _N,
+                   const bool _consider_orientation)
+    : G(Graph(map_filename)),
+      starts(Config()),
+      goals(Config()),
+      N(_N),
+      consider_orientation(_consider_orientation)
 {
   // load start-goal pairs
   std::ifstream file(scen_filename);
@@ -79,8 +88,12 @@ Instance::Instance(const std::string& scen_filename,
 }
 
 Instance::Instance(const std::string& map_filename, std::mt19937* MT,
-                   const int _N)
-    : G(Graph(map_filename)), starts(Config()), goals(Config()), N(_N)
+                   const int _N, const bool _consider_orientation)
+    : G(Graph(map_filename)),
+      starts(Config()),
+      goals(Config()),
+      N(_N),
+      consider_orientation(_consider_orientation)
 {
   // random assignment
   const auto K = G.size();
@@ -133,7 +146,8 @@ int Instance::get_total_goals() const
   return total_goals;
 }
 
-std::vector<int> Instance::calculate_goal_indices(const Config& c, const Config& c_prev) const
+std::vector<int> Instance::calculate_goal_indices(const Config& c,
+                                                  const Config& c_prev) const
 {
   auto goal_indices = c_prev.goal_indices;
   for (size_t i = 0; i < N; ++i) {
