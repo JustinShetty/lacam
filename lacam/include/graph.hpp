@@ -44,18 +44,18 @@ private:
 class Config : public std::vector<Vertex*>
 {
 public:
-  Config() : goal_indices(), orientations(), data() {}
+  Config() : goal_indices(), data() {}
   Config(const int N, Vertex* v)
-      : goal_indices(N, 0), orientations(), data(N, v)
+      : goal_indices(N, 0), data(N, v)
   {
   }
   Config(const std::initializer_list<Vertex*> vertices)
-      : goal_indices(vertices.size(), 0), orientations(), data(vertices)
+      : goal_indices(vertices.size(), 0), data(vertices)
   {
   }
   Config(const std::initializer_list<Vertex*> vertices,
          const std::initializer_list<int> goal_indices)
-      : goal_indices(goal_indices), orientations(), data(vertices)
+      : goal_indices(goal_indices), data(vertices)
   {
   }
 
@@ -92,7 +92,6 @@ public:
   }
 
   std::vector<int> goal_indices;
-  std::vector<Orientation> orientations;
 
 private:
   std::vector<Vertex*> data;
