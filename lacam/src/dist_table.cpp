@@ -2,92 +2,38 @@
 
 #include <algorithm>
 
-DistTable::DistTable(const Instance* ins)
-    : K(ins->G.V.size()), table(ins->N, std::vector<int>(K, K))
-{
-  setup(ins);
-}
-
-void DistTable::setup(const Instance* ins)
-{
-  for (size_t i = 0; i < ins->N; ++i) {
-    OPEN.push_back(std::queue<Vertex*>());
-    auto n = ins->goals[i];
-    OPEN[i].push(n);
-    table[i][n->id] = 0;
-  }
-}
-
-int DistTable::get(int i, int v_id)
-{
-  if (table[i][v_id] < K) return table[i][v_id];
-
-  /*
-   * BFS with lazy evaluation
-   * c.f., Reverse Resumable A*
-   * https://www.aaai.org/Papers/AIIDE/2005/AIIDE05-020.pdf
-   */
-
-  while (!OPEN[i].empty()) {
-    auto n = OPEN[i].front();
-    OPEN[i].pop();
-    const int d_n = table[i][n->id];
-    for (auto& m : n->neighbor) {
-      const int d_m = table[i][m->id];
-      if (d_n + 1 >= d_m) continue;
-      table[i][m->id] = d_n + 1;
-      OPEN[i].push(m);
-    }
-    if (n->id == v_id) return d_n;
-  }
-  return K;
-}
-
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-
-DistTableMultiGoal::DistTableMultiGoal(const Instance* ins)
-    : K(ins->G.V.size()), table(), OPEN()
+DistTableMultiGoal::DistTableMultiGoal(const Instance* _ins)
+    : ins(_ins), table(), OPEN()
 {
   setup(ins);
 }
 
 void DistTableMultiGoal::setup(const Instance* ins)
 {
-  // initialize all values to K
-  for (size_t i = 0; i < ins->N; i++) {
-    table.push_back(std::vector<std::vector<int>>(ins->goal_sequences[i].size(),
-                                                  std::vector<int>(K, K)));
-  }
-
   // initialize search queues and table values for goals
   for (size_t i = 0; i < ins->N; i++) {
-    OPEN.push_back(
-        std::vector<std::queue<Vertex*>>(ins->goal_sequences[i].size()));
-    for (size_t j = 0; j < ins->goal_sequences[i].size(); j++) {
-      auto g = ins->goal_sequences[i][j];
-      OPEN[i][j].push(g);
-      table[i][j][g->id] = 0;
+    table.push_back(std::unordered_map<State, int, StateHasher>());
+    OPEN.push_back(std::queue<State>());
+    const auto& goal_seq = ins->goal_sequences[i];
+    for (size_t j = 0; j < goal_seq.size(); j++) {
+      auto g = goal_seq[j];
+      OPEN[i].push(g);
+      table[i][g] = 0;
     }
   }
 }
 
-int DistTableMultiGoal::get(int agent_id, int goal_index, int from_id)
+int DistTableMultiGoal::get(int agent_id, const State& from)
 {
   // goal_index can be past the end to signify we've already reached the last
   // goal, but when we want to use the index we need to cap it at the last goal
-  goal_index = std::min(goal_index, (int)(table[agent_id].size() - 1));
+  auto goal_index = std::min(from.goal_index,
+                             (int)(ins->goal_sequences[agent_id].size() - 1));
+  auto key = State(from.v, from.o, goal_index);
 
-  if (table[agent_id][goal_index][from_id] < K)
-    return table[agent_id][goal_index][from_id];
+  if (table[agent_id].find(key) != table[agent_id].end()) {
+    return table[agent_id][from];
+  }
 
   /*
    * BFS with lazy evaluation
@@ -95,17 +41,26 @@ int DistTableMultiGoal::get(int agent_id, int goal_index, int from_id)
    * https://www.aaai.org/Papers/AIIDE/2005/AIIDE05-020.pdf
    */
 
-  while (!OPEN[agent_id][goal_index].empty()) {
-    auto n = OPEN[agent_id][goal_index].front();
-    OPEN[agent_id][goal_index].pop();
-    const int d_n = table[agent_id][goal_index][n->id];
-    for (auto& m : n->neighbor) {
-      const int d_m = table[agent_id][goal_index][m->id];
-      if (d_n + 1 >= d_m) continue;
-      table[agent_id][goal_index][m->id] = d_n + 1;
-      OPEN[agent_id][goal_index].push(m);
+  const auto K = ins->G.size();
+  const auto next_goal = ins->goal_sequences[agent_id][goal_index];
+  while (!OPEN[agent_id].empty()) {
+    auto n = OPEN[agent_id].front();
+    OPEN[agent_id].pop();
+    if (table[agent_id].find(n) == table[agent_id].end()) {
+      table[agent_id][n] = K;
     }
-    if (n->id == from_id) return d_n;
+    auto d_n = table[agent_id][n];
+    const auto neighbors = n.get_neighbors();
+    for (const auto& m : neighbors) {
+      if (table[agent_id].find(m) == table[agent_id].end()) {
+        table[agent_id][m] = K;
+      }
+      auto d_m = table[agent_id][m];
+      if (d_n + 1 >= d_m) continue;
+      table[agent_id][m] = d_n + 1;
+      OPEN[agent_id].push(m);
+    }
+    if (n == next_goal) return d_n;
   }
   return K;
 }

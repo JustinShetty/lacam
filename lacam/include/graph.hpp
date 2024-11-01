@@ -2,7 +2,6 @@
  * graph definition
  */
 #pragma once
-#include <optional>
 
 #include "utils.hpp"
 
@@ -20,13 +19,13 @@ using Vertices = std::vector<Vertex*>;
 class Orientation
 {
 public:
-  enum Value : int8_t {
-    NONE = -1,
-    UP = 0,
-    LEFT = 1,
-    DOWN = 2,
-    RIGHT = 3,
-    // NUM_ORIENTATIONS = 4
+  enum Value : uint8_t {
+    NONE = 0,
+    UP = 1,
+    LEFT = 2,
+    DOWN = 3,
+    RIGHT = 4,
+    NUM_ORIENTATIONS = 5
   };
 
   constexpr Orientation(Value v) : value(v) {}
@@ -61,11 +60,12 @@ std::ostream& operator<<(std::ostream& os, const Orientation& o);
 class State
 {
 public:
-  const Vertex* v;
-  const Orientation o;
-  const int goal_index;
+  Vertex* v;
+  Orientation o;
+  int goal_index;
 
-  State(const Vertex* _v, Orientation _o, int _goal_index);
+  State() : v(nullptr), o(Orientation::NONE), goal_index(0) {}
+  State(Vertex* _v, Orientation _o, int _goal_index);
 
   std::vector<State> get_neighbors();
 
@@ -76,63 +76,48 @@ public:
   bool operator!=(const State& other) const { return !(*this == other); }
 
 private:
-  std::optional<std::vector<State>> neighbors;
+  std::vector<State> neighbors;
+  bool neighbors_generated;
   void gen_neighbors();
 };
 
 std::ostream& operator<<(std::ostream& os, const State& s);
 
-class Config
+class Config : public std::vector<Vertex*>
 {
 public:
-  Config() : goal_indices(), data() {}
-  Config(const int N, Vertex* v) : goal_indices(N, 0), data(N, v) {}
-  Config(const std::initializer_list<Vertex*> vertices)
-      : goal_indices(vertices.size(), 0), data(vertices)
-  {
-  }
-  Config(const std::initializer_list<Vertex*> vertices,
-         const std::initializer_list<int> goal_indices)
-      : goal_indices(goal_indices), data(vertices)
-  {
-  }
+  Config() : data() {}
+  Config(const int N) : data(N) {}
+  Config(const int N, State s) : data(N, s) {}
+  Config(const std::initializer_list<State> states) : data(states) {}
 
   size_t size() const { return data.size(); }
 
-  bool operator==(const Config& other) const
-  {
-    return data == other.data && goal_indices == other.goal_indices;
-  }
+  bool operator==(const Config& other) const { return data == other.data; }
   bool operator!=(const Config& other) const { return !(*this == other); }
 
-  Vertex*& operator[](size_t i) { return data[i]; }
-  Vertex* operator[](size_t i) const { return data[i]; }
+  State& operator[](size_t i) { return data[i]; }
+  State operator[](size_t i) const { return data[i]; }
 
   auto begin() { return data.begin(); }
   auto begin() const { return data.begin(); }
   auto end() { return data.end(); }
   auto end() const { return data.end(); }
 
-  void push_back(Vertex* v, int goal_index)
-  {
-    data.push_back(v);
-    goal_indices.push_back(goal_index);
-  }
+  void push_back(State s) { data.push_back(s); }
 
   bool enough_goals_reached(int threshold) const
   {
     int count = 0;
     for (size_t i = 0; i < size(); ++i) {
-      count += goal_indices[i];
+      count += data[i].goal_index;
       if (count >= threshold) return true;
     }
     return false;
   }
 
-  std::vector<int> goal_indices;
-
 private:
-  std::vector<Vertex*> data;
+  std::vector<State> data;
 };
 
 std::ostream& operator<<(std::ostream& os, const Config& c);
@@ -149,11 +134,13 @@ struct Graph {
   int size() const;  // the number of vertices, |V|
 };
 
-// hash function of configuration
 // c.f.
 // https://stackoverflow.com/questions/10405030/c-unordered-map-fail-when-used-with-a-vector-as-key
+struct StateHasher {
+  uint operator()(const State& s) const;
+};
 struct ConfigHasher {
-  uint operator()(const Config& C) const;
+  uint operator()(const Config& c) const;
 };
 
 std::ostream& operator<<(std::ostream& os, const Vertex* v);

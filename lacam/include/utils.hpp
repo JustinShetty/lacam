@@ -59,4 +59,4 @@ std::ostream& operator<<(std::ostream& os, std::vector<T> vec)
   return os;
 }
 
-uint hash_combine(uint a, uint b);
+uint hash_two_ints(uint a, uint b);

@@ -16,18 +16,16 @@ TEST(Graph, load_graph)
 
 TEST(Orientation, adjacent)
 {
+  Orientation none = Orientation::NONE;
   Orientation up = Orientation::UP;
   Orientation down = Orientation::DOWN;
   Orientation left = Orientation::LEFT;
   Orientation right = Orientation::RIGHT;
-  ASSERT_EQ(up.adjacent(),
-            std::vector<Orientation>({Orientation::LEFT, Orientation::RIGHT}));
-  ASSERT_EQ(down.adjacent(),
-            std::vector<Orientation>({Orientation::LEFT, Orientation::RIGHT}));
-  ASSERT_EQ(left.adjacent(),
-            std::vector<Orientation>({Orientation::UP, Orientation::DOWN}));
-  ASSERT_EQ(right.adjacent(),
-            std::vector<Orientation>({Orientation::UP, Orientation::DOWN}));
+  ASSERT_EQ(none.adjacent(), std::vector<Orientation>({none}));
+  ASSERT_EQ(up.adjacent(), std::vector<Orientation>({left, right}));
+  ASSERT_EQ(down.adjacent(), std::vector<Orientation>({left, right}));
+  ASSERT_EQ(left.adjacent(), std::vector<Orientation>({up, down}));
+  ASSERT_EQ(right.adjacent(), std::vector<Orientation>({up, down}));
 }
 
 TEST(State, get_neighbors)

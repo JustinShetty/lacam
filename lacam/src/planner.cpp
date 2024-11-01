@@ -1,14 +1,15 @@
 #include "../include/planner.hpp"
 
-Constraint::Constraint() : who(std::vector<int>()), where(Vertices()), depth(0)
+Constraint::Constraint()
+    : who(std::vector<int>()), where(std::vector<State>()), depth(0)
 {
 }
 
-Constraint::Constraint(Constraint* parent, int i, Vertex* v)
+Constraint::Constraint(Constraint* parent, int i, State s)
     : who(parent->who), where(parent->where), depth(parent->depth + 1)
 {
   who.push_back(i);
-  where.push_back(v);
+  where.push_back(s);
 }
 
 Constraint::~Constraint() {};
@@ -27,12 +28,12 @@ Node::Node(Config _C, DistTableMultiGoal& D, Node* _parent)
   if (parent == nullptr) {
     // initialize
     for (size_t i = 0; i < N; ++i) {
-      priorities[i] = (float)D.get(i, C.goal_indices[i], C[i]) / N;
+      priorities[i] = (float)D.get(i, C[i]) / N;
     }
   } else {
     // dynamic priorities, akin to PIBT
     for (size_t i = 0; i < N; ++i) {
-      if (D.get(i, C.goal_indices[i], C[i]) != 0) {
+      if (D.get(i, C[i]) != 0) {
         priorities[i] = parent->priorities[i] + 1;
       } else {
         priorities[i] = parent->priorities[i] - (int)parent->priorities[i];
@@ -66,7 +67,7 @@ Planner::Planner(const Instance* _ins, const Deadline* _deadline,
       N(ins->N),
       V_size(ins->G.size()),
       D(DistTableMultiGoal(ins)),
-      C_next(Candidates(N, std::array<Vertex*, 5>())),
+      // C_next(Candidates(N, std::array<Vertex*, 5>())),
       tie_breakers(std::vector<float>(V_size, 0)),
       A(Agents(N, nullptr)),
       occupied_now(Agents(V_size, nullptr)),
@@ -88,8 +89,6 @@ Solution Planner::solve()
 
   // insert initial node
   auto initial_config = ins->starts;
-  // initial_config.goal_indices =
-  //     calculate_goal_indices(ins, initial_config, initial_config);
   auto S = new Node(initial_config, D);
   OPEN.push(S);
   CLOSED[S->C] = S;
@@ -127,19 +126,20 @@ Solution Planner::solve()
     S->search_tree.pop();
     if (M->depth < N) {
       auto i = S->order[M->depth];
-      auto C = S->C[i]->neighbor;
-      C.push_back(S->C[i]);
-      if (MT != nullptr) std::shuffle(C.begin(), C.end(), *MT);  // randomize
-      for (auto u : C) S->search_tree.push(new Constraint(M, i, u));
+      auto candidates = S->C[i].get_neighbors();
+      candidates.push_back(S->C[i]);
+      if (MT != nullptr)
+        std::shuffle(candidates.begin(), candidates.end(), *MT);  // randomize
+      for (auto u : candidates) S->search_tree.push(new Constraint(M, i, u));
     }
 
     // create successors at the high-level search
     if (!get_new_config(S, M)) continue;
 
     // create new configuration
-    auto C = Config(N, nullptr);
-    for (auto a : A) C[a->id] = a->v_next;
-    C.goal_indices = ins->calculate_goal_indices(C, S->C);
+    auto C = Config(N);
+    for (auto a : A) C[a->id] = a->s_next;
+    ins->update_goal_indices(C, S->C);
 
     // check explored list
     auto iter = CLOSED.find(C);
@@ -171,30 +171,30 @@ bool Planner::get_new_config(Node* S, Constraint* M)
   // setup cache
   for (auto a : A) {
     // clear previous cache
-    if (a->v_now != nullptr && occupied_now[a->v_now->id] == a) {
-      occupied_now[a->v_now->id] = nullptr;
+    if (a->s_now.v != nullptr && occupied_now[a->s_now.v->id] == a) {
+      occupied_now[a->s_now.v->id] = nullptr;
     }
-    if (a->v_next != nullptr) {
-      occupied_next[a->v_next->id] = nullptr;
-      a->v_next = nullptr;
+    if (a->s_next.v != nullptr) {
+      occupied_next[a->s_next.v->id] = nullptr;
+      a->s_next = State();
     }
 
     // set occupied now
-    a->v_now = S->C[a->id];
-    occupied_now[a->v_now->id] = a;
+    a->s_now = S->C[a->id];
+    occupied_now[a->s_now.v->id] = a;
   }
 
   // add constraints
   for (auto k = 0; k < M->depth; ++k) {
-    const auto i = M->who[k];        // agent
-    const auto l = M->where[k]->id;  // loc
+    const auto i = M->who[k];          // agent
+    const auto l = M->where[k].v->id;  // loc
 
     // check vertex collision
     if (occupied_next[l] != nullptr) return false;
 
     if (allow_following) {
       // check swap collision
-      auto l_pre = S->C[i]->id;
+      auto l_pre = S->C[i].v->id;
       if (occupied_next[l_pre] != nullptr && occupied_now[l] != nullptr &&
           occupied_next[l_pre]->id == occupied_now[l]->id) {
         return false;
@@ -205,137 +205,135 @@ bool Planner::get_new_config(Node* S, Constraint* M)
     }
 
     // set occupied_next
-    A[i]->v_next = M->where[k];
+    A[i]->s_next = M->where[k];
     occupied_next[l] = A[i];
   }
 
   // perform PIBT
   for (auto k : S->order) {
     auto a = A[k];
-    if (a->v_next == nullptr && !funcPIBT(a, S->C.goal_indices))
+    if (a->s_next.v == nullptr && !funcPIBT(a))
       return false;  // planning failure
   }
   return true;
 }
 
-bool Planner::funcPIBT(Agent* ai, const std::vector<int>& goal_indices)
+bool Planner::funcPIBT(Agent* ai)
 {
-  if (allow_following) return funcPIBT_following(ai, goal_indices);
-  return funcPIBT_no_following(ai, nullptr, goal_indices);
+  // if (allow_following) return funcPIBT_following(ai);
+  return funcPIBT_no_following(ai, nullptr);
 }
 
-bool Planner::funcPIBT_following(Agent* ai,
-                                 const std::vector<int>& goal_indices)
+// bool Planner::funcPIBT_following(Agent* ai)
+// {
+//   const auto i = ai->id;
+//   const auto K = ai->v_now->neighbor.size();
+
+//   // get candidates for next locations
+//   for (size_t k = 0; k < K; ++k) {
+//     auto u = ai->v_now->neighbor[k];
+//     C_next[i][k] = u;
+//     if (MT != nullptr)
+//       tie_breakers[u->id] = get_random_float(MT);  // set tie-breaker
+//   }
+//   C_next[i][K] = ai->v_now;
+
+//   // sort, note: K + 1 is sufficient
+//   std::sort(C_next[i].begin(), C_next[i].begin() + K + 1,
+//             [&](Vertex* const v, Vertex* const u) {
+//               return D.get(i, goal_indices[i], v) + tie_breakers[v->id] <
+//                      D.get(i, goal_indices[i], u) + tie_breakers[u->id];
+//             });
+
+//   for (size_t k = 0; k < K + 1; ++k) {
+//     auto u = C_next[i][k];
+
+//     // avoid vertex conflicts
+//     if (occupied_next[u->id] != nullptr) continue;
+
+//     auto& ak = occupied_now[u->id];
+
+//     // avoid swap conflicts with constraints
+//     if (ak != nullptr && ak->v_next == ai->v_now) continue;
+
+//     // reserve next location
+//     occupied_next[u->id] = ai;
+//     ai->v_next = u;
+
+//     // empty or stay
+//     if (ak == nullptr || u == ai->v_now) return true;
+
+//     // priority inheritance
+//     if (ak->v_next == nullptr && !funcPIBT_following(ak, goal_indices))
+//       continue;
+
+//     // success to plan next one step
+//     return true;
+//   }
+
+//   // failed to secure node
+//   occupied_next[ai->v_now->id] = ai;
+//   ai->v_next = ai->v_now;
+//   return false;
+// }
+
+bool Planner::funcPIBT_no_following(Agent* ai, Agent* aj)
 {
   const auto i = ai->id;
-  const auto K = ai->v_now->neighbor.size();
+  const auto neighbors = ai->s_now.get_neighbors();
+  const auto K = neighbors.size();
 
   // get candidates for next locations
+  std::vector<State> candidates;
   for (size_t k = 0; k < K; ++k) {
-    auto u = ai->v_now->neighbor[k];
-    C_next[i][k] = u;
+    auto u = neighbors[k];
+    candidates.push_back(u);
     if (MT != nullptr)
-      tie_breakers[u->id] = get_random_float(MT);  // set tie-breaker
+      tie_breakers[u.v->id] = get_random_float(MT);  // set tie-breaker
   }
-  C_next[i][K] = ai->v_now;
-
-  // sort, note: K + 1 is sufficient
-  std::sort(C_next[i].begin(), C_next[i].begin() + K + 1,
-            [&](Vertex* const v, Vertex* const u) {
-              return D.get(i, goal_indices[i], v) + tie_breakers[v->id] <
-                     D.get(i, goal_indices[i], u) + tie_breakers[u->id];
-            });
-
-  for (size_t k = 0; k < K + 1; ++k) {
-    auto u = C_next[i][k];
-
-    // avoid vertex conflicts
-    if (occupied_next[u->id] != nullptr) continue;
-
-    auto& ak = occupied_now[u->id];
-
-    // avoid swap conflicts with constraints
-    if (ak != nullptr && ak->v_next == ai->v_now) continue;
-
-    // reserve next location
-    occupied_next[u->id] = ai;
-    ai->v_next = u;
-
-    // empty or stay
-    if (ak == nullptr || u == ai->v_now) return true;
-
-    // priority inheritance
-    if (ak->v_next == nullptr && !funcPIBT_following(ak, goal_indices))
-      continue;
-
-    // success to plan next one step
-    return true;
-  }
-
-  // failed to secure node
-  occupied_next[ai->v_now->id] = ai;
-  ai->v_next = ai->v_now;
-  return false;
-}
-
-bool Planner::funcPIBT_no_following(Agent* ai, Agent* aj,
-                                    const std::vector<int>& goal_indices)
-{
-  const auto i = ai->id;
-  const auto K = ai->v_now->neighbor.size();
-
-  // get candidates for next locations
-  for (size_t k = 0; k < K; ++k) {
-    auto u = ai->v_now->neighbor[k];
-    C_next[i][k] = u;
-    if (MT != nullptr)
-      tie_breakers[u->id] = get_random_float(MT);  // set tie-breaker
-  }
-  size_t num_candidates = K;
   if (aj == nullptr) {
-    C_next[i][K] = ai->v_now;
-    num_candidates++;
+    candidates.push_back(ai->s_now);
   }
 
   // sort
-  std::sort(C_next[i].begin(), C_next[i].begin() + num_candidates,
-            [&](Vertex* const v, Vertex* const u) {
-              return D.get(i, goal_indices[i], v) + tie_breakers[v->id] <
-                     D.get(i, goal_indices[i], u) + tie_breakers[u->id];
+  std::sort(candidates.begin(), candidates.begin() + candidates.size(),
+            [&](State s, State t) {
+              return D.get(i, s) + tie_breakers[s.v->id] <
+                     D.get(i, t) + tie_breakers[t.v->id];
             });
 
-  for (size_t k = 0; k < num_candidates; ++k) {
-    auto u = C_next[i][k];
+  for (size_t k = 0; k < candidates.size(); ++k) {
+    auto u = candidates[k];
 
     // avoid vertex conflicts
-    if (occupied_next[u->id] != nullptr) continue;
+    if (occupied_next[u.v->id] != nullptr) continue;
 
     // avoid following conflicts
-    auto& ak = occupied_now[u->id];
+    auto& ak = occupied_now[u.v->id];
     if (ak != nullptr && ak != ai) {
-      if (ak->v_next == nullptr) {
+      if (ak->s_next.v == nullptr) {
         // preemptively reserve current location
-        occupied_next[ai->v_now->id] = ai;
-        ai->v_next = ai->v_now;
+        occupied_next[ai->s_now.v->id] = ai;
+        ai->s_next = ai->s_now;
 
-        if (funcPIBT_no_following(ak, ai, goal_indices)) return true;
+        if (funcPIBT_no_following(ak, ai)) return true;
 
         // revert if priority inheritance failed
-        occupied_next[ai->v_now->id] = nullptr;
-        ai->v_next = nullptr;
+        occupied_next[ai->s_now.v->id] = nullptr;
+        ai->s_next = State();
       }
       continue;
     }
 
     // success
-    occupied_next[u->id] = ai;
-    ai->v_next = u;
+    occupied_next[u.v->id] = ai;
+    ai->s_next = u;
     return true;
   }
 
   // failed to secure node
-  occupied_next[ai->v_now->id] = ai;
-  ai->v_next = ai->v_now;
+  occupied_next[ai->s_now.v->id] = ai;
+  ai->s_next = ai->s_now;
   return false;
 }
 

@@ -17,7 +17,7 @@ std::vector<Orientation> Orientation::adjacent() const
     case RIGHT:
       return {Orientation::UP, Orientation::DOWN};
     default:
-      return {};
+      return {Orientation::NONE};
   }
 }
 
@@ -43,24 +43,28 @@ std::ostream& operator<<(std::ostream& os, const Orientation& o)
   return os;
 }
 
-State::State(const Vertex* _v, Orientation _o, int _goal_index)
-    : v(_v), o(_o), goal_index(_goal_index), neighbors()
+State::State(Vertex* _v, Orientation _o, int _goal_index)
+    : v(_v),
+      o(_o),
+      goal_index(_goal_index),
+      neighbors(),
+      neighbors_generated(false)
 {
 }
 
 std::vector<State> State::get_neighbors()
 {
-  if (!neighbors.has_value()) {
+  if (!neighbors_generated) {
     gen_neighbors();
   }
-  return neighbors.value();
+  return neighbors;
 }
 
 void State::gen_neighbors()
 {
   neighbors = std::vector<State>();
   for (auto oa : o.adjacent()) {
-    neighbors->emplace_back(v, oa, goal_index);
+    neighbors.emplace_back(v, oa, goal_index);
   }
   for (auto u : v->neighbor) {
     if (o == Orientation::UP && u->y != v->y + 1)
@@ -71,8 +75,9 @@ void State::gen_neighbors()
       continue;
     else if (o == Orientation::RIGHT && u->x != v->x + 1)
       continue;
-    neighbors->push_back({u, o, goal_index});
+    neighbors.push_back({u, o, goal_index});
   }
+  neighbors_generated = true;
 }
 
 std::ostream& operator<<(std::ostream& os, const State& s)
@@ -169,19 +174,19 @@ Graph::Graph(const std::string& filename) : V(Vertices()), width(0), height(0)
 
 int Graph::size() const { return V.size(); }
 
-uint ConfigHasher::operator()(const Config& C) const
+uint StateHasher::operator()(const State& s) const
 {
-  uint location_hash = C.size();
-  for (auto& v : C) {
-    location_hash ^=
-        v->id + 0x9e3779b9 + (location_hash << 6) + (location_hash >> 2);
+  return hash_two_ints(s.v->id, hash_two_ints(s.o, s.goal_index));
+}
+
+uint ConfigHasher::operator()(const Config& c) const
+{
+  StateHasher state_hasher;
+  uint hash = c.size();
+  for (auto& s : c) {
+    hash = hash_two_ints(hash, state_hasher(s));
   }
-  uint indices_hash = C.goal_indices.size();
-  for (auto& idx : C.goal_indices) {
-    indices_hash ^=
-        idx + 0x9e3779b9 + (indices_hash << 6) + (indices_hash >> 2);
-  }
-  return hash_combine(location_hash, indices_hash);
+  return hash;
 }
 
 std::ostream& operator<<(std::ostream& os, const Vertex* v)
@@ -190,14 +195,14 @@ std::ostream& operator<<(std::ostream& os, const Vertex* v)
   return os;
 }
 
-std::ostream& operator<<(std::ostream& os, const Config& c)
-{
-  os << "{ ";
-  std::copy(c.begin(), c.end(), std::ostream_iterator<Vertex*>(os, " "));
-  os << "} ";
-  os << "{ ";
-  std::copy(c.goal_indices.begin(), c.goal_indices.end(),
-            std::ostream_iterator<int>(os, " "));
-  os << "}";
-  return os;
-}
+// std::ostream& operator<<(std::ostream& os, const Config& c)
+// {
+//   os << "{ ";
+//   std::copy(c.begin(), c.end(), std::ostream_iterator<Vertex*>(os, " "));
+//   os << "} ";
+//   os << "{ ";
+//   std::copy(c.goal_indices.begin(), c.goal_indices.end(),
+//             std::ostream_iterator<int>(os, " "));
+//   os << "}";
+//   return os;
+// }

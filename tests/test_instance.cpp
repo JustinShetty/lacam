@@ -11,11 +11,9 @@ TEST(Instance, initialize)
   ASSERT_TRUE(ins.is_valid(0));
 
   ASSERT_EQ(ins.starts.size(), 3);
-  ASSERT_EQ(ins.goals.size(), 3);
-  ASSERT_EQ(ins.starts[0]->index, 203);
-  ASSERT_EQ(ins.goals[0]->index, 583);
-
-  ASSERT_EQ(ins.goals.goal_indices, std::vector<int>({0, 0, 0}));
+  ASSERT_EQ(ins.goal_sequences.size(), 3);
+  ASSERT_EQ(ins.starts[0].v->index, 203);
+  ASSERT_EQ(ins.goal_sequences[0].back().v->index, 583);
 }
 
 TEST(Instance, sequence)
@@ -24,17 +22,13 @@ TEST(Instance, sequence)
   const auto ins = Instance(map_filename, {0, 1}, {{2, 3, 4}, {5, 6, 7}});
 
   ASSERT_EQ(ins.starts.size(), 2);
-  ASSERT_EQ(ins.goals.size(), 2);
-  ASSERT_EQ(ins.starts[0]->index, 0);
-  ASSERT_EQ(ins.goals[0]->index, 4);
+  ASSERT_EQ(ins.goal_sequences.size(), 2);
+  ASSERT_EQ(ins.starts[0].v->index, 0);
+  ASSERT_EQ(ins.goal_sequences[0].back().v->index, 4);
 
   ASSERT_EQ(ins.goal_sequences.size(), 2);
-  ASSERT_EQ(ins.goal_sequences[0].front()->index, 2);
-  ASSERT_EQ(ins.goal_sequences[0].back()->index, 4);
-  ASSERT_EQ(ins.goal_sequences[1].front()->index, 5);
-  ASSERT_EQ(ins.goal_sequences[1].back()->index, 7);
-
-  Config goals({ins.G.U[4], ins.G.U[7]});
-  goals.goal_indices = {2, 2};
-  ASSERT_EQ(ins.goals, goals);
+  ASSERT_EQ(ins.goal_sequences[0].front().v->index, 2);
+  ASSERT_EQ(ins.goal_sequences[0].back().v->index, 4);
+  ASSERT_EQ(ins.goal_sequences[1].front().v->index, 5);
+  ASSERT_EQ(ins.goal_sequences[1].back().v->index, 7);
 }

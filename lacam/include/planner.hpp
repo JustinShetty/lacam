@@ -11,10 +11,10 @@
 // low-level search node
 struct Constraint {
   std::vector<int> who;
-  Vertices where;
+  std::vector<State> where;
   const int depth;
   Constraint();
-  Constraint(Constraint* parent, int i, Vertex* v);  // who and where
+  Constraint(Constraint* parent, int i, State s);  // who and where
   ~Constraint();
 };
 
@@ -36,14 +36,14 @@ using Nodes = std::vector<Node*>;
 // PIBT agent
 struct Agent {
   const int id;
-  Vertex* v_now;   // current location
-  Vertex* v_next;  // next location
-  Agent(int _id) : id(_id), v_now(nullptr), v_next(nullptr) {}
+  State s_now;   // current state
+  State s_next;  // next state
+  Agent(int _id) : id(_id), s_now(), s_next() {}
 };
 using Agents = std::vector<Agent*>;
 
 // next location candidates, for saving memory allocation
-using Candidates = std::vector<std::array<Vertex*, 5> >;
+// using Candidates = std::vector<std::array<Vertex*, 5> >;
 
 struct Planner {
   const Instance* ins;
@@ -57,7 +57,7 @@ struct Planner {
   const int N;  // number of agents
   const int V_size;
   DistTableMultiGoal D;
-  Candidates C_next;                // next location candidates
+  // Candidates C_next;                // next location candidates
   std::vector<float> tie_breakers;  // random values, used in PIBT
   Agents A;
   Agents occupied_now;   // for quick collision checking
@@ -67,10 +67,9 @@ struct Planner {
           int _verbose = 0, int _threshold = 1, bool _allow_following = false);
   Solution solve();
   bool get_new_config(Node* S, Constraint* M);
-  bool funcPIBT(Agent* ai, const std::vector<int>& goal_indices);
-  bool funcPIBT_following(Agent* ai, const std::vector<int>& goal_indices);
-  bool funcPIBT_no_following(Agent* ai, Agent* aj,
-                             const std::vector<int>& goal_indices);
+  bool funcPIBT(Agent* ai);
+  // bool funcPIBT_following(Agent* ai);
+  bool funcPIBT_no_following(Agent* ai, Agent* aj);
 };
 
 // main function

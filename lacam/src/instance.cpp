@@ -8,17 +8,17 @@ Instance::Instance(const std::string& map_filename,
                    const bool _consider_orientation)
     : G(map_filename),
       starts(Config()),
-      goals(Config()),
       N(start_indexes.size()),
       consider_orientation(_consider_orientation)
 {
-  for (auto k : start_indexes) starts.push_back(G.U[k], 0);
-  for (auto k : goal_indexes) {
-    auto vp = G.U[k];
-    goals.push_back(vp, 0);
-    goal_sequences.push_back(std::vector<Vertex*>{vp});
+  for (auto k : start_indexes) {
+    starts.push_back(State(G.U[k], Orientation::NONE, 0));
   }
-  starts.goal_indices = calculate_goal_indices(starts, starts);
+  for (auto k : goal_indexes) {
+    goal_sequences.push_back(
+        std::vector<State>{State(G.U[k], Orientation::NONE, 0)});
+  }
+  update_goal_indices(starts, starts);
 }
 
 Instance::Instance(const std::string& map_filename,
@@ -27,18 +27,18 @@ Instance::Instance(const std::string& map_filename,
                    const bool _consider_orientation)
     : G(map_filename),
       starts(Config()),
-      goals(Config()),
       N(start_indexes.size()),
       consider_orientation(_consider_orientation)
 {
-  for (auto k : start_indexes) starts.push_back(G.U[k], 0);
+  for (auto k : start_indexes)
+    starts.push_back(State(G.U[k], Orientation::NONE, 0));
   for (auto goal_sequence : goal_index_sequences) {
-    std::vector<Vertex*> as_vertices;
-    for (auto k : goal_sequence) as_vertices.push_back(G.U[k]);
-    goal_sequences.push_back(as_vertices);
-    goals.push_back(as_vertices.back(), as_vertices.size() - 1);
+    std::vector<State> as_states;
+    for (auto k : goal_sequence)
+      as_states.push_back(State(G.U[k], Orientation::NONE, 0));
+    goal_sequences.push_back(as_states);
   }
-  starts.goal_indices = calculate_goal_indices(starts, starts);
+  update_goal_indices(starts, starts);
 }
 
 // for load instance
@@ -50,7 +50,6 @@ Instance::Instance(const std::string& scen_filename,
                    const bool _consider_orientation)
     : G(Graph(map_filename)),
       starts(Config()),
-      goals(Config()),
       N(_N),
       consider_orientation(_consider_orientation)
 {
@@ -77,21 +76,20 @@ Instance::Instance(const std::string& scen_filename,
       auto s = G.U[G.width * y_s + x_s];
       auto g = G.U[G.width * y_g + x_g];
       if (s == nullptr || g == nullptr) continue;
-      starts.push_back(s, 0);
-      goals.push_back(g, 0);
-      goal_sequences.push_back(std::vector<Vertex*>{g});
+      starts.push_back(State(s, Orientation::NONE, 0));
+      goal_sequences.push_back(
+          std::vector<State>{State(g, Orientation::NONE, 0)});
     }
 
     if (starts.size() == N) break;
   }
-  starts.goal_indices = calculate_goal_indices(starts, starts);
+  update_goal_indices(starts, starts);
 }
 
 Instance::Instance(const std::string& map_filename, std::mt19937* MT,
                    const int _N, const bool _consider_orientation)
     : G(Graph(map_filename)),
       starts(Config()),
-      goals(Config()),
       N(_N),
       consider_orientation(_consider_orientation)
 {
@@ -105,7 +103,7 @@ Instance::Instance(const std::string& map_filename, std::mt19937* MT,
   int i = 0;
   while (true) {
     if (i >= K) return;
-    starts.push_back(G.V[s_indexes[i]], 0);
+    starts.push_back(State(G.V[s_indexes[i]], Orientation::NONE, 0));
     if (starts.size() == N) break;
     ++i;
   }
@@ -117,19 +115,17 @@ Instance::Instance(const std::string& map_filename, std::mt19937* MT,
   int j = 0;
   while (true) {
     if (j >= K) return;
-    auto vp = G.V[g_indexes[j]];
-    goals.push_back(vp, 0);
-    goal_sequences.push_back(std::vector<Vertex*>{vp});
-    if (goals.size() == N) break;
+    goal_sequences.push_back(
+        std::vector<State>{State(G.V[g_indexes[j]], Orientation::NONE, 0)});
+    if (goal_sequences.size() == N) break;
     ++j;
   }
-
-  starts.goal_indices = calculate_goal_indices(starts, starts);
+  update_goal_indices(starts, starts);
 }
 
 bool Instance::is_valid(const int verbose) const
 {
-  if (N != starts.size() || N != goals.size()) {
+  if (N != starts.size() || N != goal_sequences.size()) {
     info(1, verbose, "invalid N, check instance");
     return false;
   }
@@ -146,18 +142,16 @@ int Instance::get_total_goals() const
   return total_goals;
 }
 
-std::vector<int> Instance::calculate_goal_indices(const Config& c,
-                                                  const Config& c_prev) const
+void Instance::update_goal_indices(Config& c, const Config& c_prev) const
 {
-  auto goal_indices = c_prev.goal_indices;
   for (size_t i = 0; i < N; ++i) {
-    const auto current_location = c[i];
+    const auto current = c[i];
     const auto goal_seq = goal_sequences[i];
-    auto& goal_idx = goal_indices[i];
-    const auto next_goal = goal_seq[goal_indices[i]];
-    if (current_location == next_goal && goal_idx < (int)goal_seq.size()) {
+    auto goal_idx = c_prev[i].goal_index;
+    const auto next_goal = goal_seq[goal_idx];
+    if (current == next_goal && goal_idx < (int)goal_seq.size()) {
       goal_idx += 1;
     }
+    c[i] = State(current.v, current.o, goal_idx);
   }
-  return goal_indices;
 }

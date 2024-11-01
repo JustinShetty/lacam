@@ -8,12 +8,10 @@
 #include "utils.hpp"
 
 struct Instance {
-  const Graph G;  // graph
-  Config starts;  // initial configuration
-  Config goals;   // goal configuration
-  std::vector<std::vector<Vertex*>>
-      goal_sequences;  // agent id -> goal sequence
-  const uint N;        // number of agents
+  const Graph G;                                   // graph
+  Config starts;                                   // initial configuration
+  std::vector<std::vector<State>> goal_sequences;  // agent id -> goal sequence
+  const uint N;                                    // number of agents
   const bool consider_orientation;
 
   // for testing
@@ -38,8 +36,7 @@ struct Instance {
 
   int get_total_goals() const;
 
-  std::vector<int> calculate_goal_indices(const Config& c,
-                                          const Config& c_prev) const;
+  void update_goal_indices(Config& c, const Config& c_prev) const;
 };
 
 // solution: a sequence of configurations
