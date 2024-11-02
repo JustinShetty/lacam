@@ -64,8 +64,15 @@ public:
   Orientation o;
   int goal_index;
 
-  State() : v(nullptr), o(Orientation::NONE), goal_index(0) {}
-  State(Vertex* _v, int _goal_index, Orientation _o = Orientation::NONE);
+  State() : State(nullptr, 0) {}
+  State(Vertex* _v, int _goal_index, Orientation _o = Orientation::NONE)
+      : v(_v),
+        o(_o),
+        goal_index(_goal_index),
+        neighbors(),
+        neighbors_generated(false)
+  {
+  }
 
   inline std::vector<State> get_neighbors()
   {

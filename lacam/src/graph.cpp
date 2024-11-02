@@ -43,18 +43,9 @@ std::ostream& operator<<(std::ostream& os, const Orientation& o)
   return os;
 }
 
-State::State(Vertex* _v, int _goal_index, Orientation _o)
-    : v(_v),
-      o(_o),
-      goal_index(_goal_index),
-      neighbors(),
-      neighbors_generated(false)
-{
-}
-
 void State::gen_neighbors()
 {
-  neighbors = std::vector<State>();
+  neighbors.reserve(4);
   for (auto oa : o.adjacent()) {
     neighbors.emplace_back(v, goal_index, oa);
   }
