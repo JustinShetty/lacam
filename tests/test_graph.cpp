@@ -17,10 +17,10 @@ TEST(Graph, load_graph)
 TEST(Orientation, adjacent)
 {
   Orientation none = Orientation::NONE;
-  Orientation up = Orientation::UP;
-  Orientation down = Orientation::DOWN;
-  Orientation left = Orientation::LEFT;
-  Orientation right = Orientation::RIGHT;
+  Orientation up = Orientation::Y_PLUS;
+  Orientation down = Orientation::X_MINUS;
+  Orientation left = Orientation::Y_MINUS;
+  Orientation right = Orientation::X_PLUS;
   ASSERT_EQ(none.adjacent(), std::vector<Orientation>());
   ASSERT_EQ(up.adjacent(), std::vector<Orientation>({left, right}));
   ASSERT_EQ(down.adjacent(), std::vector<Orientation>({left, right}));
@@ -32,11 +32,11 @@ TEST(State, get_neighbors)
 {
   const std::string filename = "./assets/random-32-32-10.map";
   auto G = Graph(filename);
-  auto s = State(G.V[0], 0, Orientation::UP);
+  auto s = State(G.V[0], 0, Orientation::Y_PLUS);
   auto neighbors = s.get_neighbors();
-  std::vector<State> expected_neighbors = {State(G.V[0], 0, Orientation::LEFT),
-                                           State(G.V[0], 0, Orientation::RIGHT),
-                                           State(G.U[32], 0, Orientation::UP)};
+  std::vector<State> expected_neighbors = {State(G.V[0], 0, Orientation::Y_MINUS),
+                                           State(G.V[0], 0, Orientation::X_PLUS),
+                                           State(G.U[32], 0, Orientation::Y_PLUS)};
   ASSERT_EQ(neighbors.size(), expected_neighbors.size());
   for (size_t i = 0; i < neighbors.size(); ++i) {
     ASSERT_EQ(neighbors[i], expected_neighbors[i]);

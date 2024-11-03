@@ -8,14 +8,14 @@ Vertex::Vertex(int _x, int _y, int _id, int _index)
 std::vector<Orientation> Orientation::adjacent() const
 {
   switch (value) {
-    case UP:
-      return {Orientation::LEFT, Orientation::RIGHT};
-    case LEFT:
-      return {Orientation::UP, Orientation::DOWN};
-    case DOWN:
-      return {Orientation::LEFT, Orientation::RIGHT};
-    case RIGHT:
-      return {Orientation::UP, Orientation::DOWN};
+    case Y_PLUS:
+      return {Orientation::Y_MINUS, Orientation::X_PLUS};
+    case Y_MINUS:
+      return {Orientation::Y_PLUS, Orientation::X_MINUS};
+    case X_MINUS:
+      return {Orientation::Y_MINUS, Orientation::X_PLUS};
+    case X_PLUS:
+      return {Orientation::Y_PLUS, Orientation::X_MINUS};
     default:
       return {};
   }
@@ -24,17 +24,17 @@ std::vector<Orientation> Orientation::adjacent() const
 std::ostream& operator<<(std::ostream& os, const Orientation& o)
 {
   switch (o) {
-    case Orientation::UP:
-      os << "UP";
+    case Orientation::Y_PLUS:
+      os << "Y_PLUS";
       break;
-    case Orientation::LEFT:
-      os << "LEFT";
+    case Orientation::Y_MINUS:
+      os << "Y_MINUS";
       break;
-    case Orientation::DOWN:
-      os << "DOWN";
+    case Orientation::X_MINUS:
+      os << "X_MINUS";
       break;
-    case Orientation::RIGHT:
-      os << "RIGHT";
+    case Orientation::X_PLUS:
+      os << "X_PLUS";
       break;
     default:
       os << "NONE";
@@ -50,13 +50,13 @@ void State::gen_neighbors()
     neighbors.emplace_back(v, goal_index, oa);
   }
   for (auto u : v->neighbor) {
-    if (o == Orientation::UP && u->y != v->y + 1)
+    if (o == Orientation::Y_PLUS && u->y != v->y + 1)
       continue;
-    else if (o == Orientation::DOWN && u->y != v->y - 1)
+    else if (o == Orientation::X_MINUS && u->y != v->y - 1)
       continue;
-    else if (o == Orientation::LEFT && u->x != v->x - 1)
+    else if (o == Orientation::Y_MINUS && u->x != v->x - 1)
       continue;
-    else if (o == Orientation::RIGHT && u->x != v->x + 1)
+    else if (o == Orientation::X_PLUS && u->x != v->x + 1)
       continue;
     neighbors.push_back({u, goal_index, o});
   }

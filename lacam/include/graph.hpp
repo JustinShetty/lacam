@@ -21,10 +21,10 @@ class Orientation
 public:
   enum Value : uint8_t {
     NONE = 0,
-    UP = 1,
-    LEFT = 2,
-    DOWN = 3,
-    RIGHT = 4,
+    X_MINUS = 1,
+    X_PLUS = 2,
+    Y_MINUS = 3,
+    Y_PLUS = 4,
     NUM_ORIENTATIONS = 5
   };
 

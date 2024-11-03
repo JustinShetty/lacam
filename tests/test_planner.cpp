@@ -25,12 +25,12 @@ TEST(planner, basic_with_orientation)
   const auto G = std::shared_ptr<Graph>(new Graph(map_filename));
   const auto N = 2;
   const std::vector<State> starts = {
-      State(G->U[0], 0, Orientation::DOWN),
-      State(G->U[3], 0, Orientation::RIGHT),
+      State(G->U[0], 0, Orientation::X_MINUS),
+      State(G->U[3], 0, Orientation::X_PLUS),
   };
   const std::vector<std::vector<State>> goals{
-      {State(G->U[3], 0, Orientation::UP)},
-      {State(G->U[0], 0, Orientation::LEFT)},
+      {State(G->U[3], 0, Orientation::Y_PLUS)},
+      {State(G->U[0], 0, Orientation::Y_MINUS)},
   };
   const Instance ins(G, starts, goals);
   ASSERT_TRUE(ins.is_valid(VERBOSITY));

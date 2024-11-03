@@ -18,9 +18,9 @@ TEST(dist_table, orientation)
   const auto map_filename = "./tests/assets/2x2.map";
   const auto G = new Graph(map_filename);
   const std::vector<State> starts = {
-      State(G->U[0], 0, Orientation::DOWN)};  // (0,0)
+      State(G->U[0], 0, Orientation::X_MINUS)};  // (0,0)
   const std::vector<std::vector<State>> goal_sequences = {
-      {State(G->U[3], 0, Orientation::UP)}};  // (1,1)
+      {State(G->U[3], 0, Orientation::Y_PLUS)}};  // (1,1)
   const auto ins = Instance(std::shared_ptr<Graph>(G), starts, goal_sequences);
   auto dist_table = DistTableMultiGoal(ins);
 
