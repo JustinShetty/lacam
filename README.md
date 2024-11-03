@@ -1,4 +1,4 @@
-p-lacam (pLaCAM, Practical LaCAM)
+pLaCAM (Practical LaCAM)
 ---
 [![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE)
 [![CI](https://github.com/justinshetty/early-exit-lacam/actions/workflows/ci.yml/badge.svg)](https://github.com/justinshetty/early-exit-lacam/actions/workflows/ci.yml)
