@@ -19,6 +19,27 @@ TEST(planner, basic)
   ASSERT_TRUE(is_feasible_solution(ins, solution, VERBOSITY, N, false));
 }
 
+TEST(planner, basic_with_orientation)
+{
+  const auto map_filename = "./tests/assets/2x2.map";
+  const auto G = std::shared_ptr<Graph>(new Graph(map_filename));
+  const auto N = 2;
+  const std::vector<State> starts = {
+      State(G->U[0], 0, Orientation::DOWN),
+      State(G->U[3], 0, Orientation::RIGHT),
+  };
+  const std::vector<std::vector<State>> goals{
+      {State(G->U[3], 0, Orientation::UP)},
+      {State(G->U[0], 0, Orientation::LEFT)},
+  };
+  const Instance ins(G, starts, goals);
+  ASSERT_TRUE(ins.is_valid(VERBOSITY));
+
+  auto solution = solve(ins, VERBOSITY, nullptr, nullptr, N);
+  ASSERT_GT(solution.size(), 0);
+  ASSERT_TRUE(is_feasible_solution(ins, solution, VERBOSITY, N, false));
+}
+
 TEST(planner, solve)
 {
   const auto scen_filename = "./assets/random-32-32-10-random-1.scen";

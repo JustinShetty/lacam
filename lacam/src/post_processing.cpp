@@ -169,8 +169,6 @@ void make_log(const Instance& ins, const Solution& solution,
   auto dist_table = DistTableMultiGoal(ins);
 
   // log for visualizer
-  auto get_x = [&](int k) { return k % ins.G->width; };
-  auto get_y = [&](int k) { return k / ins.G->width; };
   std::ofstream log;
   log.open(output_name, std::ios::out);
   log << "agents=" << ins.N << "\n";
@@ -206,7 +204,11 @@ void make_log(const Instance& ins, const Solution& solution,
     log << t << ":";
     auto C = solution[t];
     for (auto s : C) {
-      log << "(" << get_x(s.v->index) << "," << get_y(s.v->index) << "),";
+      log << "(" << s.v->x << "," << s.v->y;
+      if (s.o != Orientation::NONE) {
+        log << "," << s.o;
+      }
+      log << "),";
     }
     log << "\n";
   }
