@@ -9,13 +9,13 @@ std::vector<Orientation> Orientation::adjacent() const
 {
   switch (value) {
     case Y_PLUS:
-      return {Orientation::Y_MINUS, Orientation::X_PLUS};
+      return {Orientation::X_MINUS, Orientation::X_PLUS};
     case Y_MINUS:
-      return {Orientation::Y_PLUS, Orientation::X_MINUS};
+      return {Orientation::X_MINUS, Orientation::X_PLUS};
     case X_MINUS:
-      return {Orientation::Y_MINUS, Orientation::X_PLUS};
+      return {Orientation::Y_MINUS, Orientation::Y_PLUS};
     case X_PLUS:
-      return {Orientation::Y_PLUS, Orientation::X_MINUS};
+      return {Orientation::Y_MINUS, Orientation::Y_PLUS};
     default:
       return {};
   }
@@ -46,17 +46,17 @@ std::ostream& operator<<(std::ostream& os, const Orientation& o)
 void State::gen_neighbors()
 {
   neighbors.reserve(4);
-  for (auto oa : o.adjacent()) {
-    neighbors.emplace_back(v, goal_index, oa);
+  for (auto adjacent_orientation : o.adjacent()) {
+    neighbors.emplace_back(v, goal_index, adjacent_orientation);
   }
   for (auto u : v->neighbor) {
+    if (o == Orientation::Y_MINUS && u->y != v->y - 1)
+      continue;
     if (o == Orientation::Y_PLUS && u->y != v->y + 1)
       continue;
-    else if (o == Orientation::X_MINUS && u->y != v->y - 1)
+    if (o == Orientation::X_MINUS && u->x != v->x - 1)
       continue;
-    else if (o == Orientation::Y_MINUS && u->x != v->x - 1)
-      continue;
-    else if (o == Orientation::X_PLUS && u->x != v->x + 1)
+    if (o == Orientation::X_PLUS && u->x != v->x + 1)
       continue;
     neighbors.push_back({u, goal_index, o});
   }
