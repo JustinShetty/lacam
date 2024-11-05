@@ -41,19 +41,18 @@ int DistTableMultiGoal::get(int agent_id, const State& from)
    * https://www.aaai.org/Papers/AIIDE/2005/AIIDE05-020.pdf
    */
 
-  const auto K = ins->G->size();
   const auto next_goal = ins->goal_sequences[agent_id][goal_index];
   while (!OPEN[agent_id].empty()) {
     auto n = OPEN[agent_id].front();
     OPEN[agent_id].pop();
     if (table[agent_id].find(n) == table[agent_id].end()) {
-      table[agent_id][n] = K;
+      table[agent_id][n] = INT_MAX;
     }
     auto d_n = table[agent_id][n];
     const auto neighbors = n.get_neighbors();
     for (const auto& m : neighbors) {
       if (table[agent_id].find(m) == table[agent_id].end()) {
-        table[agent_id][m] = K;
+        table[agent_id][m] = INT_MAX;
       }
       auto d_m = table[agent_id][m];
       if (d_n + 1 >= d_m) continue;
@@ -62,5 +61,5 @@ int DistTableMultiGoal::get(int agent_id, const State& from)
     }
     if (n == from) return d_n;
   }
-  return K;
+  return INT_MAX;
 }
