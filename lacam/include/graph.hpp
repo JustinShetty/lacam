@@ -70,6 +70,7 @@ public:
         o(_o),
         goal_index(_goal_index),
         neighbors(),
+        in_neighbors(),
         neighbors_generated(false)
   {
   }
@@ -80,6 +81,12 @@ public:
     return neighbors;
   }
 
+  inline std::vector<State> get_in_neighbors()
+  {
+    if (!neighbors_generated) gen_neighbors();
+    return in_neighbors;
+  }
+
   bool operator==(const State& other) const
   {
     return v == other.v && o == other.o && goal_index == other.goal_index;
@@ -88,6 +95,7 @@ public:
 
 private:
   std::vector<State> neighbors;
+  std::vector<State> in_neighbors;
   bool neighbors_generated;
   void gen_neighbors();
 };

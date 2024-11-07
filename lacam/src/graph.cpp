@@ -45,20 +45,28 @@ std::ostream& operator<<(std::ostream& os, const Orientation& o)
 
 void State::gen_neighbors()
 {
-  neighbors.reserve(4);
   for (auto adjacent_orientation : o.adjacent()) {
-    neighbors.emplace_back(v, goal_index, adjacent_orientation);
+    const State s(v, goal_index, adjacent_orientation);
+    neighbors.emplace_back(s);
+    in_neighbors.emplace_back(s);
   }
   for (auto u : v->neighbor) {
-    if (o == Orientation::Y_MINUS && u->y != v->y - 1)
-      continue;
-    if (o == Orientation::Y_PLUS && u->y != v->y + 1)
-      continue;
-    if (o == Orientation::X_MINUS && u->x != v->x - 1)
-      continue;
-    if (o == Orientation::X_PLUS && u->x != v->x + 1)
-      continue;
-    neighbors.push_back({u, goal_index, o});
+    auto candidate = State(u, goal_index, o);
+    if (o == Orientation::Y_MINUS) {
+      if (u->y == v->y - 1) neighbors.push_back(candidate);
+      if (u->y == v->y + 1) in_neighbors.push_back(candidate);
+    } else if (o == Orientation::Y_PLUS) {
+      if (u->y == v->y + 1) neighbors.push_back(candidate);
+      if (u->y == v->y - 1) in_neighbors.push_back(candidate);
+    } else if (o == Orientation::X_MINUS) {
+      if (u->x == v->x - 1) neighbors.push_back(candidate);
+      if (u->x == v->x + 1) in_neighbors.push_back(candidate);
+    } else if (o == Orientation::X_PLUS) {
+      if (u->x == v->x + 1) neighbors.push_back(candidate);
+      if (u->x == v->x - 1) in_neighbors.push_back(candidate);
+    } else {
+      neighbors.push_back(candidate);
+    }
   }
   neighbors_generated = true;
 }
