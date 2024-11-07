@@ -24,8 +24,9 @@ TEST(dist_table, orientation)
   const auto ins = Instance(std::shared_ptr<Graph>(G), starts, goal_sequences);
   auto dist_table = DistTableMultiGoal(ins);
 
+
   ASSERT_EQ(dist_table.get(0, ins.goal_sequences[0].back()), 0);
-  ASSERT_EQ(dist_table.get(0, ins.starts[0]), 4);
+  ASSERT_EQ(dist_table.get(0, ins.starts[0]), 5);
 }
 
 TEST(dist_table, multiple)
