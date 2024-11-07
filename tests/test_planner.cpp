@@ -36,7 +36,7 @@ TEST(planner, basic_with_orientation)
   ASSERT_TRUE(ins.is_valid(VERBOSITY));
 
   auto solution = solve(ins, VERBOSITY, nullptr, nullptr, N);
-  ASSERT_GT(solution.size(), 0);
+  ASSERT_EQ(solution.size(), 6);
   ASSERT_TRUE(is_feasible_solution(ins, solution, VERBOSITY, N, false));
 }
 

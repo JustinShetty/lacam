@@ -49,7 +49,8 @@ int DistTableMultiGoal::get(int agent_id, const State& from)
       table[agent_id][n] = INT_MAX;
     }
     auto d_n = table[agent_id][n];
-    const auto neighbors = n.get_neighbors();
+    const auto neighbors =
+        (n.o == Orientation::NONE) ? n.get_neighbors() : n.get_in_neighbors();
     for (const auto& m : neighbors) {
       if (table[agent_id].find(m) == table[agent_id].end()) {
         table[agent_id][m] = INT_MAX;
