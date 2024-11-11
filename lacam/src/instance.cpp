@@ -130,6 +130,20 @@ bool Instance::is_valid(const int verbose) const
     return false;
   }
 
+  bool consider_orientation = starts[0].o != Orientation::NONE;
+  for (int i = 0; i < N; i++) {
+    if (consider_orientation ^ (starts[i].o != Orientation::NONE)) {
+      info(1, verbose, "invalid start orientation(agent ", i ,"). check instance");
+      return false;
+    }
+    for (int j = 0; j < goal_sequences[i].size(); j++) {
+      if (consider_orientation ^ (goal_sequences[i][j].o != Orientation::NONE)) {
+        info(1, verbose, "invalid goal orientation(agent ", i ,", goal ", j, "). check instance");
+        return false;
+      }
+    }
+  }
+
   return true;
 }
 
