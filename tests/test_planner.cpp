@@ -84,6 +84,30 @@ TEST(planner, benchmark)
       is_feasible_solution(ins, solution, VERBOSITY, N, allow_following));
 }
 
+TEST(planner, benchmark_with_orientation)
+{
+  auto MT = std::mt19937(0);
+  const auto allow_following = true;
+  const auto scen_filename = "./assets/random-32-32-10-random-1.scen";
+  const auto map_filename = "./assets/random-32-32-10.map";
+  const auto N = 50;
+
+  auto ins = Instance(scen_filename, map_filename, N);
+  ASSERT_TRUE(ins.is_valid(VERBOSITY));
+  std::uniform_int_distribution<int> dist(1, 4); // uniform over [1, 4]
+  for (int i = 0; i < N; i++)
+  {
+    ins.starts[i].o = static_cast<Orientation::Value>(dist(MT));
+    ins.goal_sequences[i][0].o = static_cast<Orientation::Value>(dist(MT));
+  }
+  ASSERT_TRUE(ins.is_valid(VERBOSITY));
+
+  auto solution = solve(ins, VERBOSITY, nullptr, &MT, N, allow_following);
+  ASSERT_GT(solution.size(), 0);
+  ASSERT_TRUE(
+      is_feasible_solution(ins, solution, VERBOSITY, N, allow_following));
+}
+
 TEST(planner, solve_multiple_goals_2x2)
 {
   const auto map_filename = "./tests/assets/2x2.map";
