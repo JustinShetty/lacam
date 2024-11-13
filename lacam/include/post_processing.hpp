@@ -2,10 +2,11 @@
  * post processing, e.g., calculating solution quality
  */
 #pragma once
+#include <optional>
+
 #include "dist_table.hpp"
 #include "instance.hpp"
 #include "utils.hpp"
-#include <optional>
 
 bool is_feasible_solution(const Instance& ins, const Solution& solution,
                           const int verbose, const std::optional<int> threshold,

@@ -94,9 +94,8 @@ TEST(planner, benchmark_with_orientation)
 
   auto ins = Instance(scen_filename, map_filename, N);
   ASSERT_TRUE(ins.is_valid(VERBOSITY));
-  std::uniform_int_distribution<int> dist(1, 4); // uniform over [1, 4]
-  for (int i = 0; i < N; i++)
-  {
+  std::uniform_int_distribution<int> dist(1, 4);  // uniform over [1, 4]
+  for (int i = 0; i < N; i++) {
     ins.starts[i].o = static_cast<Orientation::Value>(dist(MT));
     ins.goal_sequences[i][0].o = static_cast<Orientation::Value>(dist(MT));
   }
@@ -119,9 +118,11 @@ TEST(planner, solve_multiple_goals_2x2)
 
   const auto threshold = std::nullopt;
   const auto allow_following = false;
-  auto solution = solve(ins, VERBOSITY, nullptr, nullptr, threshold, allow_following);
+  auto solution =
+      solve(ins, VERBOSITY, nullptr, nullptr, threshold, allow_following);
   ASSERT_GT(solution.size(), 0);
-  ASSERT_TRUE(is_feasible_solution(ins, solution, VERBOSITY, threshold, allow_following));
+  ASSERT_TRUE(is_feasible_solution(ins, solution, VERBOSITY, threshold,
+                                   allow_following));
 }
 
 TEST(planner, solve_multiple_goals_2x2_2agents)
@@ -135,9 +136,11 @@ TEST(planner, solve_multiple_goals_2x2_2agents)
 
   const auto threshold = std::nullopt;
   const auto allow_following = false;
-  auto solution = solve(ins, VERBOSITY, nullptr, nullptr, threshold, allow_following);
+  auto solution =
+      solve(ins, VERBOSITY, nullptr, nullptr, threshold, allow_following);
   ASSERT_GT(solution.size(), 0);
-  ASSERT_TRUE(is_feasible_solution(ins, solution, VERBOSITY, threshold, allow_following));
+  ASSERT_TRUE(is_feasible_solution(ins, solution, VERBOSITY, threshold,
+                                   allow_following));
 }
 
 TEST(planner, solve_multiple_goals_32x32a)

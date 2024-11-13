@@ -15,9 +15,10 @@ bool is_feasible_solution(const Instance& ins, const Solution& solution,
   }
 
   // check goal locations
-  const bool goal_ok = threshold.has_value()
-                           ? solution.back().enough_goals_reached(threshold.value())
-                           : ins.is_goal_config(solution.back());
+  const bool goal_ok =
+      threshold.has_value()
+          ? solution.back().enough_goals_reached(threshold.value())
+          : ins.is_goal_config(solution.back());
   if (!goal_ok) {
     info(1, verbose, "invalid goals");
     return false;

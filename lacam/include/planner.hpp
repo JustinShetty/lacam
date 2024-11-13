@@ -3,11 +3,12 @@
  */
 #pragma once
 
+#include <optional>
+
 #include "dist_table.hpp"
 #include "graph.hpp"
 #include "instance.hpp"
 #include "utils.hpp"
-#include <optional>
 
 // low-level search node
 struct Constraint {
@@ -61,7 +62,8 @@ struct Planner {
   Agents occupied_next;  // for quick collision checking
 
   Planner(const Instance* _ins, const Deadline* _deadline, std::mt19937* _MT,
-          int _verbose = 0, const std::optional<int> threshold = std::nullopt, bool _allow_following = false);
+          int _verbose = 0, const std::optional<int> threshold = std::nullopt,
+          bool _allow_following = false);
   Solution solve();
   bool get_new_config(Node* S, Constraint* M);
   bool funcPIBT(Agent* ai, Agent* caller = nullptr);
@@ -70,4 +72,5 @@ struct Planner {
 // main function
 Solution solve(const Instance& ins, const int verbose = 0,
                const Deadline* deadline = nullptr, std::mt19937* MT = nullptr,
-               const std::optional<int> threshold = std::nullopt, const bool allow_following = false);
+               const std::optional<int> threshold = std::nullopt,
+               const bool allow_following = false);

@@ -103,7 +103,9 @@ Solution Planner::solve()
     S = OPEN.top();
 
     // check goal condition
-    auto goal_reached = threshold.has_value() ? S->C.enough_goals_reached(threshold.value()) : ins->is_goal_config(S->C);
+    auto goal_reached = threshold.has_value()
+                            ? S->C.enough_goals_reached(threshold.value())
+                            : ins->is_goal_config(S->C);
     if (goal_reached) {
       // backtrack
       while (S != nullptr) {
@@ -236,11 +238,10 @@ bool Planner::funcPIBT(Agent* ai, Agent* caller)
     candidates.push_back(ai->s_now);
   }
 
-  std::sort(candidates.begin(), candidates.begin() + candidates.size(),
-          [&](State s, State t) {
-            return D.get(i, s) + tie_breakers[s.pose_id] <
-                    D.get(i, t) + tie_breakers[t.pose_id];
-          });
+  std::sort(candidates.begin(), candidates.end(), [&](State s, State t) {
+    return D.get(i, s) + tie_breakers[s.pose_id] <
+           D.get(i, t) + tie_breakers[t.pose_id];
+  });
 
   for (size_t k = 0; k < candidates.size(); ++k) {
     auto u = candidates[k];
@@ -266,7 +267,7 @@ bool Planner::funcPIBT(Agent* ai, Agent* caller)
 
       // success to plan next one step
       return true;
-    } else { // no following
+    } else {  // no following
       if (ak != nullptr && ak != ai) {
         if (ak->s_next.v == nullptr) {
           // preemptively reserve current location
