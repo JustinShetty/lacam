@@ -163,7 +163,9 @@ bool Instance::is_goal_config(const Config& C) const
 {
   if (!C.enough_goals_reached(get_total_goals())) return false;
   for (size_t i = 0; i < N; ++i) {
-    if (C[i] != goal_sequences[i].back()) return false;
+    const auto& s = C[i];
+    const auto& g = goal_sequences[i].back();
+    if (s.v != g.v or s.o != g.o) return false;
   }
   return true;
 }
