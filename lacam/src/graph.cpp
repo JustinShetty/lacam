@@ -104,7 +104,7 @@ uint ConfigHasher::operator()(const Config& C) const
     indices_hash ^=
         idx + 0x9e3779b9 + (indices_hash << 6) + (indices_hash >> 2);
   }
-  return hash_combine(location_hash, indices_hash);
+  return hash_two_ints(location_hash, indices_hash);
 }
 
 std::ostream& operator<<(std::ostream& os, const Vertex* v)

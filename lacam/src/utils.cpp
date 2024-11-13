@@ -44,7 +44,7 @@ float get_random_float(std::mt19937* MT, float from, float to)
   return r(*MT);
 }
 
-uint hash_combine(uint a, uint b)
+uint hash_to_ints(uint a, uint b)
 {
   a ^= b + 0x9e3779b9 + (a << 6) + (a >> 2);
   return a;

@@ -104,20 +104,20 @@ int get_sum_of_loss(const Solution& solution)
   return c;
 }
 
-int get_makespan_lower_bound(const Instance& ins, DistTable& dist_table)
+int get_makespan_lower_bound(const Instance& ins, DistTableMultiGoal& dist_table)
 {
   int c = 0;
   for (size_t i = 0; i < ins.N; ++i) {
-    c = std::max(c, dist_table.get(i, ins.starts[i]));
+    c = std::max(c, dist_table.get(i, 0, ins.starts[i]));
   }
   return c;
 }
 
-int get_sum_of_costs_lower_bound(const Instance& ins, DistTable& dist_table)
+int get_sum_of_costs_lower_bound(const Instance& ins, DistTableMultiGoal& dist_table)
 {
   int c = 0;
   for (size_t i = 0; i < ins.N; ++i) {
-    c += dist_table.get(i, ins.starts[i]);
+    c += dist_table.get(i, 0, ins.starts[i]);
   }
   return c;
 }
@@ -126,7 +126,7 @@ void print_stats(const int verbose, const Instance& ins,
                  const Solution& solution, const double comp_time_ms)
 {
   auto ceil = [](float x) { return std::ceil(x * 100) / 100; };
-  auto dist_table = DistTable(ins);
+  auto dist_table = DistTableMultiGoal(ins);
   const auto makespan = get_makespan(solution);
   const auto makespan_lb = get_makespan_lower_bound(ins, dist_table);
   const auto sum_of_costs = get_sum_of_costs(solution);
@@ -155,7 +155,7 @@ void make_log(const Instance& ins, const Solution& solution,
                                                         : map_name;
 
   // for instance-specific values
-  auto dist_table = DistTable(ins);
+  auto dist_table = DistTableMultiGoal(ins);
 
   // log for visualizer
   auto get_x = [&](int k) { return k % ins.G.width; };
