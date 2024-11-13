@@ -262,7 +262,7 @@ bool Planner::funcPIBT_following(Agent* ai)
     ai->s_next = u;
 
     // empty or stay
-    if (ak == nullptr || u == ai->s_now) return true;
+    if (ak == nullptr || u.v == ai->s_now.v) return true;
 
     // priority inheritance
     if (ak->s_next.v == nullptr && !funcPIBT_following(ak)) continue;
