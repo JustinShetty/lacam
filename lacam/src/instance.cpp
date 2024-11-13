@@ -133,6 +133,15 @@ int Instance::get_total_goals() const
   return total_goals;
 }
 
+bool Instance::is_goal_config(const Config& C) const
+{
+  if (!C.enough_goals_reached(get_total_goals())) return false;
+  for (size_t i = 0; i < N; ++i) {
+    if (C[i] != goal_sequences[i].back()) return false;
+  }
+  return true;
+}
+
 std::vector<int> Instance::calculate_goal_indices(const Config& c,
                                                   const Config& c_prev) const
 {
