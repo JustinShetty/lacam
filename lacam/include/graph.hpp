@@ -63,12 +63,14 @@ public:
   Vertex* v;
   Orientation o;
   int goal_index;
+  int pose_id;
 
   State() : State(nullptr, 0) {}
   State(Vertex* _v, int _goal_index, Orientation _o = Orientation::NONE)
       : v(_v),
         o(_o),
         goal_index(_goal_index),
+        pose_id(v == nullptr ? 0 : v->id * (1 + o)),
         neighbors(),
         in_neighbors(),
         neighbors_generated(false)

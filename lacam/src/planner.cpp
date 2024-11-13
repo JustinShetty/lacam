@@ -67,7 +67,7 @@ Planner::Planner(const Instance* _ins, const Deadline* _deadline,
       N(ins->N),
       V_size(ins->G->size()),
       D(DistTableMultiGoal(ins)),
-      tie_breakers(std::vector<float>(V_size, 0)),
+      tie_breakers(std::vector<float>(V_size * 5, 0)),
       A(Agents(N, nullptr)),
       occupied_now(Agents(V_size, nullptr)),
       occupied_next(Agents(V_size, nullptr))
@@ -235,15 +235,15 @@ bool Planner::funcPIBT_following(Agent* ai)
     auto u = neighbors[k];
     candidates.push_back(u);
     if (MT != nullptr)
-      tie_breakers[u.v->id] = get_random_float(MT);  // set tie-breaker
+      tie_breakers[u.pose_id] = get_random_float(MT);  // set tie-breaker
   }
   candidates.push_back(ai->s_now);
 
   // sort, note: K + 1 is sufficient
   std::sort(candidates.begin(), candidates.begin() + K + 1,
             [&](const State& s, const State& t) {
-              return D.get(i, s) + tie_breakers[s.v->id] <
-                     D.get(i, t) + tie_breakers[t.v->id];
+              return D.get(i, s) + tie_breakers[s.pose_id] <
+                     D.get(i, t) + tie_breakers[t.pose_id];
             });
 
   for (size_t k = 0; k < K + 1; ++k) {
@@ -289,7 +289,7 @@ bool Planner::funcPIBT_no_following(Agent* ai, Agent* aj)
     auto u = neighbors[k];
     candidates.push_back(u);
     if (MT != nullptr)
-      tie_breakers[u.v->id] = get_random_float(MT);  // set tie-breaker
+      tie_breakers[u.pose_id] = get_random_float(MT);  // set tie-breaker
   }
   if (aj == nullptr) {
     candidates.push_back(ai->s_now);
@@ -298,8 +298,8 @@ bool Planner::funcPIBT_no_following(Agent* ai, Agent* aj)
   // sort
   std::sort(candidates.begin(), candidates.begin() + candidates.size(),
             [&](State s, State t) {
-              return D.get(i, s) + tie_breakers[s.v->id] <
-                     D.get(i, t) + tie_breakers[t.v->id];
+              return D.get(i, s) + tie_breakers[s.pose_id] <
+                     D.get(i, t) + tie_breakers[t.pose_id];
             });
 
   for (size_t k = 0; k < candidates.size(); ++k) {
