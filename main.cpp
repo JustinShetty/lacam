@@ -61,13 +61,13 @@ int main(int argc, char* argv[])
   const auto log_short = program.get<bool>("log_short");
   const auto N = std::stoi(program.get<std::string>("num"));
   auto user_threshold = std::stoi(program.get<std::string>("threshold"));
-  if (user_threshold < 0)
-    user_threshold = N;
-  else if (user_threshold == 0 || user_threshold > N) {
+  std::optional<int> threshold = std::nullopt;
+  if (user_threshold == 0 || user_threshold > N) {
     info(0, verbose, "invalid threshold");
     return 1;
+  } else if (user_threshold > 0) {
+    threshold = user_threshold;
   }
-  const auto threshold = user_threshold;
   const auto allow_following = program.get<bool>("allow_following");
   const auto skip_post_processing = program.get<bool>("skip_post_processing");
   const auto ins = scen_name.size() > 0 ? Instance(scen_name, map_name, N)

@@ -2,12 +2,14 @@
  * post processing, e.g., calculating solution quality
  */
 #pragma once
+#include <optional>
+
 #include "dist_table.hpp"
 #include "instance.hpp"
 #include "utils.hpp"
 
 bool is_feasible_solution(const Instance& ins, const Solution& solution,
-                          const int verbose, const int threshold,
+                          const int verbose, const std::optional<int> threshold,
                           const bool allow_following);
 int get_makespan(const Solution& solution);
 int get_path_cost(const Solution& solution, int i);  // single-agent path cost
