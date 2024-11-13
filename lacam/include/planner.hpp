@@ -28,6 +28,10 @@ struct Node {
   std::vector<int> order;
   std::queue<Constraint*> search_tree;
 
+  // heuristics
+  float cost_to_come;
+  float cost_to_go;
+
   Node(Config _C, DistTableMultiGoal& D, Node* _parent = nullptr);
   ~Node();
 };

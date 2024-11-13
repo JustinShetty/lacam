@@ -45,6 +45,30 @@ Node::Node(Config _C, DistTableMultiGoal& D, Node* _parent)
   std::iota(order.begin(), order.end(), 0);
   std::sort(order.begin(), order.end(),
             [&](int i, int j) { return priorities[i] > priorities[j]; });
+
+  // calculate cost_to_come
+  cost_to_come = 0;
+  if (parent != nullptr) {
+    cost_to_come = parent->cost_to_come;
+    for (size_t i = 0; i < N; ++i) {
+      if (C[i] != parent->C[i]) {
+        cost_to_come += 1;
+      }
+    }
+  }
+
+  // calculate cost_to_go
+  cost_to_go = 0;
+  for (size_t i = 0; i < N; ++i) {
+    cost_to_go += D.get_to_end(i, C[i]);
+  }
+
+  if (parent != nullptr) {
+    std::cout << "parent->cost_to_come: " << parent->cost_to_come << std::endl;
+    std::cout << "parent->cost_to_go: " << parent->cost_to_go << std::endl;
+  }
+  std::cout << "\tcost_to_come: " << cost_to_come << std::endl;
+  std::cout << "\tcost_to_go: " << cost_to_go << "\n" << std::endl;
 }
 
 Node::~Node()
@@ -82,7 +106,14 @@ Solution Planner::solve()
   for (auto i = 0; i < N; ++i) A[i] = new Agent(i);
 
   // setup search queues
-  std::stack<Node*> OPEN;
+  // std::stack<Node*> OPEN;
+
+  // std::greater semantics for a min-heap (minimize cost_to_go)
+  auto cmp = [](Node* a, Node* b) {
+    // return (a->cost_to_come + a->cost_to_go) > (b->cost_to_come + b->cost_to_go);
+    return a->cost_to_go > b->cost_to_go;
+  };
+  std::priority_queue<Node*, Nodes, decltype(cmp)> OPEN(cmp);
   std::unordered_map<Config, Node*, ConfigHasher> CLOSED;
   std::vector<Constraint*> GC;  // garbage collection of constraints
 
@@ -141,11 +172,11 @@ Solution Planner::solve()
     ins->update_goal_indices(C, S->C);
 
     // check explored list
-    auto iter = CLOSED.find(C);
-    if (iter != CLOSED.end()) {
-      OPEN.push(iter->second);
-      continue;
-    }
+    // auto iter = CLOSED.find(C);
+    // if (iter != CLOSED.end()) {
+    //   OPEN.push(iter->second);
+    //   continue;
+    // }
 
     // insert new search node
     auto S_new = new Node(C, D, S);

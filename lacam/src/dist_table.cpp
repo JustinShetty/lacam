@@ -64,3 +64,13 @@ int DistTableMultiGoal::get(int agent_id, const State& from)
   }
   return INT_MAX;
 }
+
+int DistTableMultiGoal::get_to_end(int agent_id, const State& from)
+{
+  int dist = 0;
+  dist += get(agent_id, from);
+  for (int i = from.goal_index + 1; i < ins->goal_sequences[agent_id].size() - 1; i++) {
+    dist += get(agent_id, State(ins->goal_sequences[agent_id][i]));
+  }
+  return dist;
+}

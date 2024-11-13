@@ -15,6 +15,8 @@ struct DistTableMultiGoal {
 
   int get(int agent_id, const State& from);
 
+  int get_to_end(int agent_id, const State& from);
+
   DistTableMultiGoal(const Instance* _ins);
   DistTableMultiGoal(const Instance& _ins) : DistTableMultiGoal(&_ins) {}
 
