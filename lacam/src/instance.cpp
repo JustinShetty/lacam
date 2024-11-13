@@ -133,7 +133,8 @@ int Instance::get_total_goals() const
   return total_goals;
 }
 
-std::vector<int> Instance::calculate_goal_indices(const Config& c, const Config& c_prev) const
+std::vector<int> Instance::calculate_goal_indices(const Config& c,
+                                                  const Config& c_prev) const
 {
   auto goal_indices = c_prev.goal_indices;
   for (size_t i = 0; i < N; ++i) {

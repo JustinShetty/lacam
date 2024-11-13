@@ -11,7 +11,7 @@ Constraint::Constraint(Constraint* parent, int i, Vertex* v)
   where.push_back(v);
 }
 
-Constraint::~Constraint() {};
+Constraint::~Constraint(){};
 
 Node::Node(Config _C, DistTableMultiGoal& D, Node* _parent)
     : C(_C),
@@ -218,68 +218,8 @@ bool Planner::get_new_config(Node* S, Constraint* M)
   return true;
 }
 
-bool Planner::funcPIBT(Agent* ai, const std::vector<int>& goal_indices)
-{
-  if (allow_following) return funcPIBT_following(ai, goal_indices);
-  return funcPIBT_no_following(ai, nullptr, goal_indices);
-}
-
-bool Planner::funcPIBT_following(Agent* ai,
-                                 const std::vector<int>& goal_indices)
-{
-  const auto i = ai->id;
-  const auto K = ai->v_now->neighbor.size();
-
-  // get candidates for next locations
-  for (size_t k = 0; k < K; ++k) {
-    auto u = ai->v_now->neighbor[k];
-    C_next[i][k] = u;
-    if (MT != nullptr)
-      tie_breakers[u->id] = get_random_float(MT);  // set tie-breaker
-  }
-  C_next[i][K] = ai->v_now;
-
-  // sort, note: K + 1 is sufficient
-  std::sort(C_next[i].begin(), C_next[i].begin() + K + 1,
-            [&](Vertex* const v, Vertex* const u) {
-              return D.get(i, goal_indices[i], v) + tie_breakers[v->id] <
-                     D.get(i, goal_indices[i], u) + tie_breakers[u->id];
-            });
-
-  for (size_t k = 0; k < K + 1; ++k) {
-    auto u = C_next[i][k];
-
-    // avoid vertex conflicts
-    if (occupied_next[u->id] != nullptr) continue;
-
-    auto& ak = occupied_now[u->id];
-
-    // avoid swap conflicts with constraints
-    if (ak != nullptr && ak->v_next == ai->v_now) continue;
-
-    // reserve next location
-    occupied_next[u->id] = ai;
-    ai->v_next = u;
-
-    // empty or stay
-    if (ak == nullptr || u == ai->v_now) return true;
-
-    // priority inheritance
-    if (ak->v_next == nullptr && !funcPIBT_following(ak, goal_indices))
-      continue;
-
-    // success to plan next one step
-    return true;
-  }
-
-  // failed to secure node
-  occupied_next[ai->v_now->id] = ai;
-  ai->v_next = ai->v_now;
-  return false;
-}
-
-bool Planner::funcPIBT_no_following(Agent* ai, Agent* aj,
-                                    const std::vector<int>& goal_indices)
+bool Planner::funcPIBT(Agent* ai, const std::vector<int>& goal_indices,
+                       Agent* caller)
 {
   const auto i = ai->id;
   const auto K = ai->v_now->neighbor.size();
@@ -292,7 +232,7 @@ bool Planner::funcPIBT_no_following(Agent* ai, Agent* aj,
       tie_breakers[u->id] = get_random_float(MT);  // set tie-breaker
   }
   size_t num_candidates = K;
-  if (aj == nullptr) {
+  if (caller == nullptr) {
     C_next[i][K] = ai->v_now;
     num_candidates++;
   }
@@ -310,27 +250,44 @@ bool Planner::funcPIBT_no_following(Agent* ai, Agent* aj,
     // avoid vertex conflicts
     if (occupied_next[u->id] != nullptr) continue;
 
-    // avoid following conflicts
     auto& ak = occupied_now[u->id];
-    if (ak != nullptr && ak != ai) {
-      if (ak->v_next == nullptr) {
-        // preemptively reserve current location
-        occupied_next[ai->v_now->id] = ai;
-        ai->v_next = ai->v_now;
+    if (allow_following) {
+      // avoid swap conflicts with constraints
+      if (ak != nullptr && ak->v_next == ai->v_now) continue;
 
-        if (funcPIBT_no_following(ak, ai, goal_indices)) return true;
+      // reserve next location
+      occupied_next[u->id] = ai;
+      ai->v_next = u;
 
-        // revert if priority inheritance failed
-        occupied_next[ai->v_now->id] = nullptr;
-        ai->v_next = nullptr;
+      // empty or stay
+      if (ak == nullptr || u == ai->v_now) return true;
+
+      // priority inheritance
+      if (ak->v_next == nullptr && !funcPIBT(ak, goal_indices, ai)) continue;
+
+      // success to plan next one step
+      return true;
+    } else {  // no following
+      if (ak != nullptr && ak != ai) {
+        if (ak->v_next == nullptr) {
+          // preemptively reserve current location
+          occupied_next[ai->v_now->id] = ai;
+          ai->v_next = ai->v_now;
+
+          if (funcPIBT(ak, goal_indices, ai)) return true;
+
+          // revert if priority inheritance failed
+          occupied_next[ai->v_now->id] = nullptr;
+          ai->v_next = nullptr;
+        }
+        continue;
       }
-      continue;
-    }
 
-    // success
-    occupied_next[u->id] = ai;
-    ai->v_next = u;
-    return true;
+      // success
+      occupied_next[u->id] = ai;
+      ai->v_next = u;
+      return true;
+    }
   }
 
   // failed to secure node

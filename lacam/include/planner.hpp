@@ -67,10 +67,8 @@ struct Planner {
           int _verbose = 0, int _threshold = 1, bool _allow_following = false);
   Solution solve();
   bool get_new_config(Node* S, Constraint* M);
-  bool funcPIBT(Agent* ai, const std::vector<int>& goal_indices);
-  bool funcPIBT_following(Agent* ai, const std::vector<int>& goal_indices);
-  bool funcPIBT_no_following(Agent* ai, Agent* aj,
-                             const std::vector<int>& goal_indices);
+  bool funcPIBT(Agent* ai, const std::vector<int>& goal_indices,
+                Agent* caller = nullptr);
 };
 
 // main function

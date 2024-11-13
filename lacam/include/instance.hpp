@@ -34,7 +34,8 @@ struct Instance {
 
   int get_total_goals() const;
 
-  std::vector<int> calculate_goal_indices(const Config& c, const Config& c_prev) const;
+  std::vector<int> calculate_goal_indices(const Config& c,
+                                          const Config& c_prev) const;
 };
 
 // solution: a sequence of configurations

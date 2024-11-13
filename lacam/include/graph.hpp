@@ -17,13 +17,16 @@ class Config
 {
 public:
   Config() : goal_indices(), data() {}
-  Config(const int N, Vertex* v)
-    : goal_indices(N, 0), data(N, v) {}
+  Config(const int N, Vertex* v) : goal_indices(N, 0), data(N, v) {}
   Config(const std::initializer_list<Vertex*> vertices)
-      : goal_indices(vertices.size(), 0), data(vertices) {}
+      : goal_indices(vertices.size(), 0), data(vertices)
+  {
+  }
   Config(const std::initializer_list<Vertex*> vertices,
          const std::initializer_list<int> goal_indices)
-      : goal_indices(goal_indices), data(vertices) {}
+      : goal_indices(goal_indices), data(vertices)
+  {
+  }
 
   size_t size() const { return data.size(); }
 
@@ -40,7 +43,6 @@ public:
   auto begin() const { return data.begin(); }
   auto end() { return data.end(); }
   auto end() const { return data.end(); }
-
 
   void push_back(Vertex* v, int goal_index)
   {
@@ -59,6 +61,7 @@ public:
   }
 
   std::vector<int> goal_indices;
+
 private:
   std::vector<Vertex*> data;
 };
