@@ -35,7 +35,10 @@ struct Instance {
 
   int get_total_goals() const;
 
-  void update_goal_indices(Config& c, const Config& c_prev) const;
+  bool is_goal_config(const Config& C) const;
+
+  void update_goal_indices(Config& c,
+                                          const Config& c_prev) const;
 };
 
 // solution: a sequence of configurations

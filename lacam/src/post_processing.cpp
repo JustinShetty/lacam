@@ -3,7 +3,7 @@
 #include "../include/dist_table.hpp"
 
 bool is_feasible_solution(const Instance& ins, const Solution& solution,
-                          const int verbose, const int threshold,
+                          const int verbose, const std::optional<int> threshold,
                           const bool allow_following)
 {
   if (solution.empty()) return true;
@@ -15,7 +15,10 @@ bool is_feasible_solution(const Instance& ins, const Solution& solution,
   }
 
   // check goal locations
-  if (!solution.back().enough_goals_reached(threshold)) {
+  const bool goal_ok = threshold.has_value()
+                           ? solution.back().enough_goals_reached(threshold.value())
+                           : ins.is_goal_config(solution.back());
+  if (!goal_ok) {
     info(1, verbose, "invalid goals");
     return false;
   }

@@ -56,7 +56,7 @@ Node::~Node()
 }
 
 Planner::Planner(const Instance* _ins, const Deadline* _deadline,
-                 std::mt19937* _MT, int _verbose, int _threshold,
+                 std::mt19937* _MT, int _verbose, std::optional<int> _threshold,
                  bool _allow_following)
     : ins(_ins),
       deadline(_deadline),
@@ -103,7 +103,8 @@ Solution Planner::solve()
     S = OPEN.top();
 
     // check goal condition
-    if (S->C.enough_goals_reached(threshold)) {
+    auto goal_reached = threshold.has_value() ? S->C.enough_goals_reached(threshold.value()) : ins->is_goal_config(S->C);
+    if (goal_reached) {
       // backtrack
       while (S != nullptr) {
         solution.push_back(S->C);
@@ -217,13 +218,7 @@ bool Planner::get_new_config(Node* S, Constraint* M)
   return true;
 }
 
-bool Planner::funcPIBT(Agent* ai)
-{
-  if (allow_following) return funcPIBT_following(ai);
-  return funcPIBT_no_following(ai, nullptr);
-}
-
-bool Planner::funcPIBT_following(Agent* ai)
+bool Planner::funcPIBT(Agent* ai, Agent* caller)
 {
   const auto i = ai->id;
   const auto neighbors = ai->s_now.get_neighbors();
@@ -237,70 +232,15 @@ bool Planner::funcPIBT_following(Agent* ai)
     if (MT != nullptr)
       tie_breakers[u.pose_id] = get_random_float(MT);  // set tie-breaker
   }
-  candidates.push_back(ai->s_now);
-
-  // sort, note: K + 1 is sufficient
-  std::sort(candidates.begin(), candidates.begin() + K + 1,
-            [&](const State& s, const State& t) {
-              return D.get(i, s) + tie_breakers[s.pose_id] <
-                     D.get(i, t) + tie_breakers[t.pose_id];
-            });
-
-  for (size_t k = 0; k < K + 1; ++k) {
-    auto u = candidates[k];
-
-    // avoid vertex conflicts
-    if (occupied_next[u.v->id] != nullptr) continue;
-
-    auto& ak = occupied_now[u.v->id];
-
-    // avoid swap conflicts with constraints
-    if (ak != nullptr && ak->s_next.v == ai->s_now.v) continue;
-
-    // reserve next location
-    occupied_next[u.v->id] = ai;
-    ai->s_next = u;
-
-    // empty or stay
-    if (ak == nullptr || u.v == ai->s_now.v) return true;
-
-    // priority inheritance
-    if (ak->s_next.v == nullptr && !funcPIBT_following(ak)) continue;
-
-    // success to plan next one step
-    return true;
-  }
-
-  // failed to secure node
-  occupied_next[ai->s_now.v->id] = ai;
-  ai->s_next = ai->s_now;
-  return false;
-}
-
-bool Planner::funcPIBT_no_following(Agent* ai, Agent* aj)
-{
-  const auto i = ai->id;
-  const auto neighbors = ai->s_now.get_neighbors();
-  const auto K = neighbors.size();
-
-  // get candidates for next locations
-  std::vector<State> candidates;
-  for (size_t k = 0; k < K; ++k) {
-    auto u = neighbors[k];
-    candidates.push_back(u);
-    if (MT != nullptr)
-      tie_breakers[u.pose_id] = get_random_float(MT);  // set tie-breaker
-  }
-  if (aj == nullptr) {
+  if (caller == nullptr) {
     candidates.push_back(ai->s_now);
   }
 
-  // sort
   std::sort(candidates.begin(), candidates.begin() + candidates.size(),
-            [&](State s, State t) {
-              return D.get(i, s) + tie_breakers[s.pose_id] <
-                     D.get(i, t) + tie_breakers[t.pose_id];
-            });
+          [&](State s, State t) {
+            return D.get(i, s) + tie_breakers[s.pose_id] <
+                    D.get(i, t) + tie_breakers[t.pose_id];
+          });
 
   for (size_t k = 0; k < candidates.size(); ++k) {
     auto u = candidates[k];
@@ -308,27 +248,45 @@ bool Planner::funcPIBT_no_following(Agent* ai, Agent* aj)
     // avoid vertex conflicts
     if (occupied_next[u.v->id] != nullptr) continue;
 
-    // avoid following conflicts
     auto& ak = occupied_now[u.v->id];
-    if (ak != nullptr && ak != ai) {
-      if (ak->s_next.v == nullptr) {
-        // preemptively reserve current location
-        occupied_next[ai->s_now.v->id] = ai;
-        ai->s_next = ai->s_now;
 
-        if (funcPIBT_no_following(ak, ai)) return true;
+    if (allow_following) {
+      // avoid swap conflicts with constraints
+      if (ak != nullptr && ak->s_next.v == ai->s_now.v) continue;
 
-        // revert if priority inheritance failed
-        occupied_next[ai->s_now.v->id] = nullptr;
-        ai->s_next = State();
+      // reserve next location
+      occupied_next[u.v->id] = ai;
+      ai->s_next = u;
+
+      // empty or stay
+      if (ak == nullptr || u.v == ai->s_now.v) return true;
+
+      // priority inheritance
+      if (ak->s_next.v == nullptr && !funcPIBT(ak)) continue;
+
+      // success to plan next one step
+      return true;
+    } else { // no following
+      if (ak != nullptr && ak != ai) {
+        if (ak->s_next.v == nullptr) {
+          // preemptively reserve current location
+          occupied_next[ai->s_now.v->id] = ai;
+          ai->s_next = ai->s_now;
+
+          if (funcPIBT(ak, ai)) return true;
+
+          // revert if priority inheritance failed
+          occupied_next[ai->s_now.v->id] = nullptr;
+          ai->s_next = State();
+        }
+        continue;
       }
-      continue;
-    }
 
-    // success
-    occupied_next[u.v->id] = ai;
-    ai->s_next = u;
-    return true;
+      // success
+      occupied_next[u.v->id] = ai;
+      ai->s_next = u;
+      return true;
+    }
   }
 
   // failed to secure node
@@ -338,7 +296,7 @@ bool Planner::funcPIBT_no_following(Agent* ai, Agent* aj)
 }
 
 Solution solve(const Instance& ins, const int verbose, const Deadline* deadline,
-               std::mt19937* MT, const int threshold,
+               std::mt19937* MT, const std::optional<int> threshold,
                const bool allow_following)
 {
   info(1, verbose, "elapsed:", elapsed_ms(deadline), "ms\tpre-processing");
