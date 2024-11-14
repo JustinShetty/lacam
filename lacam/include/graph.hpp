@@ -70,7 +70,7 @@ public:
       : v(_v),
         o(_o),
         goal_index(_goal_index),
-        pose_id(v == nullptr ? 0 : 5 * v->id + o),
+        pose_id(v == nullptr ? 0 : Orientation::NUM_ORIENTATIONS * v->id + o),
         neighbors(),
         in_neighbors(),
         neighbors_generated(false)
