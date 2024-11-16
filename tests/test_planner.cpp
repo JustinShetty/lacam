@@ -13,29 +13,31 @@ TEST(planner, solve)
   const auto ins = Instance(scen_filename, map_filename, N);
   ASSERT_TRUE(ins.is_valid(VERBOSITY));
 
-  auto solution = solve(ins, VERBOSITY, nullptr, nullptr, N);
+  const auto threshold = std::nullopt;
+  const auto allow_following = false;
+  auto solution = solve(ins, VERBOSITY, nullptr, nullptr, threshold);
   ASSERT_GT(solution.size(), 0);
-  ASSERT_TRUE(is_feasible_solution(ins, solution, VERBOSITY, N, false));
+  ASSERT_TRUE(is_feasible_solution(ins, solution, VERBOSITY, threshold, allow_following));
 }
 
 TEST(planner, already_solved)
 {
   const auto map_filename = "./tests/assets/2x2.map";
-  const auto N = 2;
   const std::vector<int> starts = {0, 3};
   const std::vector<int> goals = {0, 3};
   const Instance ins(map_filename, starts, goals);
   ASSERT_TRUE(ins.is_valid(VERBOSITY));
 
-  auto solution = solve(ins, VERBOSITY, nullptr, nullptr, N);
+  const auto threshold = std::nullopt;
+  const auto allow_following = false;
+  auto solution = solve(ins, VERBOSITY, nullptr, nullptr, threshold);
   ASSERT_GT(solution.size(), 0);
-  ASSERT_TRUE(is_feasible_solution(ins, solution, VERBOSITY, N, false));
+  ASSERT_TRUE(is_feasible_solution(ins, solution, VERBOSITY, threshold, allow_following));
 }
 
 TEST(planner, benchmark)
 {
   auto MT = std::mt19937(0);
-  const auto allow_following = true;
   const auto scen_filename = "./assets/random-32-32-10-random-1.scen";
   const auto map_filename = "./assets/random-32-32-10.map";
   const auto N = 50;
@@ -43,10 +45,12 @@ TEST(planner, benchmark)
   const auto ins = Instance(scen_filename, map_filename, N);
   ASSERT_TRUE(ins.is_valid(VERBOSITY));
 
-  auto solution = solve(ins, VERBOSITY, nullptr, &MT, N, allow_following);
+  const auto threshold = std::nullopt;
+  const auto allow_following = false;
+  auto solution = solve(ins, VERBOSITY, nullptr, &MT, threshold, allow_following);
   ASSERT_GT(solution.size(), 0);
   ASSERT_TRUE(
-      is_feasible_solution(ins, solution, VERBOSITY, N, allow_following));
+      is_feasible_solution(ins, solution, VERBOSITY, threshold, allow_following));
 }
 
 TEST(planner, solve_multiple_goals_2x2)
@@ -220,9 +224,10 @@ TEST(planner, solve_multiple_goals_thresholded)
   ASSERT_TRUE(ins.is_valid(VERBOSITY));
 
   const auto threshold = 1;
-  auto solution = solve(ins, VERBOSITY, nullptr, nullptr, threshold);
+  const bool allow_following = false;
+  auto solution = solve(ins, VERBOSITY, nullptr, nullptr, threshold, allow_following);
   ASSERT_GT(solution.size(), 0);
-  ASSERT_TRUE(is_feasible_solution(ins, solution, VERBOSITY, threshold, false));
+  ASSERT_TRUE(is_feasible_solution(ins, solution, VERBOSITY, threshold, allow_following));
 }
 
 TEST(planner, solver_multiple_goals_thresholded2)
