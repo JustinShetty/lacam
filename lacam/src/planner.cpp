@@ -179,7 +179,7 @@ bool Planner::get_new_config(Node* S, Constraint* M)
     }
     if (a->s_next->v != nullptr) {
       occupied_next[a->s_next->v->id] = nullptr;
-      a->s_next = ins->G->NewState();
+      a->s_next = Graph::NewState();
     }
 
     // set occupied now
@@ -279,7 +279,7 @@ bool Planner::funcPIBT(Agent* ai, Agent* caller)
 
           // revert if priority inheritance failed
           occupied_next[ai->s_now->v->id] = nullptr;
-          ai->s_next = ins->G->NewState();
+          ai->s_next = Graph::NewState();
         }
         continue;
       }

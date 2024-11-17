@@ -25,12 +25,12 @@ TEST(planner, basic_with_orientation)
   const auto G = std::shared_ptr<Graph>(new Graph(map_filename));
   const auto N = 2;
   const std::vector<StatePtr> starts = {
-      G->NewState(G->U[0], 0, Orientation::X_MINUS),
-      G->NewState(G->U[3], 0, Orientation::X_PLUS),
+      Graph::NewState(G->U[0], 0, Orientation::X_MINUS),
+      Graph::NewState(G->U[3], 0, Orientation::X_PLUS),
   };
   const std::vector<std::vector<StatePtr>> goals{
-      {G->NewState(G->U[3], 0, Orientation::Y_PLUS)},
-      {G->NewState(G->U[0], 0, Orientation::Y_MINUS)},
+      {Graph::NewState(G->U[3], 0, Orientation::Y_PLUS)},
+      {Graph::NewState(G->U[0], 0, Orientation::Y_MINUS)},
   };
   const Instance ins(G, starts, goals);
   ASSERT_TRUE(ins.is_valid(VERBOSITY));
@@ -105,10 +105,10 @@ TEST(planner, benchmark_with_orientation)
   std::uniform_int_distribution<int> dist(1, 4);  // uniform over [1, 4]
   for (int i = 0; i < N; i++) {
     auto start = ins.starts[i];
-    ins.starts[i] = ins.G->NewState(start->v, start->goal_index,
+    ins.starts[i] = Graph::NewState(start->v, start->goal_index,
                                     static_cast<Orientation::Value>(dist(MT)));
     auto goal = ins.goal_sequences[i][0];
-    ins.goal_sequences[i][0] = ins.G->NewState(
+    ins.goal_sequences[i][0] = Graph::NewState(
         goal->v, goal->goal_index, static_cast<Orientation::Value>(dist(MT)));
   }
   ASSERT_TRUE(ins.is_valid(VERBOSITY));

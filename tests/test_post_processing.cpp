@@ -16,58 +16,58 @@ TEST(PostProcessing, validate_following)
   // correct solution
   auto sol = Solution(3);
   sol[0] = Config(
-      {ins.G->NewState(ins.G->U[0], 0), ins.G->NewState(ins.G->U[8], 0)});
+      {Graph::NewState(ins.G->U[0], 0), Graph::NewState(ins.G->U[8], 0)});
   sol[1] = Config(
-      {ins.G->NewState(ins.G->U[1], 0), ins.G->NewState(ins.G->U[0], 0)});
+      {Graph::NewState(ins.G->U[1], 0), Graph::NewState(ins.G->U[0], 0)});
   sol[2] = Config(
-      {ins.G->NewState(ins.G->U[9], 1), ins.G->NewState(ins.G->U[1], 1)});
+      {Graph::NewState(ins.G->U[9], 1), Graph::NewState(ins.G->U[1], 1)});
   ASSERT_TRUE(is_feasible_solution(ins, sol, VERBOSITY, N, allow_following));
 
   // invalid start
   sol[0] = Config(
-      {ins.G->NewState(ins.G->U[0], 0), ins.G->NewState(ins.G->U[4], 0)});
+      {Graph::NewState(ins.G->U[0], 0), Graph::NewState(ins.G->U[4], 0)});
   sol[1] = Config(
-      {ins.G->NewState(ins.G->U[1], 0), ins.G->NewState(ins.G->U[0], 0)});
+      {Graph::NewState(ins.G->U[1], 0), Graph::NewState(ins.G->U[0], 0)});
   sol[2] = Config(
-      {ins.G->NewState(ins.G->U[9], 1), ins.G->NewState(ins.G->U[1], 1)});
+      {Graph::NewState(ins.G->U[9], 1), Graph::NewState(ins.G->U[1], 1)});
   ASSERT_FALSE(is_feasible_solution(ins, sol, VERBOSITY, N, allow_following));
 
   // invalid goal
   sol[0] = Config(
-      {ins.G->NewState(ins.G->U[0], 0), ins.G->NewState(ins.G->U[8], 0)});
+      {Graph::NewState(ins.G->U[0], 0), Graph::NewState(ins.G->U[8], 0)});
   sol[1] = Config(
-      {ins.G->NewState(ins.G->U[1], 0), ins.G->NewState(ins.G->U[0], 0)});
+      {Graph::NewState(ins.G->U[1], 0), Graph::NewState(ins.G->U[0], 0)});
   sol[2] = Config(
-      {ins.G->NewState(ins.G->U[10], 0), ins.G->NewState(ins.G->U[1], 1)});
+      {Graph::NewState(ins.G->U[10], 0), Graph::NewState(ins.G->U[1], 1)});
   ASSERT_FALSE(is_feasible_solution(ins, sol, VERBOSITY, N, allow_following));
 
   // invalid transition
   sol[0] = Config(
-      {ins.G->NewState(ins.G->U[0], 0), ins.G->NewState(ins.G->U[8], 0)});
+      {Graph::NewState(ins.G->U[0], 0), Graph::NewState(ins.G->U[8], 0)});
   sol[1] = Config(
-      {ins.G->NewState(ins.G->U[4], 0), ins.G->NewState(ins.G->U[0], 0)});
+      {Graph::NewState(ins.G->U[4], 0), Graph::NewState(ins.G->U[0], 0)});
   sol[2] = Config(
-      {ins.G->NewState(ins.G->U[9], 1), ins.G->NewState(ins.G->U[1], 1)});
+      {Graph::NewState(ins.G->U[9], 1), Graph::NewState(ins.G->U[1], 1)});
   ASSERT_FALSE(is_feasible_solution(ins, sol, VERBOSITY, N, allow_following));
 
   // swap conflict
   sol[0] = Config(
-      {ins.G->NewState(ins.G->U[0], 0), ins.G->NewState(ins.G->U[8], 0)});
+      {Graph::NewState(ins.G->U[0], 0), Graph::NewState(ins.G->U[8], 0)});
   sol[1] = Config(
-      {ins.G->NewState(ins.G->U[8], 0), ins.G->NewState(ins.G->U[0], 0)});
+      {Graph::NewState(ins.G->U[8], 0), Graph::NewState(ins.G->U[0], 0)});
   sol[2] = Config(
-      {ins.G->NewState(ins.G->U[9], 1), ins.G->NewState(ins.G->U[1], 1)});
+      {Graph::NewState(ins.G->U[9], 1), Graph::NewState(ins.G->U[1], 1)});
   ASSERT_FALSE(is_feasible_solution(ins, sol, VERBOSITY, N, allow_following));
 
   // vertex conflict
   sol[0] = Config(
-      {ins.G->NewState(ins.G->U[0], 0), ins.G->NewState(ins.G->U[8], 0)});
+      {Graph::NewState(ins.G->U[0], 0), Graph::NewState(ins.G->U[8], 0)});
   sol[1] = Config(
-      {ins.G->NewState(ins.G->U[0], 0), ins.G->NewState(ins.G->U[0], 0)});
+      {Graph::NewState(ins.G->U[0], 0), Graph::NewState(ins.G->U[0], 0)});
   sol[2] = Config(
-      {ins.G->NewState(ins.G->U[8], 0), ins.G->NewState(ins.G->U[1], 1)});
+      {Graph::NewState(ins.G->U[8], 0), Graph::NewState(ins.G->U[1], 1)});
   sol.push_back(Config(
-      {ins.G->NewState(ins.G->U[9], 1), ins.G->NewState(ins.G->U[1], 1)}));
+      {Graph::NewState(ins.G->U[9], 1), Graph::NewState(ins.G->U[1], 1)}));
   ASSERT_FALSE(is_feasible_solution(ins, sol, VERBOSITY, N, allow_following));
 }
 
@@ -83,68 +83,68 @@ TEST(PostProcessing, validate_no_following)
   // correct solution
   auto sol = Solution(4);
   sol[0] = Config(
-      {ins.G->NewState(ins.G->U[0], 0), ins.G->NewState(ins.G->U[8], 0)});
+      {Graph::NewState(ins.G->U[0], 0), Graph::NewState(ins.G->U[8], 0)});
   sol[1] = Config(
-      {ins.G->NewState(ins.G->U[1], 0), ins.G->NewState(ins.G->U[8], 0)});
+      {Graph::NewState(ins.G->U[1], 0), Graph::NewState(ins.G->U[8], 0)});
   sol[2] = Config(
-      {ins.G->NewState(ins.G->U[9], 1), ins.G->NewState(ins.G->U[0], 0)});
+      {Graph::NewState(ins.G->U[9], 1), Graph::NewState(ins.G->U[0], 0)});
   sol[3] = Config(
-      {ins.G->NewState(ins.G->U[9], 1), ins.G->NewState(ins.G->U[1], 1)});
+      {Graph::NewState(ins.G->U[9], 1), Graph::NewState(ins.G->U[1], 1)});
   ASSERT_TRUE(is_feasible_solution(ins, sol, VERBOSITY, N, allow_following));
 
   // invalid start
   sol[0] = Config(
-      {ins.G->NewState(ins.G->U[0], 0), ins.G->NewState(ins.G->U[4], 0)});
+      {Graph::NewState(ins.G->U[0], 0), Graph::NewState(ins.G->U[4], 0)});
   sol[1] = Config(
-      {ins.G->NewState(ins.G->U[1], 0), ins.G->NewState(ins.G->U[8], 0)});
+      {Graph::NewState(ins.G->U[1], 0), Graph::NewState(ins.G->U[8], 0)});
   sol[2] = Config(
-      {ins.G->NewState(ins.G->U[9], 1), ins.G->NewState(ins.G->U[0], 0)});
+      {Graph::NewState(ins.G->U[9], 1), Graph::NewState(ins.G->U[0], 0)});
   sol[3] = Config(
-      {ins.G->NewState(ins.G->U[9], 1), ins.G->NewState(ins.G->U[1], 1)});
+      {Graph::NewState(ins.G->U[9], 1), Graph::NewState(ins.G->U[1], 1)});
   ASSERT_FALSE(is_feasible_solution(ins, sol, VERBOSITY, N, allow_following));
 
   // invalid goal
   sol[0] = Config(
-      {ins.G->NewState(ins.G->U[0], 0), ins.G->NewState(ins.G->U[8], 0)});
+      {Graph::NewState(ins.G->U[0], 0), Graph::NewState(ins.G->U[8], 0)});
   sol[1] = Config(
-      {ins.G->NewState(ins.G->U[1], 0), ins.G->NewState(ins.G->U[8], 0)});
+      {Graph::NewState(ins.G->U[1], 0), Graph::NewState(ins.G->U[8], 0)});
   sol[2] = Config(
-      {ins.G->NewState(ins.G->U[5], 0), ins.G->NewState(ins.G->U[0], 0)});
+      {Graph::NewState(ins.G->U[5], 0), Graph::NewState(ins.G->U[0], 0)});
   sol[3] = Config(
-      {ins.G->NewState(ins.G->U[10], 0), ins.G->NewState(ins.G->U[1], 1)});
+      {Graph::NewState(ins.G->U[10], 0), Graph::NewState(ins.G->U[1], 1)});
   ASSERT_FALSE(is_feasible_solution(ins, sol, VERBOSITY, N, allow_following));
 
   // invalid transition
   sol[0] = Config(
-      {ins.G->NewState(ins.G->U[0], 0), ins.G->NewState(ins.G->U[8], 0)});
+      {Graph::NewState(ins.G->U[0], 0), Graph::NewState(ins.G->U[8], 0)});
   sol[1] = Config(
-      {ins.G->NewState(ins.G->U[10], 0), ins.G->NewState(ins.G->U[8], 0)});
+      {Graph::NewState(ins.G->U[10], 0), Graph::NewState(ins.G->U[8], 0)});
   sol[2] = Config(
-      {ins.G->NewState(ins.G->U[9], 1), ins.G->NewState(ins.G->U[0], 0)});
+      {Graph::NewState(ins.G->U[9], 1), Graph::NewState(ins.G->U[0], 0)});
   sol[3] = Config(
-      {ins.G->NewState(ins.G->U[9], 1), ins.G->NewState(ins.G->U[1], 1)});
+      {Graph::NewState(ins.G->U[9], 1), Graph::NewState(ins.G->U[1], 1)});
   ASSERT_FALSE(is_feasible_solution(ins, sol, VERBOSITY, N, allow_following));
 
   // following conflict
   sol[0] = Config(
-      {ins.G->NewState(ins.G->U[0], 0), ins.G->NewState(ins.G->U[8], 0)});
+      {Graph::NewState(ins.G->U[0], 0), Graph::NewState(ins.G->U[8], 0)});
   sol[1] = Config(
-      {ins.G->NewState(ins.G->U[1], 0), ins.G->NewState(ins.G->U[0], 0)});
+      {Graph::NewState(ins.G->U[1], 0), Graph::NewState(ins.G->U[0], 0)});
   sol[2] = Config(
-      {ins.G->NewState(ins.G->U[9], 1), ins.G->NewState(ins.G->U[1], 1)});
+      {Graph::NewState(ins.G->U[9], 1), Graph::NewState(ins.G->U[1], 1)});
   sol[3] = Config(
-      {ins.G->NewState(ins.G->U[9], 1), ins.G->NewState(ins.G->U[1], 1)});
+      {Graph::NewState(ins.G->U[9], 1), Graph::NewState(ins.G->U[1], 1)});
   ASSERT_FALSE(is_feasible_solution(ins, sol, VERBOSITY, N, allow_following));
 
   // vertex conflict
   sol[0] = Config(
-      {ins.G->NewState(ins.G->U[0], 0), ins.G->NewState(ins.G->U[8], 0)});
+      {Graph::NewState(ins.G->U[0], 0), Graph::NewState(ins.G->U[8], 0)});
   sol[1] = Config(
-      {ins.G->NewState(ins.G->U[1], 0), ins.G->NewState(ins.G->U[8], 0)});
+      {Graph::NewState(ins.G->U[1], 0), Graph::NewState(ins.G->U[8], 0)});
   sol[2] = Config(
-      {ins.G->NewState(ins.G->U[9], 1), ins.G->NewState(ins.G->U[0], 0)});
+      {Graph::NewState(ins.G->U[9], 1), Graph::NewState(ins.G->U[0], 0)});
   sol[3] = Config(
-      {ins.G->NewState(ins.G->U[1], 1), ins.G->NewState(ins.G->U[1], 1)});
+      {Graph::NewState(ins.G->U[1], 1), Graph::NewState(ins.G->U[1], 1)});
   ASSERT_FALSE(is_feasible_solution(ins, sol, VERBOSITY, N, allow_following));
 }
 
@@ -159,19 +159,19 @@ TEST(PostProcessing, metrics)
   // correct solution
   auto sol = Solution(3);
   sol[0] = Config({
-      ins.G->NewState(ins.G->U[0], 0),
-      ins.G->NewState(ins.G->U[5], 0),
-      ins.G->NewState(ins.G->U[10], 0),
+      Graph::NewState(ins.G->U[0], 0),
+      Graph::NewState(ins.G->U[5], 0),
+      Graph::NewState(ins.G->U[10], 0),
   });
   sol[1] = Config({
-      ins.G->NewState(ins.G->U[1], 0),
-      ins.G->NewState(ins.G->U[4], 1),
-      ins.G->NewState(ins.G->U[11], 1),
+      Graph::NewState(ins.G->U[1], 0),
+      Graph::NewState(ins.G->U[4], 1),
+      Graph::NewState(ins.G->U[11], 1),
   });
   sol[2] = Config({
-      ins.G->NewState(ins.G->U[2], 1),
-      ins.G->NewState(ins.G->U[4], 1),
-      ins.G->NewState(ins.G->U[11], 1),
+      Graph::NewState(ins.G->U[2], 1),
+      Graph::NewState(ins.G->U[4], 1),
+      Graph::NewState(ins.G->U[11], 1),
   });
 
   ASSERT_TRUE(is_feasible_solution(ins, sol, VERBOSITY, N, true));
