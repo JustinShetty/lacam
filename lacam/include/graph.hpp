@@ -3,8 +3,9 @@
  */
 #pragma once
 
-#include "utils.hpp"
 #include <memory>
+
+#include "utils.hpp"
 
 struct Vertex {
   const int x;
@@ -56,13 +57,11 @@ private:
   Value value;
 };
 
-std::ostream& operator<<(std::ostream& os, const Orientation& o);
-
+// need these stubs so we can reference Graph, State, and StatePtr in each
+// other.
+class Graph;
 class State;
-struct StateHasher {
-  uint operator()(const State& s) const;
-};
-using StatePtr = std::shared_ptr<State>;
+using StatePtr = State*;
 class State
 {
 public:
@@ -71,16 +70,7 @@ public:
   int goal_index;
   int pose_id;
 
-  static StatePtr NewState(Vertex* _v, int _goal_index, Orientation _o = Orientation::NONE)
-  {
-    State s(_v, _goal_index, _o);
-    if (state_cache.find(s) == state_cache.end()) {
-      state_cache[s] = std::make_shared<State>(s);
-    }
-    return state_cache[s];
-  }
-  
-  static StatePtr NewState() { return NewState(nullptr, 0); }
+  friend class Graph;
 
   inline std::vector<StatePtr> get_neighbors()
   {
@@ -101,7 +91,6 @@ public:
   bool operator!=(const State& other) const { return !(*this == other); }
 
 private:
-  State() : State(nullptr, 0) {}
   State(Vertex* _v, int _goal_index, Orientation _o = Orientation::NONE)
       : v(_v),
         o(_o),
@@ -111,17 +100,12 @@ private:
         in_neighbors()
   {
   }
+  State() : State(nullptr, 0) {}
 
-  static std::unordered_map<State, StatePtr, StateHasher> state_cache;
   std::vector<StatePtr> neighbors;
   std::vector<StatePtr> in_neighbors;
   void gen_neighbors();
 };
-
-std::ostream& operator<<(std::ostream& os, const State& s);
-
-using StatePtr = std::shared_ptr<State>;
-std::ostream& operator<<(std::ostream& os, const StatePtr& s);
 
 class Config
 {
@@ -160,7 +144,17 @@ private:
   std::vector<StatePtr> data;
 };
 
-std::ostream& operator<<(std::ostream& os, const Config& c);
+// c.f.
+// https://stackoverflow.com/questions/10405030/c-unordered-map-fail-when-used-with-a-vector-as-key
+struct StateHasher {
+  uint operator()(const State& s) const;
+};
+struct StatePtrHasher {
+  uint operator()(const StatePtr& s) const;
+};
+struct ConfigHasher {
+  uint operator()(const Config& c) const;
+};
 
 struct Graph {
   Vertices V;  // without nullptr
@@ -173,18 +167,25 @@ struct Graph {
   ~Graph();
 
   int size() const;  // the number of vertices, |V|
-};
 
-// c.f.
-// https://stackoverflow.com/questions/10405030/c-unordered-map-fail-when-used-with-a-vector-as-key
-// struct StateHasher {
-//   uint operator()(const State& s) const;
-// };
-struct StatePtrHasher {
-  uint operator()(const StatePtr& s) const;
-};
-struct ConfigHasher {
-  uint operator()(const Config& c) const;
+  static StatePtr NewState(Vertex* _v, int _goal_index,
+                           Orientation _o = Orientation::NONE)
+  {
+    State s(_v, _goal_index, _o);
+    if (states.find(s) == states.end()) {
+      states[s] = new State(_v, _goal_index, _o);
+    }
+    return states[s];
+  }
+
+  static StatePtr NewState() { return NewState(nullptr, 0); }
+
+private:
+  static std::unordered_map<State, StatePtr, StateHasher> states;
 };
 
 std::ostream& operator<<(std::ostream& os, const Vertex* v);
+std::ostream& operator<<(std::ostream& os, const Orientation& o);
+std::ostream& operator<<(std::ostream& os, const State& s);
+std::ostream& operator<<(std::ostream& os, const StatePtr& s);
+std::ostream& operator<<(std::ostream& os, const Config& c);

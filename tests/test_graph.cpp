@@ -32,12 +32,12 @@ TEST(State, get_neighbors)
 {
   const std::string filename = "./assets/random-32-32-10.map";
   auto G = Graph(filename);
-  auto s = State::NewState(G.V[0], 0, Orientation::Y_PLUS);
+  auto s = G.NewState(G.V[0], 0, Orientation::Y_PLUS);
   auto neighbors = s->get_neighbors();
   std::vector<StatePtr> expected_neighbors = {
-      State::NewState(G.V[0], 0, Orientation::X_MINUS),
-      State::NewState(G.V[0], 0, Orientation::X_PLUS),
-      State::NewState(G.U[32], 0, Orientation::Y_PLUS)};
+      G.NewState(G.V[0], 0, Orientation::X_MINUS),
+      G.NewState(G.V[0], 0, Orientation::X_PLUS),
+      G.NewState(G.U[32], 0, Orientation::Y_PLUS)};
   ASSERT_EQ(neighbors.size(), expected_neighbors.size());
   for (size_t i = 0; i < neighbors.size(); ++i) {
     ASSERT_EQ(neighbors[i], expected_neighbors[i]);
@@ -48,12 +48,12 @@ TEST(State, get_in_neighbors)
 {
   const std::string filename = "./assets/random-32-32-10.map";
   auto G = Graph(filename);
-  auto s = State::NewState(G.V[1], 0, Orientation::Y_MINUS);
+  auto s = G.NewState(G.V[1], 0, Orientation::Y_MINUS);
   auto in_neighbors = s->get_in_neighbors();
   std::vector<StatePtr> expected_neighbors = {
-      State::NewState(G.V[1], 0, Orientation::X_MINUS),
-      State::NewState(G.V[1], 0, Orientation::X_PLUS),
-      State::NewState(G.U[33], 0, Orientation::Y_MINUS)};
+      G.NewState(G.V[1], 0, Orientation::X_MINUS),
+      G.NewState(G.V[1], 0, Orientation::X_PLUS),
+      G.NewState(G.U[33], 0, Orientation::Y_MINUS)};
   ASSERT_EQ(in_neighbors.size(), expected_neighbors.size());
   for (size_t i = 0; i < in_neighbors.size(); ++i) {
     ASSERT_EQ(in_neighbors[i], expected_neighbors[i]);

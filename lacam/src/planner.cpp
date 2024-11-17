@@ -80,7 +80,7 @@ Solution Planner::solve()
   info(1, verbose, "elapsed:", elapsed_ms(deadline), "ms\tstart search");
 
   // setup agents
-  for (auto i = 0; i < N; ++i) A[i] = new Agent(i);
+  for (auto i = 0; i < N; ++i) A[i] = new Agent(ins->G, i);
 
   // setup search queues
   std::stack<Node*> OPEN;
@@ -179,7 +179,7 @@ bool Planner::get_new_config(Node* S, Constraint* M)
     }
     if (a->s_next->v != nullptr) {
       occupied_next[a->s_next->v->id] = nullptr;
-      a->s_next = State::NewState();
+      a->s_next = ins->G->NewState();
     }
 
     // set occupied now
@@ -189,7 +189,7 @@ bool Planner::get_new_config(Node* S, Constraint* M)
 
   // add constraints
   for (auto k = 0; k < M->depth; ++k) {
-    const auto i = M->who[k];          // agent
+    const auto i = M->who[k];           // agent
     const auto l = M->where[k]->v->id;  // loc
 
     // check vertex collision
@@ -279,7 +279,7 @@ bool Planner::funcPIBT(Agent* ai, Agent* caller)
 
           // revert if priority inheritance failed
           occupied_next[ai->s_now->v->id] = nullptr;
-          ai->s_next = State::NewState();
+          ai->s_next = ins->G->NewState();
         }
         continue;
       }

@@ -18,9 +18,9 @@ TEST(dist_table, orientation)
   const auto map_filename = "./tests/assets/2x2.map";
   const auto G = new Graph(map_filename);
   const std::vector<StatePtr> starts = {
-      State::NewState(G->U[0], 0, Orientation::X_MINUS)};  // (0,0)
+      G->NewState(G->U[0], 0, Orientation::X_MINUS)};  // (0,0)
   const std::vector<std::vector<StatePtr>> goal_sequences = {
-      {State::NewState(G->U[3], 0, Orientation::Y_PLUS)}};  // (1,1)
+      {G->NewState(G->U[3], 0, Orientation::Y_PLUS)}};  // (1,1)
   const auto ins = Instance(std::shared_ptr<Graph>(G), starts, goal_sequences);
   auto dist_table = DistTableMultiGoal(ins);
 
@@ -32,11 +32,11 @@ TEST(dist_table, multiple)
 {
   const auto map_filename = "./tests/assets/2x2.map";
   const auto G = new Graph(map_filename);
-  const std::vector<StatePtr> starts = {State::NewState(G->U[0], 0)};  // (0,0)
+  const std::vector<StatePtr> starts = {G->NewState(G->U[0], 0)};  // (0,0)
   const std::vector<std::vector<StatePtr>> goal_sequences = {
       {
-          State::NewState(G->U[3], 0),  // (1,1)
-          State::NewState(G->U[0], 1),  // (0,0)
+          G->NewState(G->U[3], 0),  // (1,1)
+          G->NewState(G->U[0], 1),  // (0,0)
       },
   };
   const auto ins = Instance(std::shared_ptr<Graph>(G), starts, goal_sequences);

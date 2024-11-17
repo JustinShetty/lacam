@@ -1,7 +1,7 @@
 #include "../include/graph.hpp"
 
 // initialize static variable
-std::unordered_map<State, StatePtr, StateHasher> State::state_cache;
+std::unordered_map<State, StatePtr, StateHasher> Graph::states;
 
 Vertex::Vertex(int _x, int _y, int _id, int _index)
     : x(_x), y(_y), id(_id), index(_index), neighbor(Vertices())
@@ -49,12 +49,12 @@ std::ostream& operator<<(std::ostream& os, const Orientation& o)
 void State::gen_neighbors()
 {
   for (auto adjacent_orientation : o.adjacent()) {
-    auto s = State::NewState(v, goal_index, adjacent_orientation);
+    auto s = Graph::NewState(v, goal_index, adjacent_orientation);
     neighbors.push_back(s);
     in_neighbors.push_back(s);
   }
   for (auto u : v->neighbor) {
-    auto candidate = State::NewState(u, goal_index, o);
+    auto candidate = Graph::NewState(u, goal_index, o);
     if (o == Orientation::Y_MINUS) {
       if (u->y == v->y - 1) neighbors.push_back(candidate);
       if (u->y == v->y + 1) in_neighbors.push_back(candidate);
@@ -86,6 +86,11 @@ Graph::~Graph()
   for (auto& v : V)
     if (v != nullptr) delete v;
   V.clear();
+
+  for (auto& kv : states) {
+    if (kv.second != nullptr) delete kv.second;
+  }
+  states.clear();
 }
 
 // to load graph
@@ -169,7 +174,8 @@ int Graph::size() const { return V.size(); }
 
 uint StateHasher::operator()(const State& s) const
 {
-  return hash_two_ints(s.v == nullptr ? 0 : s.v->id, hash_two_ints(s.o, s.goal_index));
+  return hash_two_ints(s.v == nullptr ? 0 : s.v->id,
+                       hash_two_ints(s.o, s.goal_index));
 }
 
 uint StatePtrHasher::operator()(const StatePtr& s) const

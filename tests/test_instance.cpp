@@ -40,12 +40,12 @@ TEST(Instance, orientation)
   const auto map_filename = "./tests/assets/2x2.map";
   const auto G = std::shared_ptr<Graph>(new Graph(map_filename));
   const std::vector<StatePtr> starts = {
-      State::NewState(G->U[0], 0, Orientation::X_MINUS),
-      State::NewState(G->U[3], 0, Orientation::X_PLUS),
+      G->NewState(G->U[0], 0, Orientation::X_MINUS),
+      G->NewState(G->U[3], 0, Orientation::X_PLUS),
   };
   const std::vector<std::vector<StatePtr>> goals{
-      {State::NewState(G->U[3], 0, Orientation::Y_PLUS)},
-      {State::NewState(G->U[0], 0, Orientation::Y_MINUS)},
+      {G->NewState(G->U[3], 0, Orientation::Y_PLUS)},
+      {G->NewState(G->U[0], 0, Orientation::Y_MINUS)},
   };
   const Instance ins(G, starts, goals);
   ASSERT_TRUE(ins.is_valid(VERBOSITY));

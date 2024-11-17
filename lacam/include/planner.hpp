@@ -40,7 +40,10 @@ struct Agent {
   const int id;
   StatePtr s_now;   // current state
   StatePtr s_next;  // next state
-  Agent(int _id) : id(_id), s_now(State::NewState()), s_next(State::NewState()) {}
+  Agent(std::shared_ptr<Graph> G, int _id)
+      : id(_id), s_now(G->NewState()), s_next(G->NewState())
+  {
+  }
 };
 using Agents = std::vector<Agent*>;
 
