@@ -67,7 +67,8 @@ Planner::Planner(const Instance* _ins, const Deadline* _deadline,
       N(ins->N),
       V_size(ins->G->size()),
       D(DistTableMultiGoal(ins)),
-      tie_breakers(std::vector<float>(V_size * Orientation::NUM_ORIENTATIONS, 0)),
+      tie_breakers(
+          std::vector<float>(V_size * Orientation::NUM_ORIENTATIONS, 0)),
       A(Agents(N, nullptr)),
       occupied_now(Agents(V_size, nullptr)),
       occupied_next(Agents(V_size, nullptr))

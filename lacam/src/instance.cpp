@@ -30,7 +30,7 @@ Instance::Instance(const std::string& map_filename,
   }
   for (auto goal_sequence : goal_index_sequences) {
     std::vector<State> as_states;
-    for (int k = 0; k < goal_sequence.size(); ++k) {
+    for (size_t k = 0; k < goal_sequence.size(); ++k) {
       as_states.push_back(State(G->U[goal_sequence[k]], k));
     }
     goal_sequences.push_back(as_states);
@@ -131,13 +131,13 @@ bool Instance::is_valid(const int verbose) const
   }
 
   bool consider_orientation = starts[0].o != Orientation::NONE;
-  for (int i = 0; i < N; i++) {
+  for (size_t i = 0; i < N; i++) {
     if (consider_orientation ^ (starts[i].o != Orientation::NONE)) {
       info(1, verbose, "invalid start orientation(agent ", i,
            "). check instance");
       return false;
     }
-    for (int j = 0; j < goal_sequences[i].size(); j++) {
+    for (size_t j = 0; j < goal_sequences[i].size(); j++) {
       if (consider_orientation ^
           (goal_sequences[i][j].o != Orientation::NONE)) {
         info(1, verbose, "invalid goal orientation(agent ", i, ", goal ", j,
@@ -176,7 +176,7 @@ void Instance::update_goal_indices(Config& c, const Config& c_prev) const
     const auto current = c[i];
     const auto goal_seq = goal_sequences[i];
     auto goal_idx = c_prev[i].goal_index;
-    if (goal_idx < goal_seq.size() && current == goal_seq[goal_idx]) {
+    if (goal_idx < (int)goal_seq.size() && current == goal_seq[goal_idx]) {
       goal_idx += 1;
     }
     c[i] = State(current.v, goal_idx, current.o);
