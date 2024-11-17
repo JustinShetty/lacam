@@ -30,10 +30,10 @@ bool is_feasible_solution(const Instance& ins, const Solution& solution,
       auto s_i_to = solution[t][i];
       // check connectivity
       if (s_i_from != s_i_to) {
-        auto s_i_from_neighbors = s_i_from.get_neighbors();
+        auto s_i_from_neighbors = s_i_from->get_neighbors();
         bool found = false;
         for (auto s : s_i_from_neighbors) {
-          if (s.v == s_i_to.v && s.o == s_i_to.o) {
+          if (s->v == s_i_to->v && s->o == s_i_to->o) {
             found = true;
             break;
           }
@@ -44,13 +44,13 @@ bool is_feasible_solution(const Instance& ins, const Solution& solution,
         }
       }
 
-      auto v_i_from = s_i_from.v;
-      auto v_i_to = s_i_to.v;
+      auto v_i_from = s_i_from->v;
+      auto v_i_to = s_i_to->v;
 
       // check conflicts
       for (size_t j = i + 1; j < ins.N; ++j) {
-        auto v_j_from = solution[t - 1][j].v;
-        auto v_j_to = solution[t][j].v;
+        auto v_j_from = solution[t - 1][j]->v;
+        auto v_j_to = solution[t][j]->v;
         // vertex conflicts
         if (v_j_to == v_i_to) {
           info(1, verbose, "vertex conflict", "t=", t, "i=", i, "j=", j, "at",
@@ -208,9 +208,9 @@ void make_log(const Instance& ins, const Solution& solution,
     log << t << ":";
     auto C = solution[t];
     for (auto s : C) {
-      log << "(" << s.v->x << "," << s.v->y;
-      if (s.o != Orientation::NONE) {
-        log << "," << s.o;
+      log << "(" << s->v->x << "," << s->v->y;
+      if (s->o != Orientation::NONE) {
+        log << "," << s->o;
       }
       log << "),";
     }

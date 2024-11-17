@@ -10,10 +10,10 @@ Instance::Instance(const std::string& map_filename,
       N(start_indexes.size())
 {
   for (auto k : start_indexes) {
-    starts.push_back(State(G->U[k], 0));
+    starts.push_back(State::NewState(G->U[k], 0));
   }
   for (auto k : goal_indexes) {
-    goal_sequences.push_back(std::vector<State>{State(G->U[k], 0)});
+    goal_sequences.push_back(std::vector<StatePtr>{State::NewState(G->U[k], 0)});
   }
   update_goal_indices(starts, starts);
 }
@@ -26,12 +26,12 @@ Instance::Instance(const std::string& map_filename,
       N(start_indexes.size())
 {
   for (auto k : start_indexes) {
-    starts.push_back(State(G->U[k], 0));
+    starts.push_back(State::NewState(G->U[k], 0));
   }
   for (auto goal_sequence : goal_index_sequences) {
-    std::vector<State> as_states;
+    std::vector<StatePtr> as_states;
     for (size_t k = 0; k < goal_sequence.size(); ++k) {
-      as_states.push_back(State(G->U[goal_sequence[k]], k));
+      as_states.push_back(State::NewState(G->U[goal_sequence[k]], k));
     }
     goal_sequences.push_back(as_states);
   }
@@ -39,8 +39,8 @@ Instance::Instance(const std::string& map_filename,
 }
 
 Instance::Instance(const std::shared_ptr<Graph> _G,
-                   const std::vector<State>& _starts,
-                   const std::vector<std::vector<State>>& _goal_sequences)
+                   const std::vector<StatePtr>& _starts,
+                   const std::vector<std::vector<StatePtr>>& _goal_sequences)
     : G(_G), starts(_starts), goal_sequences(_goal_sequences), N(starts.size())
 {
   update_goal_indices(starts, starts);
@@ -79,8 +79,8 @@ Instance::Instance(const std::string& scen_filename,
       auto s = G->U[G->width * y_s + x_s];
       auto g = G->U[G->width * y_g + x_g];
       if (s == nullptr || g == nullptr) continue;
-      starts.push_back(State(s, 0));
-      goal_sequences.push_back(std::vector<State>{State(g, 0)});
+      starts.push_back(State::NewState(s, 0));
+      goal_sequences.push_back(std::vector<StatePtr>{State::NewState(g, 0)});
     }
 
     if (starts.size() == N) break;
@@ -104,7 +104,7 @@ Instance::Instance(const std::string& map_filename, std::mt19937* MT,
   int i = 0;
   while (true) {
     if (i >= K) return;
-    starts.push_back(State(G->V[s_indexes[i]], 0));
+    starts.push_back(State::NewState(G->V[s_indexes[i]], 0));
     if (starts.size() == N) break;
     ++i;
   }
@@ -116,7 +116,7 @@ Instance::Instance(const std::string& map_filename, std::mt19937* MT,
   int j = 0;
   while (true) {
     if (j >= K) return;
-    goal_sequences.push_back(std::vector<State>{State(G->V[g_indexes[j]], 0)});
+    goal_sequences.push_back(std::vector<StatePtr>{State::NewState(G->V[g_indexes[j]], 0)});
     if (goal_sequences.size() == N) break;
     ++j;
   }
@@ -130,16 +130,16 @@ bool Instance::is_valid(const int verbose) const
     return false;
   }
 
-  bool consider_orientation = starts[0].o != Orientation::NONE;
+  bool consider_orientation = starts[0]->o != Orientation::NONE;
   for (size_t i = 0; i < N; i++) {
-    if (consider_orientation ^ (starts[i].o != Orientation::NONE)) {
+    if (consider_orientation ^ (starts[i]->o != Orientation::NONE)) {
       info(1, verbose, "invalid start orientation(agent ", i,
            "). check instance");
       return false;
     }
     for (size_t j = 0; j < goal_sequences[i].size(); j++) {
       if (consider_orientation ^
-          (goal_sequences[i][j].o != Orientation::NONE)) {
+          (goal_sequences[i][j]->o != Orientation::NONE)) {
         info(1, verbose, "invalid goal orientation(agent ", i, ", goal ", j,
              "). check instance");
         return false;
@@ -165,7 +165,7 @@ bool Instance::is_goal_config(const Config& C) const
   for (size_t i = 0; i < N; ++i) {
     const auto& s = C[i];
     const auto& g = goal_sequences[i].back();
-    if (s.v != g.v or s.o != g.o) return false;
+    if (s->v != g->v or s->o != g->o) return false;
   }
   return true;
 }
@@ -175,10 +175,10 @@ void Instance::update_goal_indices(Config& c, const Config& c_prev) const
   for (size_t i = 0; i < N; ++i) {
     const auto current = c[i];
     const auto goal_seq = goal_sequences[i];
-    auto goal_idx = c_prev[i].goal_index;
+    auto goal_idx = c_prev[i]->goal_index;
     if (goal_idx < (int)goal_seq.size() && current == goal_seq[goal_idx]) {
       goal_idx += 1;
     }
-    c[i] = State(current.v, goal_idx, current.o);
+    c[i] = State::NewState(current->v, goal_idx, current->o);
   }
 }

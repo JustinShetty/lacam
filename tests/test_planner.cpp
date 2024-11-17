@@ -3,7 +3,7 @@
 
 #include "gtest/gtest.h"
 
-static bool VERBOSITY = 0;
+static bool VERBOSITY = 5;
 
 TEST(planner, basic)
 {
@@ -24,13 +24,13 @@ TEST(planner, basic_with_orientation)
   const auto map_filename = "./tests/assets/2x2.map";
   const auto G = std::shared_ptr<Graph>(new Graph(map_filename));
   const auto N = 2;
-  const std::vector<State> starts = {
-      State(G->U[0], 0, Orientation::X_MINUS),
-      State(G->U[3], 0, Orientation::X_PLUS),
+  const std::vector<StatePtr> starts = {
+      State::NewState(G->U[0], 0, Orientation::X_MINUS),
+      State::NewState(G->U[3], 0, Orientation::X_PLUS),
   };
-  const std::vector<std::vector<State>> goals{
-      {State(G->U[3], 0, Orientation::Y_PLUS)},
-      {State(G->U[0], 0, Orientation::Y_MINUS)},
+  const std::vector<std::vector<StatePtr>> goals{
+      {State::NewState(G->U[3], 0, Orientation::Y_PLUS)},
+      {State::NewState(G->U[0], 0, Orientation::Y_MINUS)},
   };
   const Instance ins(G, starts, goals);
   ASSERT_TRUE(ins.is_valid(VERBOSITY));
@@ -100,8 +100,8 @@ TEST(planner, benchmark_with_orientation)
   ASSERT_TRUE(ins.is_valid(VERBOSITY));
   std::uniform_int_distribution<int> dist(1, 4);  // uniform over [1, 4]
   for (int i = 0; i < N; i++) {
-    ins.starts[i].o = static_cast<Orientation::Value>(dist(MT));
-    ins.goal_sequences[i][0].o = static_cast<Orientation::Value>(dist(MT));
+    ins.starts[i]->o = static_cast<Orientation::Value>(dist(MT));
+    ins.goal_sequences[i][0]->o = static_cast<Orientation::Value>(dist(MT));
   }
   ASSERT_TRUE(ins.is_valid(VERBOSITY));
 
