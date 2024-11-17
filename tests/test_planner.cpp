@@ -3,7 +3,7 @@
 
 #include "gtest/gtest.h"
 
-static bool VERBOSITY = 5;
+static bool VERBOSITY = 0;
 
 TEST(planner, basic)
 {
@@ -49,6 +49,7 @@ TEST(planner, solve)
   ASSERT_TRUE(ins.is_valid(VERBOSITY));
 
   const auto threshold = std::nullopt;
+
   const auto allow_following = false;
   auto solution = solve(ins, VERBOSITY, nullptr, nullptr, threshold);
   ASSERT_GT(solution.size(), 0);
@@ -100,8 +101,10 @@ TEST(planner, benchmark_with_orientation)
   ASSERT_TRUE(ins.is_valid(VERBOSITY));
   std::uniform_int_distribution<int> dist(1, 4);  // uniform over [1, 4]
   for (int i = 0; i < N; i++) {
-    ins.starts[i]->o = static_cast<Orientation::Value>(dist(MT));
-    ins.goal_sequences[i][0]->o = static_cast<Orientation::Value>(dist(MT));
+    auto start = ins.starts[i];
+    ins.starts[i] = State::NewState(start->v, start->goal_index, static_cast<Orientation::Value>(dist(MT)));
+    auto goal = ins.goal_sequences[i][0];
+    ins.goal_sequences[i][0] = State::NewState(goal->v, goal->goal_index, static_cast<Orientation::Value>(dist(MT)));
   }
   ASSERT_TRUE(ins.is_valid(VERBOSITY));
 

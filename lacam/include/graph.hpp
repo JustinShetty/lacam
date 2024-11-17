@@ -121,6 +121,7 @@ private:
 std::ostream& operator<<(std::ostream& os, const State& s);
 
 using StatePtr = std::shared_ptr<State>;
+std::ostream& operator<<(std::ostream& os, const StatePtr& s);
 
 class Config
 {

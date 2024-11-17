@@ -202,3 +202,9 @@ std::ostream& operator<<(std::ostream& os, const Config& c)
   os << "}";
   return os;
 }
+
+std::ostream& operator<<(std::ostream& os, const StatePtr& s)
+{
+  os << *s;
+  return os;
+}
