@@ -9,10 +9,11 @@
 #include "utils.hpp"
 
 struct Instance {
-  const std::shared_ptr<Graph> G;                  // graph
-  Config starts;                                   // initial configuration
-  std::vector<std::vector<State>> goal_sequences;  // agent id -> goal sequence
-  const uint N;                                    // number of agents
+  const std::shared_ptr<Graph> G;  // graph
+  Config starts;                   // initial configuration
+  std::vector<std::vector<StatePtr>>
+      goal_sequences;  // agent id -> goal sequence
+  const uint N;        // number of agents
 
   // for testing
   Instance(const std::string& map_filename,
@@ -21,8 +22,9 @@ struct Instance {
   Instance(const std::string& map_filename,
            const std::vector<int>& start_indexes,
            const std::vector<std::vector<int>>& goal_index_sequences);
-  Instance(const std::shared_ptr<Graph> _G, const std::vector<State>& _starts,
-           const std::vector<std::vector<State>>& _goal_sequences);
+  Instance(const std::shared_ptr<Graph> _G,
+           const std::vector<StatePtr>& _starts,
+           const std::vector<std::vector<StatePtr>>& _goal_sequences);
   // for MAPF benchmark
   Instance(const std::string& scen_filename, const std::string& map_filename,
            const int _N = 1);

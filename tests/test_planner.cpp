@@ -22,15 +22,15 @@ TEST(planner, basic)
 TEST(planner, basic_with_orientation)
 {
   const auto map_filename = "./tests/assets/2x2.map";
-  const auto G = std::shared_ptr<Graph>(new Graph(map_filename));
+  const auto G = std::make_shared<Graph>(map_filename);
   const auto N = 2;
-  const std::vector<State> starts = {
-      State(G->U[0], 0, Orientation::X_MINUS),
-      State(G->U[3], 0, Orientation::X_PLUS),
+  const std::vector<StatePtr> starts = {
+      G->NewState(G->U[0], 0, Orientation::X_MINUS),
+      G->NewState(G->U[3], 0, Orientation::X_PLUS),
   };
-  const std::vector<std::vector<State>> goals{
-      {State(G->U[3], 0, Orientation::Y_PLUS)},
-      {State(G->U[0], 0, Orientation::Y_MINUS)},
+  const std::vector<std::vector<StatePtr>> goals{
+      {G->NewState(G->U[3], 0, Orientation::Y_PLUS)},
+      {G->NewState(G->U[0], 0, Orientation::Y_MINUS)},
   };
   const Instance ins(G, starts, goals);
   ASSERT_TRUE(ins.is_valid(VERBOSITY));
@@ -49,10 +49,12 @@ TEST(planner, solve)
   ASSERT_TRUE(ins.is_valid(VERBOSITY));
 
   const auto threshold = std::nullopt;
+
   const auto allow_following = false;
   auto solution = solve(ins, VERBOSITY, nullptr, nullptr, threshold);
   ASSERT_GT(solution.size(), 0);
-  ASSERT_TRUE(is_feasible_solution(ins, solution, VERBOSITY, threshold, allow_following));
+  ASSERT_TRUE(is_feasible_solution(ins, solution, VERBOSITY, threshold,
+                                   allow_following));
 }
 
 TEST(planner, already_solved)
@@ -67,7 +69,8 @@ TEST(planner, already_solved)
   const auto allow_following = false;
   auto solution = solve(ins, VERBOSITY, nullptr, nullptr, threshold);
   ASSERT_GT(solution.size(), 0);
-  ASSERT_TRUE(is_feasible_solution(ins, solution, VERBOSITY, threshold, allow_following));
+  ASSERT_TRUE(is_feasible_solution(ins, solution, VERBOSITY, threshold,
+                                   allow_following));
 }
 
 TEST(planner, benchmark)
@@ -82,10 +85,11 @@ TEST(planner, benchmark)
 
   const auto threshold = std::nullopt;
   const auto allow_following = false;
-  auto solution = solve(ins, VERBOSITY, nullptr, &MT, threshold, allow_following);
+  auto solution =
+      solve(ins, VERBOSITY, nullptr, &MT, threshold, allow_following);
   ASSERT_GT(solution.size(), 0);
-  ASSERT_TRUE(
-      is_feasible_solution(ins, solution, VERBOSITY, threshold, allow_following));
+  ASSERT_TRUE(is_feasible_solution(ins, solution, VERBOSITY, threshold,
+                                   allow_following));
 }
 
 TEST(planner, benchmark_with_orientation)
@@ -100,8 +104,12 @@ TEST(planner, benchmark_with_orientation)
   ASSERT_TRUE(ins.is_valid(VERBOSITY));
   std::uniform_int_distribution<int> dist(1, 4);  // uniform over [1, 4]
   for (int i = 0; i < N; i++) {
-    ins.starts[i].o = static_cast<Orientation::Value>(dist(MT));
-    ins.goal_sequences[i][0].o = static_cast<Orientation::Value>(dist(MT));
+    auto start = ins.starts[i];
+    ins.starts[i] = ins.G->NewState(start->v, start->goal_index,
+                                    static_cast<Orientation::Value>(dist(MT)));
+    auto goal = ins.goal_sequences[i][0];
+    ins.goal_sequences[i][0] = ins.G->NewState(
+        goal->v, goal->goal_index, static_cast<Orientation::Value>(dist(MT)));
   }
   ASSERT_TRUE(ins.is_valid(VERBOSITY));
 
@@ -287,9 +295,11 @@ TEST(planner, solve_multiple_goals_thresholded)
 
   const auto threshold = 1;
   const bool allow_following = false;
-  auto solution = solve(ins, VERBOSITY, nullptr, nullptr, threshold, allow_following);
+  auto solution =
+      solve(ins, VERBOSITY, nullptr, nullptr, threshold, allow_following);
   ASSERT_GT(solution.size(), 0);
-  ASSERT_TRUE(is_feasible_solution(ins, solution, VERBOSITY, threshold, allow_following));
+  ASSERT_TRUE(is_feasible_solution(ins, solution, VERBOSITY, threshold,
+                                   allow_following));
 }
 
 TEST(planner, solver_multiple_goals_thresholded2)

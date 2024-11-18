@@ -46,12 +46,12 @@ std::ostream& operator<<(std::ostream& os, const Orientation& o)
 void State::gen_neighbors()
 {
   for (auto adjacent_orientation : o.adjacent()) {
-    const State s(v, goal_index, adjacent_orientation);
-    neighbors.emplace_back(s);
-    in_neighbors.emplace_back(s);
+    auto s = G->NewState(v, goal_index, adjacent_orientation);
+    neighbors.push_back(s);
+    in_neighbors.push_back(s);
   }
   for (auto u : v->neighbor) {
-    auto candidate = State(u, goal_index, o);
+    auto candidate = G->NewState(u, goal_index, o);
     if (o == Orientation::Y_MINUS) {
       if (u->y == v->y - 1) neighbors.push_back(candidate);
       if (u->y == v->y + 1) in_neighbors.push_back(candidate);
@@ -68,7 +68,6 @@ void State::gen_neighbors()
       neighbors.push_back(candidate);
     }
   }
-  neighbors_generated = true;
 }
 
 std::ostream& operator<<(std::ostream& os, const State& s)
@@ -84,6 +83,11 @@ Graph::~Graph()
   for (auto& v : V)
     if (v != nullptr) delete v;
   V.clear();
+
+  for (auto& kv : states) {
+    if (kv.second != nullptr) delete kv.second;
+  }
+  states.clear();
 }
 
 // to load graph
@@ -167,7 +171,13 @@ int Graph::size() const { return V.size(); }
 
 uint StateHasher::operator()(const State& s) const
 {
-  return hash_two_ints(s.v->id, hash_two_ints(s.o, s.goal_index));
+  return hash_two_ints(s.v == nullptr ? 0 : s.v->id,
+                       hash_two_ints(s.o, s.goal_index));
+}
+
+uint StatePtrHasher::operator()(const StatePtr& s) const
+{
+  return StateHasher()(*s);
 }
 
 uint ConfigHasher::operator()(const Config& c) const
@@ -175,7 +185,7 @@ uint ConfigHasher::operator()(const Config& c) const
   StateHasher state_hasher;
   uint hash = c.size();
   for (auto& s : c) {
-    hash = hash_two_ints(hash, state_hasher(s));
+    hash = hash_two_ints(hash, state_hasher(*s));
   }
   return hash;
 }
@@ -193,5 +203,11 @@ std::ostream& operator<<(std::ostream& os, const Config& c)
     os << s << " ";
   }
   os << "}";
+  return os;
+}
+
+std::ostream& operator<<(std::ostream& os, const StatePtr& s)
+{
+  os << *s;
   return os;
 }

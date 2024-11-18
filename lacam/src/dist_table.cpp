@@ -12,8 +12,8 @@ void DistTableMultiGoal::setup(const Instance* ins)
 {
   // initialize search queues and table values for goals
   for (size_t i = 0; i < ins->N; i++) {
-    table.push_back(std::unordered_map<State, int, StateHasher>());
-    OPEN.push_back(std::queue<State>());
+    table.push_back(std::unordered_map<StatePtr, int, StatePtrHasher>());
+    OPEN.push_back(std::queue<StatePtr>());
     const auto& goal_seq = ins->goal_sequences[i];
     for (size_t j = 0; j < goal_seq.size(); j++) {
       auto g = goal_seq[j];
@@ -23,13 +23,13 @@ void DistTableMultiGoal::setup(const Instance* ins)
   }
 }
 
-int DistTableMultiGoal::get(int agent_id, const State& from)
+int DistTableMultiGoal::get(int agent_id, const StatePtr from)
 {
   // goal_index can be past the end to signify we've already reached the last
   // goal, but when we want to use the index we need to cap it at the last goal
-  auto goal_index = std::min(from.goal_index,
+  auto goal_index = std::min(from->goal_index,
                              (int)(ins->goal_sequences[agent_id].size() - 1));
-  auto key = State(from.v, goal_index, from.o);
+  auto key = ins->G->NewState(from->v, goal_index, from->o);
 
   if (table[agent_id].find(key) != table[agent_id].end()) {
     return table[agent_id][key];
@@ -41,7 +41,6 @@ int DistTableMultiGoal::get(int agent_id, const State& from)
    * https://www.aaai.org/Papers/AIIDE/2005/AIIDE05-020.pdf
    */
 
-  const auto next_goal = ins->goal_sequences[agent_id][goal_index];
   while (!OPEN[agent_id].empty()) {
     auto n = OPEN[agent_id].front();
     OPEN[agent_id].pop();
@@ -49,8 +48,8 @@ int DistTableMultiGoal::get(int agent_id, const State& from)
       table[agent_id][n] = INT_MAX;
     }
     auto d_n = table[agent_id][n];
-    const auto neighbors =
-        (n.o == Orientation::NONE) ? n.get_neighbors() : n.get_in_neighbors();
+    const auto neighbors = (n->o == Orientation::NONE) ? n->get_neighbors()
+                                                       : n->get_in_neighbors();
     for (const auto& m : neighbors) {
       if (table[agent_id].find(m) == table[agent_id].end()) {
         table[agent_id][m] = INT_MAX;

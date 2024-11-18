@@ -13,10 +13,10 @@
 // low-level search node
 struct Constraint {
   std::vector<int> who;
-  std::vector<State> where;
+  std::vector<StatePtr> where;
   const int depth;
   Constraint();
-  Constraint(Constraint* parent, int i, State s);  // who and where
+  Constraint(Constraint* parent, int i, StatePtr s);  // who and where
   ~Constraint();
 };
 
@@ -38,9 +38,12 @@ using Nodes = std::vector<Node*>;
 // PIBT agent
 struct Agent {
   const int id;
-  State s_now;   // current state
-  State s_next;  // next state
-  Agent(int _id) : id(_id), s_now(), s_next() {}
+  StatePtr s_now;   // current state
+  StatePtr s_next;  // next state
+  Agent(std::shared_ptr<Graph> G, int _id)
+      : id(_id), s_now(G->NewState()), s_next(G->NewState())
+  {
+  }
 };
 using Agents = std::vector<Agent*>;
 
