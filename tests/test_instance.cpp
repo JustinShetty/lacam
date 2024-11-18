@@ -38,14 +38,14 @@ TEST(Instance, sequence)
 TEST(Instance, orientation)
 {
   const auto map_filename = "./tests/assets/2x2.map";
-  const auto G = std::shared_ptr<Graph>(new Graph(map_filename));
+  const auto G = std::make_shared<Graph>(map_filename);
   const std::vector<StatePtr> starts = {
-      Graph::NewState(G->U[0], 0, Orientation::X_MINUS),
-      Graph::NewState(G->U[3], 0, Orientation::X_PLUS),
+      G->NewState(G->U[0], 0, Orientation::X_MINUS),
+      G->NewState(G->U[3], 0, Orientation::X_PLUS),
   };
   const std::vector<std::vector<StatePtr>> goals{
-      {Graph::NewState(G->U[3], 0, Orientation::Y_PLUS)},
-      {Graph::NewState(G->U[0], 0, Orientation::Y_MINUS)},
+      {G->NewState(G->U[3], 0, Orientation::Y_PLUS)},
+      {G->NewState(G->U[0], 0, Orientation::Y_MINUS)},
   };
   const Instance ins(G, starts, goals);
   ASSERT_TRUE(ins.is_valid(VERBOSITY));

@@ -12,7 +12,7 @@ Constraint::Constraint(Constraint* parent, int i, StatePtr s)
   where.push_back(s);
 }
 
-Constraint::~Constraint(){};
+Constraint::~Constraint() {};
 
 Node::Node(Config _C, DistTableMultiGoal& D, Node* _parent)
     : C(_C),
@@ -179,7 +179,7 @@ bool Planner::get_new_config(Node* S, Constraint* M)
     }
     if (a->s_next->v != nullptr) {
       occupied_next[a->s_next->v->id] = nullptr;
-      a->s_next = Graph::NewState();
+      a->s_next = ins->G->NewState();
     }
 
     // set occupied now
@@ -279,7 +279,7 @@ bool Planner::funcPIBT(Agent* ai, Agent* caller)
 
           // revert if priority inheritance failed
           occupied_next[ai->s_now->v->id] = nullptr;
-          ai->s_next = Graph::NewState();
+          ai->s_next = ins->G->NewState();
         }
         continue;
       }

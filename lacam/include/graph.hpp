@@ -57,8 +57,8 @@ private:
 
 struct State;
 using StatePtr = State*;
-struct State
-{
+struct Graph;
+struct State {
   Vertex* v;
   Orientation o;
   int goal_index;
@@ -85,17 +85,20 @@ struct State
   bool operator!=(const State& other) const { return !(*this == other); }
 
 private:
-  State(Vertex* _v, int _goal_index, Orientation _o = Orientation::NONE)
+  State(Graph* _G, Vertex* _v, int _goal_index,
+        Orientation _o = Orientation::NONE)
       : v(_v),
         o(_o),
         goal_index(_goal_index),
         pose_id(v == nullptr ? 0 : Orientation::NUM_ORIENTATIONS * v->id + o),
+        G(_G),
         neighbors(),
         in_neighbors()
   {
   }
-  State() : State(nullptr, 0) {}
+  State(Graph* G) : State(G, nullptr, 0) {}
 
+  Graph* G;
   std::vector<StatePtr> neighbors;
   std::vector<StatePtr> in_neighbors;
   void gen_neighbors();
@@ -162,20 +165,20 @@ struct Graph {
 
   int size() const;  // the number of vertices, |V|
 
-  static StatePtr NewState(Vertex* _v, int _goal_index,
-                           Orientation _o = Orientation::NONE)
+  StatePtr NewState(Vertex* _v, int _goal_index,
+                    Orientation _o = Orientation::NONE)
   {
-    State s(_v, _goal_index, _o);
+    State s(this, _v, _goal_index, _o);
     if (states.find(s) == states.end()) {
-      states[s] = new State(_v, _goal_index, _o);
+      states[s] = new State(this, _v, _goal_index, _o);
     }
     return states[s];
   }
 
-  static StatePtr NewState() { return NewState(nullptr, 0); }
+  StatePtr NewState() { return NewState(nullptr, 0); }
 
 private:
-  static std::unordered_map<State, StatePtr, StateHasher> states;
+  std::unordered_map<State, StatePtr, StateHasher> states;
 };
 
 std::ostream& operator<<(std::ostream& os, const Vertex* v);

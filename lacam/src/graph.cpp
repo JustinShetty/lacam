@@ -1,8 +1,5 @@
 #include "../include/graph.hpp"
 
-// initialize static variable
-std::unordered_map<State, StatePtr, StateHasher> Graph::states;
-
 Vertex::Vertex(int _x, int _y, int _id, int _index)
     : x(_x), y(_y), id(_id), index(_index), neighbor(Vertices())
 {
@@ -49,12 +46,12 @@ std::ostream& operator<<(std::ostream& os, const Orientation& o)
 void State::gen_neighbors()
 {
   for (auto adjacent_orientation : o.adjacent()) {
-    auto s = Graph::NewState(v, goal_index, adjacent_orientation);
+    auto s = G->NewState(v, goal_index, adjacent_orientation);
     neighbors.push_back(s);
     in_neighbors.push_back(s);
   }
   for (auto u : v->neighbor) {
-    auto candidate = Graph::NewState(u, goal_index, o);
+    auto candidate = G->NewState(u, goal_index, o);
     if (o == Orientation::Y_MINUS) {
       if (u->y == v->y - 1) neighbors.push_back(candidate);
       if (u->y == v->y + 1) in_neighbors.push_back(candidate);

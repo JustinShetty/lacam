@@ -41,7 +41,7 @@ struct Agent {
   StatePtr s_now;   // current state
   StatePtr s_next;  // next state
   Agent(std::shared_ptr<Graph> G, int _id)
-      : id(_id), s_now(Graph::NewState()), s_next(Graph::NewState())
+      : id(_id), s_now(G->NewState()), s_next(G->NewState())
   {
   }
 };
