@@ -3,8 +3,6 @@
  */
 #pragma once
 
-#include <memory>
-
 #include "utils.hpp"
 
 struct Vertex {
@@ -57,20 +55,16 @@ private:
   Value value;
 };
 
-// need these stubs so we can reference Graph, State, and StatePtr in each
-// other.
-class Graph;
-class State;
+struct State;
 using StatePtr = State*;
-class State
+struct State
 {
-public:
   Vertex* v;
   Orientation o;
   int goal_index;
   int pose_id;
 
-  friend class Graph;
+  friend struct Graph;
 
   inline std::vector<StatePtr> get_neighbors()
   {
