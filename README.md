@@ -1,7 +1,7 @@
 pLaCAM (Practical LaCAM)
 ---
 [![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE)
-[![CI](https://github.com/justinshetty/early-exit-lacam/actions/workflows/ci.yml/badge.svg)](https://github.com/justinshetty/early-exit-lacam/actions/workflows/ci.yml)
+[![CI](https://github.com/justinshetty/placam/actions/workflows/ci.yml/badge.svg)](https://github.com/justinshetty/placam/actions/workflows/ci.yml)
 
 [LaCAM](https://github.com/kei18/lacam) modified to:
 - Prevent following conflicts
@@ -14,8 +14,8 @@ All you need is [CMake](https://cmake.org/) (≥v3.16). The code is written in C
 First, clone this repo with submodules.
 
 ```sh
-git clone --recursive https://github.com/justinshetty/early-exit-lacam.git
-cd early-exit-lacam
+git clone --recursive https://github.com/justinshetty/placam.git
+cd placam
 ```
 Then, build the project.
 
@@ -35,3 +35,7 @@ This fork introduces two additional command-line arguments:
 ```
 --skip_post_processing    Skip potentially time-consuming post processing such as calculating sum of costs.
 ```
+
+## Licence
+
+This software is released under the MIT License, see [LICENSE.txt](LICENSE.txt).
