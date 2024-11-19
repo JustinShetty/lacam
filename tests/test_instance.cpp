@@ -37,7 +37,7 @@ TEST(Instance, sequence)
 
 TEST(Instance, orientation)
 {
-  const auto map_filename = "./tests/assets/2x2.map";
+  const std::string map_filename = "./tests/assets/2x2.map";
   const auto G = std::make_shared<Graph>(map_filename);
   const std::vector<StatePtr> starts = {
       G->NewState(G->U[0], 0, Orientation::X_MINUS),

@@ -4,8 +4,9 @@
 
 Instance::Instance(const std::string& map_filename,
                    const std::vector<int>& start_indexes,
-                   const std::vector<int>& goal_indexes)
-    : G(std::shared_ptr<Graph>(new Graph(map_filename))),
+                   const std::vector<int>& goal_indexes,
+                   const bool allow_reverse)
+    : G(std::shared_ptr<Graph>(new Graph(map_filename, allow_reverse))),
       starts(Config()),
       N(start_indexes.size())
 {
@@ -20,8 +21,9 @@ Instance::Instance(const std::string& map_filename,
 
 Instance::Instance(const std::string& map_filename,
                    const std::vector<int>& start_indexes,
-                   const std::vector<std::vector<int>>& goal_index_sequences)
-    : G(std::shared_ptr<Graph>(new Graph(map_filename))),
+                   const std::vector<std::vector<int>>& goal_index_sequences,
+                   const bool allow_reverse)
+    : G(std::make_shared<Graph>(map_filename, allow_reverse)),
       starts(Config()),
       N(start_indexes.size())
 {
@@ -51,8 +53,9 @@ static const std::regex r_instance =
     std::regex(R"(\d+\t.+\.map\t\d+\t\d+\t(\d+)\t(\d+)\t(\d+)\t(\d+)\t.+)");
 
 Instance::Instance(const std::string& scen_filename,
-                   const std::string& map_filename, const int _N)
-    : G(std::shared_ptr<Graph>(new Graph(map_filename))),
+                   const std::string& map_filename, const int _N,
+                   const bool allow_reverse)
+    : G(std::make_shared<Graph>(map_filename, allow_reverse)),
       starts(Config()),
       N(_N)
 {
@@ -89,8 +92,8 @@ Instance::Instance(const std::string& scen_filename,
 }
 
 Instance::Instance(const std::string& map_filename, std::mt19937* MT,
-                   const int _N)
-    : G(std::shared_ptr<Graph>(new Graph(map_filename))),
+                   const int _N, const bool allow_reverse)
+    : G(std::make_shared<Graph>(map_filename, allow_reverse)),
       starts(Config()),
       N(_N)
 {

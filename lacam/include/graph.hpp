@@ -154,13 +154,13 @@ struct ConfigHasher {
 };
 
 struct Graph {
+  bool allow_reverse;
   Vertices V;  // without nullptr
   Vertices U;  // with nullptr, i.e., |U| = width * height
   int width;   // grid width
   int height;  // grid height
-  Graph();
-  Graph(const Graph& g);
-  Graph(const std::string& filename);  // taking map filename
+  Graph(const std::string& filename,
+        const bool allow_reverse = false);  // taking map filename
   ~Graph();
 
   int size() const;  // the number of vertices, |V|

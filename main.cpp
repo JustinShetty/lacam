@@ -40,6 +40,12 @@ int main(int argc, char* argv[])
           "sum of costs.")
       .default_value(false)
       .implicit_value(true);
+  program.add_argument("--allow-reverse")
+      .help(
+          "if orientation is considered, allow agents to move backwards, not "
+          "just forwards")
+      .default_value(false)
+      .implicit_value(true);
 
   try {
     program.parse_known_args(argc, argv);
@@ -70,8 +76,10 @@ int main(int argc, char* argv[])
   }
   const auto allow_following = program.get<bool>("allow_following");
   const auto skip_post_processing = program.get<bool>("skip_post_processing");
-  const auto ins = scen_name.size() > 0 ? Instance(scen_name, map_name, N)
-                                        : Instance(map_name, &MT, N);
+  const auto allow_reverse = program.get<bool>("allow-reverse");
+  const auto ins = scen_name.size() > 0
+                       ? Instance(scen_name, map_name, N, allow_reverse)
+                       : Instance(map_name, &MT, N, allow_reverse);
   if (!ins.is_valid(1)) return 1;
 
   // solve

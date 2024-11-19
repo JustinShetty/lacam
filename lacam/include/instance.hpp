@@ -18,18 +18,21 @@ struct Instance {
   // for testing
   Instance(const std::string& map_filename,
            const std::vector<int>& start_indexes,
-           const std::vector<int>& goal_indexes);
+           const std::vector<int>& goal_indexes,
+           const bool allow_reverse = false);
   Instance(const std::string& map_filename,
            const std::vector<int>& start_indexes,
-           const std::vector<std::vector<int>>& goal_index_sequences);
+           const std::vector<std::vector<int>>& goal_index_sequences,
+           const bool allow_reverse = false);
   Instance(const std::shared_ptr<Graph> _G,
            const std::vector<StatePtr>& _starts,
            const std::vector<std::vector<StatePtr>>& _goal_sequences);
   // for MAPF benchmark
   Instance(const std::string& scen_filename, const std::string& map_filename,
-           const int _N = 1);
+           const int _N = 1, const bool allow_reverse = false);
   // random instance generation
-  Instance(const std::string& map_filename, std::mt19937* MT, const int _N = 1);
+  Instance(const std::string& map_filename, std::mt19937* MT, const int _N = 1,
+           const bool allow_reverse = false);
   ~Instance() {}
 
   // simple feasibility check of instance
