@@ -40,6 +40,26 @@ TEST(planner, basic_with_orientation)
   ASSERT_TRUE(is_feasible_solution(ins, solution, VERBOSITY, N, false));
 }
 
+TEST(planner, basic_with_orientation_with_reverse)
+{
+  const auto map_filename = "./tests/assets/2x2.map";
+  const bool allow_reverse = true;
+  const auto G = std::make_shared<Graph>(map_filename, allow_reverse);
+  const std::vector<StatePtr> starts = {
+      G->NewState(G->U[0], 0, Orientation::Y_MINUS),
+  };
+  const std::vector<std::vector<StatePtr>> goals{
+      {G->NewState(G->U[2], 0, Orientation::Y_MINUS)},
+  };
+  const Instance ins(G, starts, goals);
+  ASSERT_TRUE(ins.is_valid(VERBOSITY));
+
+  const auto threshold = std::nullopt;
+  auto solution = solve(ins, VERBOSITY, nullptr, nullptr, threshold);
+  ASSERT_EQ(solution.size(), 2);
+  ASSERT_TRUE(is_feasible_solution(ins, solution, VERBOSITY, threshold, false));
+}
+
 TEST(planner, solve)
 {
   const auto scen_filename = "./assets/random-32-32-10-random-1.scen";

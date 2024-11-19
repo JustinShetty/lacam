@@ -45,6 +45,7 @@ std::ostream& operator<<(std::ostream& os, const Orientation& o)
 
 void State::gen_neighbors()
 {
+  const auto allow_reverse = G->allow_reverse;
   for (auto adjacent_orientation : o.adjacent()) {
     auto s = G->NewState(v, goal_index, adjacent_orientation);
     neighbors.push_back(s);
@@ -54,18 +55,27 @@ void State::gen_neighbors()
     auto candidate = G->NewState(u, goal_index, o);
     if (o == Orientation::Y_MINUS) {
       if (u->y == v->y - 1) neighbors.push_back(candidate);
+      if (allow_reverse && u->y == v->y + 1) neighbors.push_back(candidate);
       if (u->y == v->y + 1) in_neighbors.push_back(candidate);
+      if (allow_reverse && u->y == v->y - 1) in_neighbors.push_back(candidate);
     } else if (o == Orientation::Y_PLUS) {
       if (u->y == v->y + 1) neighbors.push_back(candidate);
+      if (allow_reverse && u->y == v->y - 1) neighbors.push_back(candidate);
       if (u->y == v->y - 1) in_neighbors.push_back(candidate);
+      if (allow_reverse && u->y == v->y + 1) in_neighbors.push_back(candidate);
     } else if (o == Orientation::X_MINUS) {
       if (u->x == v->x - 1) neighbors.push_back(candidate);
+      if (allow_reverse && u->x == v->x + 1) neighbors.push_back(candidate);
       if (u->x == v->x + 1) in_neighbors.push_back(candidate);
+      if (allow_reverse && u->x == v->x - 1) in_neighbors.push_back(candidate);
     } else if (o == Orientation::X_PLUS) {
       if (u->x == v->x + 1) neighbors.push_back(candidate);
+      if (allow_reverse && u->x == v->x - 1) neighbors.push_back(candidate);
       if (u->x == v->x - 1) in_neighbors.push_back(candidate);
+      if (allow_reverse && u->x == v->x + 1) in_neighbors.push_back(candidate);
     } else {
       neighbors.push_back(candidate);
+      in_neighbors.push_back(candidate);
     }
   }
 }
